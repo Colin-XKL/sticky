@@ -19,8 +19,10 @@ samples, guidance on mobile development, and a full API reference.
 
 
 ## CV Pro
-[ ] Text and Pic support
-[ ] Key shortcut support
-[ ] Text reformat, delete useless spaces etc.
-[ ] Pic OCR support
-[ ] WebDav support and automatically upload files<10M
+[x] Text support  
+[ ] Pic support  
+[ ] File support  
+[x] Key shortcut support  
+[ ] Text reformat, delete useless spaces etc.  
+[ ] Pic OCR support  
+[ ] WebDav support and automatically upload files<10M  
