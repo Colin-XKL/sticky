@@ -92,17 +92,6 @@ class _MyHomeState extends State<MyHome> {
             appBar: new AppBar(
               foregroundColor: Colors.white,
               title: Text("Stickys"),
-              actions: [
-                IconButton(
-                    icon: Icon(
-                      Icons.add,
-                      color: Colors.white,
-                    ),
-                    onPressed: () {
-                      _pasteFromPastebin();
-                      ScaffoldMessenger.of(context).showSnackBar(msgPasted);
-                    }),
-              ],
             ),
             drawer: Drawer(
               child: new ListView(
