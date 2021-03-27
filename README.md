@@ -5,7 +5,7 @@ be a CV pro!
 [x] Text support  
 [x] Key shortcut support  
 [ ] Data Storage  
-[ ] About Page  
+[x] About Page  
 [ ] Content editing
 
 

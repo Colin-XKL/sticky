@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'about.dart';
 
 void main() {
   runApp(MyApp());
@@ -12,7 +13,12 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        primarySwatch: Colors.lightGreen,
+        //TODO: set color
+        // primarySwatch: Colors.lightGreen,
+        primaryColor: Colors.white,
+        primaryColorLight: Colors.teal,
+        primaryColorDark: Colors.yellow,
+        focusColor: Colors.lightGreen,
       ),
       home: MyHome(),
     );
@@ -43,6 +49,7 @@ class _MyHomeState extends State<MyHome> {
 
   @override
   Widget build(BuildContext context) {
+    // launch
     final msgCopied = new SnackBar(
       content: Text("Copied"),
       duration: Duration(milliseconds: 300),
@@ -83,6 +90,7 @@ class _MyHomeState extends State<MyHome> {
         onNewEmptyItemDetected: _newEmptyItem,
         child: Scaffold(
             appBar: new AppBar(
+              foregroundColor: Colors.white,
               title: Text("Stickys"),
               actions: [
                 IconButton(
@@ -102,15 +110,24 @@ class _MyHomeState extends State<MyHome> {
                   UserAccountsDrawerHeader(),
                   ListTile(
                     title: Text("ITEM #1"),
-                    leading: Icon(Icons.access_alarms),
+                    leading: Icon(Icons.title),
                   ),
                   ListTile(
                     title: Text("ITEM #2"),
-                    leading: Icon(Icons.add_to_queue),
+                    leading: Icon(Icons.account_box_sharp),
                     trailing: IconButton(
                       icon: Icon(Icons.arrow_forward_ios),
-                      onPressed: () {},
                     ),
+                  ),
+                  ListTile(
+                    title: Text("Feedback"),
+                    leading: IconButton(
+                      icon: Icon(Icons.feedback_outlined),
+                    ),
+                    onTap: () {
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) => AboutPage()));
+                    },
                   ),
                   AboutListTile(),
                 ],
