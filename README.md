@@ -7,7 +7,7 @@ be a CV pro!
 [x] About Page  
 [ ] Content editing  
 [x] List item dismiss
-[ ] List Sorting
+[x] List Reorder
 
 
 
@@ -28,4 +28,4 @@ be a CV pro!
 #### Extra
 [ ] Text reformat, delete useless spaces etc.  
 [ ] Pic OCR support  
-[ ] WebDav support and automatically upload files<10M  
+[ ] WebDav support and automatically upload files<10M

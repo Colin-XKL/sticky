@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'about.dart';
@@ -9,7 +7,6 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -34,15 +31,15 @@ class MyHome extends StatefulWidget {
 
 class _MyHomeState extends State<MyHome> {
   List<StickItem> l = [
-    StickItem("ZERO", "Hello World!"),
-    StickItem("Tutorial", "Follow these steps to quickly start."),
+    StickItem("Tutorial", "Follow these steps to quickly get started."),
     StickItem("#1 Paste from your pastebin",
-        "Tap or click the plus button to paste something.\nIf it's empty, try to get stuff.\n"),
+        "Tap or click the plus button to paste something.\nIf it's empty, try to get some stuff.\n"),
     StickItem("#2 Copy from the list",
         "Tap or click the item in the list, and the content(not the title) will be copied to your pastebin\n"),
-    StickItem("#3 Delete item",
-        "Long press the item in the list and then it'll be removed.\n")
+    StickItem("#3 Delete item", "slide the item remove it.\n"),
+    StickItem("#4 Reorder items", "Long press the item and reorder it.\n")
   ];
+
   var lastDeleted = null;
   final msgEmpty = new SnackBar(
     content: Text("Empty Pastebin!"),
@@ -127,7 +124,15 @@ class _MyHomeState extends State<MyHome> {
                   ScaffoldMessenger.of(context).showSnackBar(msgPasted);
               },
             ),
-            body: ListView.builder(
+            body: ReorderableListView.builder(
+                buildDefaultDragHandles: false,
+                onReorder: (int oldIndex, int newIndex) {
+                  setState(() {
+                    if (oldIndex < newIndex) newIndex -= 1;
+                    var temp = l.removeAt(oldIndex);
+                    l.insert(newIndex, temp);
+                  });
+                },
                 itemCount: l.length,
                 itemBuilder: (context, index) {
                   final item = l[index];
@@ -141,33 +146,28 @@ class _MyHomeState extends State<MyHome> {
                         });
                         ScaffoldMessenger.of(context).showSnackBar(msgDeleted);
                       },
-                      child: ListTile(
-                        title: Text(item.title),
-                        subtitle: Text(item.content),
-                        contentPadding: EdgeInsets.fromLTRB(16, 8, 16, 8),
-                        onTap: () {
-                          var value = item.content;
-
-                          if (value.isNotEmpty) {
-                            Clipboard.setData(ClipboardData(text: value));
-                            lastDeleted = l[index];
-                            l.removeAt(index);
-                            ScaffoldMessenger.of(context)
-                                .showSnackBar(msgCopied);
-                            setState(() {});
-                          } else {
-                            ScaffoldMessenger.of(context)
-                                .showSnackBar(msgEmpty);
-                          }
-                        },
-                        onLongPress: () {
-                          lastDeleted = item;
-                          l.removeAt(index);
-                          setState(() {});
-                          ScaffoldMessenger.of(context)
-                              .showSnackBar(msgDeleted);
-                        },
-                      ));
+                      child: ReorderableDelayedDragStartListener(
+                          key: item.key,
+                          index: index,
+                          child: ListTile(
+                            title: Text(item.title),
+                            subtitle: Text(item.content),
+                            contentPadding: EdgeInsets.fromLTRB(16, 8, 16, 8),
+                            onTap: () {
+                              var value = item.content;
+                              if (value.isNotEmpty) {
+                                Clipboard.setData(ClipboardData(text: value));
+                                lastDeleted = l[index];
+                                l.removeAt(index);
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(msgCopied);
+                                setState(() {});
+                              } else {
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(msgEmpty);
+                              }
+                            },
+                          )));
                 })));
   }
 
