@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'about.dart';
@@ -65,7 +67,6 @@ class _MyHomeState extends State<MyHome> {
       content: Text("Pasted"),
       duration: Duration(milliseconds: 300),
     );
-
     final msgDeleted = new SnackBar(
       content: Text("Deleted"),
       duration: Duration(milliseconds: 2000),
@@ -80,12 +81,8 @@ class _MyHomeState extends State<MyHome> {
 
     return AreaWithKeyShortcut(
         onPasteDetected: () async {
-          // Future future = new Future(() => null);
-
           bool re = await _pasteFromPastebin();
-          if (re) {
-            ScaffoldMessenger.of(context).showSnackBar(msgPasted);
-          }
+          if (re) ScaffoldMessenger.of(context).showSnackBar(msgPasted);
         },
         onNewEmptyItemDetected: _newEmptyItem,
         child: Scaffold(
@@ -134,30 +131,80 @@ class _MyHomeState extends State<MyHome> {
                 itemCount: l.length,
                 itemBuilder: (context, index) {
                   final item = l[index];
-                  return ListTile(
-                    title: Text(item.title),
-                    subtitle: Text(item.content),
-                    onTap: () {
-                      var value = item.content;
+                  return Dismissible(
+                      key: item.key,
+                      background: listTileBackground(),
+                      onDismissed: (direction) {
+                        setState(() {
+                          lastDeleted = item;
+                          l.removeAt(index);
+                        });
+                        ScaffoldMessenger.of(context).showSnackBar(msgDeleted);
+                      },
+                      child: ListTile(
+                        title: Text(item.title),
+                        subtitle: Text(item.content),
+                        contentPadding: EdgeInsets.fromLTRB(16, 8, 16, 8),
+                        onTap: () {
+                          var value = item.content;
 
-                      if (value.isNotEmpty) {
-                        Clipboard.setData(ClipboardData(text: value));
-                        lastDeleted = l[index];
-                        l.removeAt(index);
-                        ScaffoldMessenger.of(context).showSnackBar(msgCopied);
-                        setState(() {});
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(msgEmpty);
-                      }
-                    },
-                    onLongPress: () {
-                      lastDeleted = item;
-                      l.removeAt(index);
-                      setState(() {});
-                      ScaffoldMessenger.of(context).showSnackBar(msgDeleted);
-                    },
-                  );
+                          if (value.isNotEmpty) {
+                            Clipboard.setData(ClipboardData(text: value));
+                            lastDeleted = l[index];
+                            l.removeAt(index);
+                            ScaffoldMessenger.of(context)
+                                .showSnackBar(msgCopied);
+                            setState(() {});
+                          } else {
+                            ScaffoldMessenger.of(context)
+                                .showSnackBar(msgEmpty);
+                          }
+                        },
+                        onLongPress: () {
+                          lastDeleted = item;
+                          l.removeAt(index);
+                          setState(() {});
+                          ScaffoldMessenger.of(context)
+                              .showSnackBar(msgDeleted);
+                        },
+                      ));
                 })));
+  }
+
+  Widget listTileBackground() {
+    return Container(
+        color: Colors.red,
+        child: Row(
+          children: [
+            ConstrainedBox(
+              constraints: BoxConstraints(
+                minWidth: 64,
+                maxWidth: 64,
+              ),
+              child: Icon(
+                Icons.delete,
+                color: Colors.white,
+              ),
+            ),
+            Expanded(
+              flex: 1,
+              child: Container(
+                // height: 30.0,
+                color: Colors.red,
+              ),
+            ),
+            ConstrainedBox(
+              constraints: BoxConstraints(
+                minWidth: 64,
+                maxWidth: 64,
+              ),
+              child: Icon(
+                Icons.delete,
+                color: Colors.white,
+              ),
+            )
+          ],
+        ));
   }
 
   void _newEmptyItem() {
@@ -182,27 +229,26 @@ class _MyHomeState extends State<MyHome> {
 }
 
 class StickItem {
+  Key key;
   String title;
   bool isBinary;
   var content;
   String notations;
 
   StickItem(String title, String content) {
+    this.key = UniqueKey();
     this.title = title;
     this.isBinary = false;
     this.content = content;
   }
 
   StickItem.binaryContent(String title, Object content, bool bin) {
+    this.key = UniqueKey();
     this.title = title;
     this.isBinary = true;
     this.content = content;
   }
 }
-
-// class PasteIntent extends Intent {}
-//
-// class NewEmptyItemIntent extends Intent {}
 
 class AreaWithKeyShortcut extends StatelessWidget {
   const AreaWithKeyShortcut({
@@ -240,12 +286,12 @@ class PasteIntent extends Intent {}
 
 class NewEmptyItemIntent extends Intent {}
 
-Widget a() {
-  return AreaWithKeyShortcut(
-      child: Text("ASD"),
-      onPasteDetected: () {},
-      onNewEmptyItemDetected: () {});
-}
+// Widget a() {
+//   return AreaWithKeyShortcut(
+//       child: Text("ASD"),
+//       onPasteDetected: () {},
+//       onNewEmptyItemDetected: () {});
+// }
 
 //
 // // ----------------------

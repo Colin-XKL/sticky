@@ -6,6 +6,7 @@ be a CV pro!
 [x] Key shortcut support  
 [x] About Page  
 [ ] Content editing  
+[x] List item dismiss
 [ ] List Sorting
 
 
