@@ -1,30 +1,34 @@
 # CV Pro
 be a CV pro!
+
+> Flexible: Use it in your own way  
+> Cross-platform: Use it in your favorite device  
+> Beautiful:  
+> Cloud-powered:
+
 ## Roadmap
 ### version 1.0
+#### Key functions
 [x] Text support  
 [x] Key shortcut support  
 [x] About Page  
 [ ] Content editing  
-[x] List item dismiss
-[x] List Reorder
-
-
-
-### Future
-#### Key functions
+[x] List item dismiss  
+[x] List Reorder  
 [ ] Data Storage  
 [ ] Pic support  
 [ ] Trashbin  
-[ ] File support  
 [ ] Multiple List
 
 #### Key features
-[ ] Grid view  
-[ ] Drag and Drop support  
-[ ] Card resize
+[x] Card view  
+[x] Card Move  
+[x] Card resize  
+[ ] View switch
 
-
+### Future
+[ ] File support  
+[ ] Drag and Drop support
 #### Extra
 [ ] Text reformat, delete useless spaces etc.  
 [ ] Pic OCR support  
