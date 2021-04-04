@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'about.dart';
@@ -124,51 +125,53 @@ class _MyHomeState extends State<MyHome> {
                   ScaffoldMessenger.of(context).showSnackBar(msgPasted);
               },
             ),
-            body: ReorderableListView.builder(
-                buildDefaultDragHandles: false,
-                onReorder: (int oldIndex, int newIndex) {
-                  setState(() {
-                    if (oldIndex < newIndex) newIndex -= 1;
-                    var temp = l.removeAt(oldIndex);
-                    l.insert(newIndex, temp);
-                  });
-                },
-                itemCount: l.length,
-                itemBuilder: (context, index) {
-                  final item = l[index];
-                  return Dismissible(
-                      key: item.key,
-                      background: listTileBackground(),
-                      onDismissed: (direction) {
-                        setState(() {
-                          lastDeleted = item;
-                          l.removeAt(index);
-                        });
-                        ScaffoldMessenger.of(context).showSnackBar(msgDeleted);
-                      },
-                      child: ReorderableDelayedDragStartListener(
-                          key: item.key,
-                          index: index,
-                          child: ListTile(
-                            title: Text(item.title),
-                            subtitle: Text(item.content),
-                            contentPadding: EdgeInsets.fromLTRB(16, 8, 16, 8),
-                            onTap: () {
-                              var value = item.content;
-                              if (value.isNotEmpty) {
-                                Clipboard.setData(ClipboardData(text: value));
-                                lastDeleted = l[index];
-                                l.removeAt(index);
-                                ScaffoldMessenger.of(context)
-                                    .showSnackBar(msgCopied);
-                                setState(() {});
-                              } else {
-                                ScaffoldMessenger.of(context)
-                                    .showSnackBar(msgEmpty);
-                              }
-                            },
-                          )));
-                })));
+            body: Demo()
+            // ReorderableListView.builder(
+            //     buildDefaultDragHandles: false,
+            //     onReorder: (int oldIndex, int newIndex) {
+            //       setState(() {
+            //         if (oldIndex < newIndex) newIndex -= 1;
+            //         var temp = l.removeAt(oldIndex);
+            //         l.insert(newIndex, temp);
+            //       });
+            //     },
+            //     itemCount: l.length,
+            //     itemBuilder: (context, index) {
+            //       final item = l[index];
+            //       return Dismissible(
+            //           key: item.key,
+            //           background: listTileBackground(),
+            //           onDismissed: (direction) {
+            //             setState(() {
+            //               lastDeleted = item;
+            //               l.removeAt(index);
+            //             });
+            //             ScaffoldMessenger.of(context).showSnackBar(msgDeleted);
+            //           },
+            //           child: ReorderableDelayedDragStartListener(
+            //               key: item.key,
+            //               index: index,
+            //               child: ListTile(
+            //                 title: Text(item.title),
+            //                 subtitle: Text(item.content),
+            //                 contentPadding: EdgeInsets.fromLTRB(16, 8, 16, 8),
+            //                 onTap: () {
+            //                   var value = item.content;
+            //                   if (value.isNotEmpty) {
+            //                     Clipboard.setData(ClipboardData(text: value));
+            //                     lastDeleted = l[index];
+            //                     l.removeAt(index);
+            //                     ScaffoldMessenger.of(context)
+            //                         .showSnackBar(msgCopied);
+            //                     setState(() {});
+            //                   } else {
+            //                     ScaffoldMessenger.of(context)
+            //                         .showSnackBar(msgEmpty);
+            //                   }
+            //                 },
+            //               )));
+            //     }))
+            ));
   }
 
   Widget listTileBackground() {
@@ -226,6 +229,28 @@ class _MyHomeState extends State<MyHome> {
       }
     });
   }
+}
+
+class View {
+  //to be finished
+  var itemList = <StickItem>[];
+  var stickys = <ResizableWidget>[];
+  int currentMode = 0; // 0 => list view  1 => stickys
+  bool changeMode(int mode) {
+    if (mode > 1) return false;
+    currentMode = mode;
+    return true;
+  }
+//TODO: add view change
+// Widget get() {
+//   if (currentMode==1){
+//
+//   }else if (currentMode==2){
+//
+//   }else{
+//     return Text("Wrong mode number!");
+//   }
+// }
 }
 
 class StickItem {
@@ -286,14 +311,211 @@ class PasteIntent extends Intent {}
 
 class NewEmptyItemIntent extends Intent {}
 
-// Widget a() {
-//   return AreaWithKeyShortcut(
-//       child: Text("ASD"),
-//       onPasteDetected: () {},
-//       onNewEmptyItemDetected: () {});
-// }
+class Demo extends StatefulWidget {
+  @override
+  _DemoState createState() => _DemoState();
+}
 
-//
+class _DemoState extends State<Demo> {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(24),
+      child: Stack(
+        children: [
+          ResizableWidget(
+            child: Text(
+              '''I've just did simple prototype to show main idea.
+  1. Draw size handlers with container;
+  2. Use GestureDetector to get new variables of sizes
+  3. Refresh the main container size.''',
+              // overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          ResizableWidget(
+            child: Text("Hello Widget"),
+          )
+        ],
+      ),
+    );
+  }
+}
+
+class ResizableWidget extends StatefulWidget {
+  ResizableWidget({this.child});
+
+  final Widget child;
+
+  @override
+  _ResizableWidgetState createState() => _ResizableWidgetState();
+}
+
+const ballDiameter = 20.0;
+
+class _ResizableWidgetState extends State<ResizableWidget> {
+  double height = 320;
+  double width = 600;
+
+  double top = 0;
+  double left = 0;
+
+  static const double minHeight = 128;
+  static const double minWidth = 256;
+
+  void onDrag(double dx, double dy) {
+    var newHeight = height + dy;
+    var newWidth = width + dx;
+
+    setState(() {
+      height = newHeight > minHeight ? newHeight : minHeight;
+      width = newWidth > minWidth ? newWidth : minWidth;
+    });
+  }
+
+  Widget _getContentCard(double height, double width, Widget child) {
+    return Container(
+        height: height,
+        width: width,
+        child: SizedBox(
+          width: width,
+          height: height,
+          child: Card(
+            child: Column(
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                      border: Border(
+                          bottom: BorderSide(
+                              color: Colors.grey.shade200,
+                              width: 1,
+                              style: BorderStyle.solid))),
+                  child: ListTile(
+                    title: Text(
+                      "Text",
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    leading: Icon(Icons.text_fields),
+                    dense: true,
+                  ),
+                ),
+                // widget.child,
+
+                Expanded(
+                  child: Container(
+                    margin: EdgeInsets.all(10),
+                    child: widget.child,
+                  ),
+                )
+              ],
+            ),
+          ),
+        ));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    const GRID_FACTOR = 1;
+    return Stack(
+      children: <Widget>[
+        Positioned(
+          top: top,
+          left: left,
+          child: _getContentCard(height, width, widget.child),
+        ),
+
+        // bottom right
+        Positioned(
+          top: top + height - ballDiameter / 2,
+          left: left + width - ballDiameter / 2,
+          child: ManipulatingBall(
+            child:
+                Icon(Icons.adjust_rounded, color: Colors.grey.withOpacity(0.3)),
+            onDrag: (dx, dy) {
+              // var mid = (dx + dy) / 2;
+
+              var newHeight = ((height + dy) ~/ GRID_FACTOR) * GRID_FACTOR;
+              var newWidth = ((width + dx) ~/ GRID_FACTOR) * GRID_FACTOR;
+
+              setState(() {
+                height = newHeight > minHeight ? newHeight : minHeight;
+                width = newWidth > minWidth ? newWidth : minWidth;
+                // top = top - mid;
+                // left = left - mid;
+              });
+            },
+          ),
+        ),
+
+        // center center -> left top => move
+        Positioned(
+          // top: top + height / 2 - ballDiameter / 2,
+          // left: left + width / 2 - ballDiameter / 2,
+          left: left,
+          top: top,
+          child: ManipulatingBall(
+            child: Icon(
+              Icons.push_pin,
+              size: 14,
+              color: Colors.red,
+            ),
+            onDrag: (dx, dy) {
+              setState(() {
+                top = (((top + dy) ~/ GRID_FACTOR) * GRID_FACTOR) as double;
+                left = (((left + dx) ~/ GRID_FACTOR) * GRID_FACTOR) as double;
+                top = top > 0 ? top : 0;
+                left = left > 0 ? left : 0;
+              });
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class ManipulatingBall extends StatefulWidget {
+  ManipulatingBall({Key key, this.child, this.onDrag});
+
+  final Widget child;
+  final Function onDrag;
+
+  @override
+  _ManipulatingBallState createState() => _ManipulatingBallState();
+}
+
+class _ManipulatingBallState extends State<ManipulatingBall> {
+  double initX;
+  double initY;
+
+  _handleDrag(details) {
+    setState(() {
+      initX = details.globalPosition.dx;
+      initY = details.globalPosition.dy;
+    });
+  }
+
+  _handleUpdate(details) {
+    var dx = details.globalPosition.dx - initX;
+    var dy = details.globalPosition.dy - initY;
+    initX = details.globalPosition.dx;
+    initY = details.globalPosition.dy;
+    widget.onDrag(dx, dy);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onPanStart: _handleDrag,
+      onPanUpdate: _handleUpdate,
+      child: Container(
+        width: ballDiameter,
+        height: ballDiameter,
+        child: widget.child,
+      ),
+    );
+  }
+}
+
 // // ----------------------
 // class MyHomePage extends StatefulWidget {
 //   MyHomePage({Key key, this.title}) : super(key: key);
