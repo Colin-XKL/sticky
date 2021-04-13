@@ -1,6 +1,7 @@
-# CV Pro
-be a CV pro!
+# Pinfo
 
+Pin the info you need  
+Your next desktop
 > Flexible: Use it in your own way  
 > Cross-platform: Use it in your favorite device  
 > Beautiful:  
