@@ -350,7 +350,7 @@ class ResizableWidget extends StatefulWidget {
   _ResizableWidgetState createState() => _ResizableWidgetState();
 }
 
-const ballDiameter = 20.0;
+const double ballDiameter = 20.0;
 
 class _ResizableWidgetState extends State<ResizableWidget> {
   double height = 320;
@@ -363,12 +363,12 @@ class _ResizableWidgetState extends State<ResizableWidget> {
   static const double minWidth = 256;
 
   void onDrag(double dx, double dy) {
-    var newHeight = height + dy;
-    var newWidth = width + dx;
+    double newHeight = height + dy;
+    double newWidth = width + dx;
 
     setState(() {
-      height = newHeight > minHeight ? newHeight : minHeight;
-      width = newWidth > minWidth ? newWidth : minWidth;
+      this.height = newHeight > minHeight ? newHeight : minHeight;
+      this.width = newWidth > minWidth ? newWidth : minWidth;
     });
   }
 
@@ -433,12 +433,15 @@ class _ResizableWidgetState extends State<ResizableWidget> {
             onDrag: (dx, dy) {
               // var mid = (dx + dy) / 2;
 
-              var newHeight = ((height + dy) ~/ GRID_FACTOR) * GRID_FACTOR;
-              var newWidth = ((width + dx) ~/ GRID_FACTOR) * GRID_FACTOR;
+              // num newHeight = (((height + dy) ~/ GRID_FACTOR) * GRID_FACTOR) ;
+              // num newWidth = (((width + dx) ~/ GRID_FACTOR) * GRID_FACTOR);
+              num newHeight = (height + dy);
+              num newWidth = (width + dx);
 
               setState(() {
-                height = newHeight > minHeight ? newHeight : minHeight;
-                width = newWidth > minWidth ? newWidth : minWidth;
+                height =
+                    newHeight > minHeight ? newHeight.toDouble() : minHeight;
+                width = newWidth > minWidth ? newWidth.toDouble() : minWidth;
                 // top = top - mid;
                 // left = left - mid;
               });
@@ -460,8 +463,8 @@ class _ResizableWidgetState extends State<ResizableWidget> {
             ),
             onDrag: (dx, dy) {
               setState(() {
-                top = (((top + dy) ~/ GRID_FACTOR) * GRID_FACTOR) as double;
-                left = (((left + dx) ~/ GRID_FACTOR) * GRID_FACTOR) as double;
+                top = (((top + dy) ~/ GRID_FACTOR) * GRID_FACTOR) + .0;
+                left = (((left + dx) ~/ GRID_FACTOR) * GRID_FACTOR) + .0;
                 top = top > 0 ? top : 0;
                 left = left > 0 ? left : 0;
               });
