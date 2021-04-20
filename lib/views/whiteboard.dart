@@ -1,63 +1,60 @@
 import "package:flutter/material.dart";
+import 'package:get/get.dart';
 
-class FreePainter extends StatefulWidget {
-  @override
-  _FreePainterState createState() => _FreePainterState();
+class WhiteBoardDataController extends GetxController {
+  List<ResizableCard> l = [
+    ResizableCard(
+      child: Text('''I've just did simple prototype to show main idea.
+  1. Draw size handlers with container;
+  2. Use GestureDetector to get new variables of sizes
+  3. Refresh the main container size.'''),
+    ),
+    ResizableCard(
+      child: Text("Hello Widget"),
+    )
+  ].obs;
 }
 
-class _FreePainterState extends State<FreePainter> {
+class FreePainter extends StatelessWidget {
+  final WhiteBoardDataController wbc = Get.put(WhiteBoardDataController());
+
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(24),
-      child: Stack(
-        children: [
-          ResizableWidget(
-            child: Text(
-              '''I've just did simple prototype to show main idea.
-  1. Draw size handlers with container;
-  2. Use GestureDetector to get new variables of sizes
-  3. Refresh the main container size.''',
-              // overflow: TextOverflow.ellipsis,
-            ),
-          ),
-          ResizableWidget(
-            child: Text("Hello Widget"),
-          )
-        ],
-      ),
+      child: Obx(() => Stack(
+            children: wbc.l,
+          )),
     );
   }
 }
 
-class ResizableWidget extends StatefulWidget {
-  ResizableWidget({this.child});
+class ResizableCard extends StatefulWidget {
+  ResizableCard({this.child});
 
-  final Widget child;
-
-  @override
-  _ResizableWidgetState createState() => _ResizableWidgetState();
-}
-
-const double ballDiameter = 20.0;
-
-class _ResizableWidgetState extends State<ResizableWidget> {
+  Widget child;
+  double top = 0;
+  double left = 0;
   double height = 320;
   double width = 600;
 
-  double top = 0;
-  double left = 0;
+  @override
+  _ResizableCardState createState() => _ResizableCardState();
+}
 
+const double movingBallRadius = 20.0;
+
+class _ResizableCardState extends State<ResizableCard> {
   static const double minHeight = 128;
   static const double minWidth = 256;
 
   void onDrag(double dx, double dy) {
-    double newHeight = height + dy;
-    double newWidth = width + dx;
+    double newHeight = widget.height + dy;
+    double newWidth = widget.width + dx;
 
     setState(() {
-      this.height = newHeight > minHeight ? newHeight : minHeight;
-      this.width = newWidth > minWidth ? newWidth : minWidth;
+      widget.height = newHeight > minHeight ? newHeight : minHeight;
+      widget.width = newWidth > minWidth ? newWidth : minWidth;
     });
   }
 
@@ -103,34 +100,30 @@ class _ResizableWidgetState extends State<ResizableWidget> {
 
   @override
   Widget build(BuildContext context) {
-    const GRID_FACTOR = 1;
     return Stack(
       children: <Widget>[
         Positioned(
-          top: top,
-          left: left,
-          child: _getContentCard(height, width, widget.child),
+          top: widget.top,
+          left: widget.left,
+          child: _getContentCard(widget.height, widget.width, widget.child),
         ),
 
         // bottom right
         Positioned(
-          top: top + height - ballDiameter / 2,
-          left: left + width - ballDiameter / 2,
+          top: widget.top + widget.height - movingBallRadius / 2,
+          left: widget.left + widget.width - movingBallRadius / 2,
           child: ManipulatingBall(
             child:
                 Icon(Icons.adjust_rounded, color: Colors.grey.withOpacity(0.3)),
             onDrag: (dx, dy) {
-              // var mid = (dx + dy) / 2;
-
-              // num newHeight = (((height + dy) ~/ GRID_FACTOR) * GRID_FACTOR) ;
-              // num newWidth = (((width + dx) ~/ GRID_FACTOR) * GRID_FACTOR);
-              num newHeight = (height + dy);
-              num newWidth = (width + dx);
+              num newHeight = (widget.height + dy);
+              num newWidth = (widget.width + dx);
 
               setState(() {
-                height =
+                widget.height =
                     newHeight > minHeight ? newHeight.toDouble() : minHeight;
-                width = newWidth > minWidth ? newWidth.toDouble() : minWidth;
+                widget.width =
+                    newWidth > minWidth ? newWidth.toDouble() : minWidth;
                 // top = top - mid;
                 // left = left - mid;
               });
@@ -140,10 +133,8 @@ class _ResizableWidgetState extends State<ResizableWidget> {
 
         // center center -> left top => move
         Positioned(
-          // top: top + height / 2 - ballDiameter / 2,
-          // left: left + width / 2 - ballDiameter / 2,
-          left: left,
-          top: top,
+          left: widget.left,
+          top: widget.top,
           child: ManipulatingBall(
             child: Icon(
               Icons.push_pin,
@@ -152,10 +143,10 @@ class _ResizableWidgetState extends State<ResizableWidget> {
             ),
             onDrag: (dx, dy) {
               setState(() {
-                top = (((top + dy) ~/ GRID_FACTOR) * GRID_FACTOR) + .0;
-                left = (((left + dx) ~/ GRID_FACTOR) * GRID_FACTOR) + .0;
-                top = top > 0 ? top : 0;
-                left = left > 0 ? left : 0;
+                widget.top = (widget.top + dy) + .0;
+                widget.left = (widget.left + dx) + .0;
+                widget.top = widget.top > 0 ? widget.top : 0;
+                widget.left = widget.left > 0 ? widget.left : 0;
               });
             },
           ),
@@ -200,8 +191,8 @@ class _ManipulatingBallState extends State<ManipulatingBall> {
       onPanStart: _handleDrag,
       onPanUpdate: _handleUpdate,
       child: Container(
-        width: ballDiameter,
-        height: ballDiameter,
+        width: movingBallRadius,
+        height: movingBallRadius,
         child: widget.child,
       ),
     );
