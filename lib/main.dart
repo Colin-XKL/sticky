@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -29,6 +28,8 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHome extends StatefulWidget {
+  ViewManager m = new ViewManager();
+
   @override
   State<StatefulWidget> createState() => _MyHomeState();
 }
@@ -38,9 +39,10 @@ class _MyHomeState extends State<MyHome> {
     content: Text("Empty Pastebin!"),
     duration: Duration(milliseconds: 500),
   );
-  int currentView = 0; //   0->list 1->paint
+  Widget view;
 
   void newItemTriggeredByKey() {
+    int currentView = widget.m.getCurrentViewType();
     if (currentView == 0) {
       final ListDataController c = Get.find();
       c.newEmptyItem();
@@ -52,13 +54,13 @@ class _MyHomeState extends State<MyHome> {
 
   @override
   Widget build(BuildContext context) {
-    var view = new MyList2();
+    view = widget.m.getView().getWidget();
 
     return AreaWithKeyShortcut(
         onPasteDetected: () async {
+          //TODO: act differently in different view
           bool re = await pasteFromPastebin();
-          if (re) //ScaffoldMessenger.of(context).showSnackBar(msgPasted);
-            Get.snackbar("Pasted", "Pasted");
+          // if (re) ScaffoldMessenger.of(context).showSnackBar(msgPasted);
         },
         onNewEmptyItemDetected: newItemTriggeredByKey,
         child: Scaffold(
@@ -71,15 +73,30 @@ class _MyHomeState extends State<MyHome> {
                 children: <Widget>[
                   UserAccountsDrawerHeader(),
                   ListTile(
-                    title: Text("ITEM #1"),
+                    title: Text("List View"),
                     leading: Icon(Icons.title),
-                  ),
-                  ListTile(
-                    title: Text("ITEM #2"),
-                    leading: Icon(Icons.account_box_sharp),
                     trailing: IconButton(
                       icon: Icon(Icons.arrow_forward_ios),
                     ),
+                    onTap: () {
+                      setState(() {
+                        widget.m.setCurrentViewIndex(0);
+                      });
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                  ListTile(
+                    title: Text("Whiteboard"),
+                    leading: Icon(Icons.dashboard_sharp),
+                    trailing: IconButton(
+                      icon: Icon(Icons.arrow_forward_ios),
+                    ),
+                    onTap: () {
+                      setState(() {
+                        widget.m.setCurrentViewIndex(1);
+                      });
+                      Navigator.of(context).pop();
+                    },
                   ),
                   ListTile(
                     title: Text("Feedback"),
@@ -128,25 +145,56 @@ class _MyHomeState extends State<MyHome> {
 }
 
 class View {
-  //to be finished
-  var itemList = <StickItem>[];
-  var stickys = <ResizableWidget>[];
-  int currentMode = 0; // 0 => list view  1 => stickys
-  bool changeMode(int mode) {
-    if (mode > 1) return false;
-    currentMode = mode;
-    return true;
+  Key key;
+  int viewMode; // 0 => list view  1 => stickys
+  MyList2 l;
+  FreePainter f;
+
+  View(MyList2 list) {
+    this.key = UniqueKey();
+    this.l = list;
+    this.viewMode = 0;
   }
-//TODO: add view change
-// Widget get() {
-//   if (currentMode==1){
-//
-//   }else if (currentMode==2){
-//
-//   }else{
-//     return Text("Wrong mode number!");
-//   }
-// }
+
+  View.whiteboard(FreePainter p) {
+    this.key = UniqueKey();
+    this.f = p;
+    this.viewMode = 1;
+  }
+
+  Widget getWidget() {
+    if (viewMode == 0) {
+      return l;
+    } else if (viewMode == 1) {
+      return f;
+    } else
+      return Text("Wrong view mode");
+  }
+}
+
+class ViewManager {
+  // 0 => list view  1 => stickys
+  int currentViewIndex = 0;
+  var views = [new View(new MyList2()), new View.whiteboard(new FreePainter())];
+
+  View getView() {
+    if (currentViewIndex < views.length)
+      return views[currentViewIndex];
+    else
+      return new View(new MyList2());
+  }
+
+  int getCurrentViewType() {
+    return getView().viewMode;
+  }
+
+  bool setCurrentViewIndex(int i) {
+    if (i < views.length) {
+      this.currentViewIndex = i;
+      return true;
+    } else
+      return false;
+  }
 }
 
 class AreaWithKeyShortcut extends StatelessWidget {

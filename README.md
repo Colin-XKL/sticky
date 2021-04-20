@@ -8,7 +8,7 @@ Your next desktop
 > **Cloud-powered**:
 
 ## Roadmap
-### version 1.0 *(8 of 13)*
+### version 1.0 *(9 of 13)*
 #### Key functions
 - [x] Text support  
 - [x] Key shortcut support  
@@ -25,7 +25,7 @@ Your next desktop
 - [x] Card view  
 - [x] Card Move  
 - [x] Card resize  
-- [ ] View switch
+- [x] View switch
 
 ### Future
 - [ ] File support  
