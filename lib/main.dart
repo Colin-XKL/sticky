@@ -39,16 +39,24 @@ class _MyHomeState extends State<MyHome> {
     content: Text("Empty Pastebin!"),
     duration: Duration(milliseconds: 500),
   );
+  final msgPasted = new SnackBar(
+    content: Text("Pasted"),
+    duration: Duration(milliseconds: 300),
+  );
   Widget view;
 
   void newItemTriggeredByKey() {
     int currentView = widget.m.getCurrentViewType();
     if (currentView == 0) {
+      //list
       final ListDataController c = Get.find();
-      c.newEmptyItem();
+      c.l.add(StickItem("Empty ", ""));
     } else if (currentView == 1) {
-      //TODO: add new item action for painting view
-      print("Not finished.");
+      //whiteboard
+      final WhiteBoardDataController wbc = Get.find();
+      wbc.l.add(new ResizableCard(
+        child: Text(""),
+      ));
     }
   }
 
@@ -58,9 +66,8 @@ class _MyHomeState extends State<MyHome> {
 
     return AreaWithKeyShortcut(
         onPasteDetected: () async {
-          //TODO: act differently in different view
-          bool re = await pasteFromPastebin();
-          // if (re) ScaffoldMessenger.of(context).showSnackBar(msgPasted);
+          if (await pasteFromPastebin()) //has content
+            ScaffoldMessenger.of(context).showSnackBar(msgPasted);
         },
         onNewEmptyItemDetected: newItemTriggeredByKey,
         child: Scaffold(
@@ -115,31 +122,33 @@ class _MyHomeState extends State<MyHome> {
             floatingActionButton: FloatingActionButton(
               child: Icon(Icons.add),
               onPressed: () async {
-                bool hasContent = await pasteFromPastebin();
-                if (hasContent)
-                  ScaffoldMessenger.of(context).showSnackBar(new SnackBar(
-                    content: Text("Pasted"),
-                    duration: Duration(milliseconds: 300),
-                  ));
-                // ScaffoldMessenger.of(context).showSnackBar(msgPasted);
+                if (await pasteFromPastebin()) //hasContent
+                  ScaffoldMessenger.of(context).showSnackBar(msgPasted);
               },
             ),
-            body: view
-            // FreePainter()
-            ));
+            body: view));
   }
 
   Future<bool> pasteFromPastebin() async {
     final ListDataController c = Get.find();
+    final WhiteBoardDataController wbc = Get.find();
     return Clipboard.getData(Clipboard.kTextPlain).then((value) {
-      if (value != null && value.text.isNotEmpty) {
-        c.l.add(StickItem("Text", value.text));
+      int viewType = widget.m.getCurrentViewType();
+      bool notEmpty = (value != null && value.text.isNotEmpty);
+
+      if ((viewType == 0 || viewType == 1)) {
+        if (viewType == 0)
+          c.l.add(notEmpty
+              ? StickItem("Text", value.text)
+              : StickItem("Empty ", ""));
+        else if (viewType == 1)
+          wbc.l.add(new ResizableCard(
+            child: Text(notEmpty ? value.text : ""),
+          ));
         Clipboard.setData(ClipboardData(text: ""));
-        return true;
-      } else {
-        c.newEmptyItem();
-        return false;
+        return notEmpty;
       }
+      return false;
     });
   }
 }
@@ -148,7 +157,7 @@ class View {
   Key key;
   int viewMode; // 0 => list view  1 => stickys
   MyList2 l;
-  FreePainter f;
+  WhiteBoard f;
 
   View(MyList2 list) {
     this.key = UniqueKey();
@@ -156,7 +165,7 @@ class View {
     this.viewMode = 0;
   }
 
-  View.whiteboard(FreePainter p) {
+  View.whiteboard(WhiteBoard p) {
     this.key = UniqueKey();
     this.f = p;
     this.viewMode = 1;
@@ -175,7 +184,7 @@ class View {
 class ViewManager {
   // 0 => list view  1 => stickys
   int currentViewIndex = 0;
-  var views = [new View(new MyList2()), new View.whiteboard(new FreePainter())];
+  var views = [new View(new MyList2()), new View.whiteboard(new WhiteBoard())];
 
   View getView() {
     if (currentViewIndex < views.length)

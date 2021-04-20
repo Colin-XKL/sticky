@@ -15,7 +15,7 @@ class WhiteBoardDataController extends GetxController {
   ].obs;
 }
 
-class FreePainter extends StatelessWidget {
+class WhiteBoard extends StatelessWidget {
   final WhiteBoardDataController wbc = Get.put(WhiteBoardDataController());
 
   @override

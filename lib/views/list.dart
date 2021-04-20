@@ -35,14 +35,6 @@ class ListDataController extends GetxController {
     StickItem("#4 Reorder items", "Long press the item and reorder it.\n")
   ].obs;
   var lastDeleted = new StickItem("Empty", "No thing here.");
-
-  void newEmptyItem() {
-    l.add(StickItem("EMPTY ITEM", ""));
-    // ScaffoldMessenger.of(Get.context).showSnackBar(msgEmpty);
-    // Get.snackbar(
-    //     "Empty pastebin!", "The pastebin is empty");
-    // Get.showSnackbar()
-  }
 }
 
 class MyList2 extends StatelessWidget {
