@@ -1,13 +1,12 @@
-# Pinfo
-
+# The Sticky
 Pin the info you need  
 Your next desktop
 
 ## Introduction
 Desktop productivity? What is it?
-Todo list, Kanban, Stiky notes, etc...
+Todo list, Kan ban, Sticky notes, etc...
 All in all, they are just list and content cards.
-Introducing THE NEXT DESKTOP: The Stikys
+Introducing THE NEXT DESKTOP: The Sticky
 
 > **Flexible**: Use it in your own way  
 > **Cross-platform**: Use it in your favorite device  
@@ -22,16 +21,16 @@ Introducing THE NEXT DESKTOP: The Stikys
 - [x] About Page  
 - [ ] Content editing  
 - [x] List item dismiss  
-- [x] List Reorder  
+- [x] List Reorder
 - [ ] Data Storage  
 - [ ] Pic support  
 - [ ] Trashbin  
 - [ ] Multiple List
 
 #### Key features
-- [x] Card view  
-- [x] Card Move  
-- [x] Card resize  
+- [x] Card view
+- [x] Card Move
+- [x] Card resize
 - [x] View switch
 
 ### Future
