@@ -2,6 +2,13 @@
 
 Pin the info you need  
 Your next desktop
+
+## Introduction
+Desktop productivity? What is it?
+Todo list, Kanban, Stiky notes, etc...
+All in all, they are just list and content cards.
+Introducing THE NEXT DESKTOP: The Stikys
+
 > **Flexible**: Use it in your own way  
 > **Cross-platform**: Use it in your favorite device  
 > **Beautiful**:  
