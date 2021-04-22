@@ -32,6 +32,7 @@ class WhiteBoard extends StatelessWidget {
 class ResizableCard extends StatefulWidget {
   ResizableCard({this.child});
 
+  final Key key = UniqueKey();
   Widget child;
   double top = 0;
   double left = 0;
@@ -58,11 +59,11 @@ class _ResizableCardState extends State<ResizableCard> {
     });
   }
 
-  Widget _getFunctionButton(
-      IconData icon, String tooltip, void Function() onPressed) {
+  Widget _getFunctionButton(IconData icon, Function(Key key) onPressed,
+      [String tooltip]) {
     return IconButton(
       icon: Icon(icon),
-      onPressed: onPressed,
+      onPressed: onPressed(this.widget.key),
       padding: EdgeInsets.zero,
       tooltip: tooltip,
       splashRadius: 18,
@@ -132,15 +133,23 @@ class _ResizableCardState extends State<ResizableCard> {
                                 buttonPadding: EdgeInsets.zero,
                                 children: [
                                   _getFunctionButton(
-                                      Icons.arrow_forward_ios, "asd", () {}),
+                                      Icons.delete_outline_rounded, (k) {
+                                    // setState(() {
+                                    // final WhiteBoardDataController wbc =
+                                    //     Get.find();
+                                    // wbc.l.removeWhere(
+                                    //     (element) => element.key == k);
+                                    // });
+
+                                    // setState(() {});
+                                    // wbc.l.removeWhere((element) => element.key=)
+                                  }, "asd"),
                                   _getFunctionButton(
-                                      Icons.add_a_photo_rounded, "asd", () {}),
+                                      Icons.add_a_photo_rounded, (k) {}, "asd"),
                                   _getFunctionButton(
                                       Icons.airline_seat_recline_normal_sharp,
-                                      "asd",
-                                      () {}),
-                                  _getFunctionButton(
-                                      Icons.assistant_sharp, "asd", () {}),
+                                      (k) {},
+                                      "asd"),
                                 ],
                               ),
                             ],
@@ -152,11 +161,40 @@ class _ResizableCardState extends State<ResizableCard> {
                   ),
                 ),
                 Expanded(
-                  child: Container(
-                    margin: EdgeInsets.all(10),
-                    child: widget.child,
-                  ),
-                )
+                    child: Stack(
+                  children: [
+                    Align(
+                      alignment: Alignment.bottomRight,
+                      child: ManipulatingBall(
+                        child: Tooltip(
+                          child: Icon(
+                            Icons.signal_cellular_4_bar_rounded,
+                            color: Colors.grey[100],
+                          ),
+                          message: "Drag to resize",
+                        ),
+                        onDrag: (dx, dy) {
+                          num newHeight = (widget.height + dy);
+                          num newWidth = (widget.width + dx);
+
+                          setState(() {
+                            widget.height = newHeight > minHeight
+                                ? newHeight.toDouble()
+                                : minHeight;
+                            widget.width = newWidth > minWidth
+                                ? newWidth.toDouble()
+                                : minWidth;
+                          });
+                        },
+                        dragAreaLength: 20,
+                      ),
+                    ),
+                    Container(
+                      margin: EdgeInsets.all(10),
+                      child: widget.child,
+                    ),
+                  ],
+                ))
               ],
             ),
           ),
@@ -165,38 +203,10 @@ class _ResizableCardState extends State<ResizableCard> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: <Widget>[
-        Positioned(
-          top: widget.top,
-          left: widget.left,
-          child: _getContentCard(widget.height, widget.width, widget.child),
-        ),
-
-        // bottom right => resize
-        Positioned(
-          top: widget.top + widget.height - movingControllerAreaLength / 2,
-          left: widget.left + widget.width - movingControllerAreaLength / 2,
-          child: ManipulatingBall(
-            child:
-                Icon(Icons.adjust_rounded, color: Colors.grey.withOpacity(0.3)),
-            onDrag: (dx, dy) {
-              num newHeight = (widget.height + dy);
-              num newWidth = (widget.width + dx);
-
-              setState(() {
-                widget.height =
-                    newHeight > minHeight ? newHeight.toDouble() : minHeight;
-                widget.width =
-                    newWidth > minWidth ? newWidth.toDouble() : minWidth;
-                // top = top - mid;
-                // left = left - mid;
-              });
-            },
-            dragAreaLength: 20,
-          ),
-        ),
-      ],
+    return Positioned(
+      top: widget.top,
+      left: widget.left,
+      child: _getContentCard(widget.height, widget.width, widget.child),
     );
   }
 }
