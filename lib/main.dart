@@ -54,7 +54,7 @@ class _MyHomeState extends State<MyHome> {
     } else if (currentView == 1) {
       //whiteboard
       final WhiteBoardDataController wbc = Get.find();
-      wbc.l.add(new ResizableCard(
+      wbc.l.add(new ContentCard(
         child: Text(""),
       ));
     }
@@ -142,7 +142,7 @@ class _MyHomeState extends State<MyHome> {
               ? StickItem("Text", value.text)
               : StickItem("Empty ", ""));
         else if (viewType == 1)
-          wbc.l.add(new ResizableCard(
+          wbc.l.add(new ContentCard(
             child: Text(notEmpty ? value.text : ""),
           ));
         Clipboard.setData(ClipboardData(text: ""));

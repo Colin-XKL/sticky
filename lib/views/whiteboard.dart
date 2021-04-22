@@ -2,14 +2,14 @@ import "package:flutter/material.dart";
 import 'package:get/get.dart';
 
 class WhiteBoardDataController extends GetxController {
-  List<ResizableCard> l = [
-    ResizableCard(
+  List<ContentCard> l = [
+    ContentCard(
       child: Text('''I've just did simple prototype to show main idea.
   1. Draw size handlers with container;
   2. Use GestureDetector to get new variables of sizes
   3. Refresh the main container size.'''),
     ),
-    ResizableCard(
+    ContentCard(
       child: Text("Hello Widget"),
     )
   ].obs;
@@ -29,23 +29,23 @@ class WhiteBoard extends StatelessWidget {
   }
 }
 
-class ResizableCard extends StatefulWidget {
-  ResizableCard({this.child});
+class ContentCard extends StatefulWidget {
+  ContentCard({this.child});
 
   final Key key = UniqueKey();
-  Widget child;
+  final Widget child;
   double top = 0;
   double left = 0;
   double height = 320;
   double width = 600;
 
   @override
-  _ResizableCardState createState() => _ResizableCardState();
+  _ContentCardState createState() => _ContentCardState();
 }
 
 const double movingControllerAreaLength = 20.0;
 
-class _ResizableCardState extends State<ResizableCard> {
+class _ContentCardState extends State<ContentCard> {
   static const double minHeight = 128;
   static const double minWidth = 256;
 
@@ -59,11 +59,11 @@ class _ResizableCardState extends State<ResizableCard> {
     });
   }
 
-  Widget _getFunctionButton(IconData icon, Function(Key key) onPressed,
+  Widget _getFunctionButton(IconData icon, Function() onPressed,
       [String tooltip]) {
     return IconButton(
       icon: Icon(icon),
-      onPressed: onPressed(this.widget.key),
+      onPressed: onPressed,
       padding: EdgeInsets.zero,
       tooltip: tooltip,
       splashRadius: 18,
@@ -133,22 +133,20 @@ class _ResizableCardState extends State<ResizableCard> {
                                 buttonPadding: EdgeInsets.zero,
                                 children: [
                                   _getFunctionButton(
-                                      Icons.delete_outline_rounded, (k) {
-                                    // setState(() {
-                                    // final WhiteBoardDataController wbc =
-                                    //     Get.find();
-                                    // wbc.l.removeWhere(
-                                    //     (element) => element.key == k);
-                                    // });
-
-                                    // setState(() {});
-                                    // wbc.l.removeWhere((element) => element.key=)
-                                  }, "asd"),
+                                      Icons.delete_outline_rounded, () {
+                                    WidgetsBinding.instance
+                                        .addPostFrameCallback((timeStamp) {
+                                      final WhiteBoardDataController wbc =
+                                          Get.find();
+                                      wbc.l.removeWhere((element) =>
+                                          element.key == widget.key);
+                                    });
+                                  }, "delete"),
                                   _getFunctionButton(
-                                      Icons.add_a_photo_rounded, (k) {}, "asd"),
+                                      Icons.add_a_photo_rounded, () {}, "asd"),
                                   _getFunctionButton(
                                       Icons.airline_seat_recline_normal_sharp,
-                                      (k) {},
+                                      () {},
                                       "asd"),
                                 ],
                               ),
