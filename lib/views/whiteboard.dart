@@ -42,7 +42,7 @@ class ResizableCard extends StatefulWidget {
   _ResizableCardState createState() => _ResizableCardState();
 }
 
-const double movingBallRadius = 20.0;
+const double movingControllerAreaLength = 20.0;
 
 class _ResizableCardState extends State<ResizableCard> {
   static const double minHeight = 128;
@@ -80,12 +80,23 @@ class _ResizableCardState extends State<ResizableCard> {
                       "Text",
                       style: TextStyle(fontWeight: FontWeight.w600),
                     ),
-                    leading: Icon(Icons.text_fields),
+                    leading: Tooltip(
+                        message: "Drag to move the card",
+                        child: ManipulatingBall(
+                          child: Icon(Icons.text_fields),
+                          onDrag: (dx, dy) {
+                            setState(() {
+                              widget.top = (widget.top + dy) + .0;
+                              widget.left = (widget.left + dx) + .0;
+                              widget.top = widget.top > 0 ? widget.top : 0;
+                              widget.left = widget.left > 0 ? widget.left : 0;
+                            });
+                          },
+                          dragAreaLength: 48,
+                        )),
                     dense: true,
                   ),
                 ),
-                // widget.child,
-
                 Expanded(
                   child: Container(
                     margin: EdgeInsets.all(10),
@@ -108,10 +119,10 @@ class _ResizableCardState extends State<ResizableCard> {
           child: _getContentCard(widget.height, widget.width, widget.child),
         ),
 
-        // bottom right
+        // bottom right => resize
         Positioned(
-          top: widget.top + widget.height - movingBallRadius / 2,
-          left: widget.left + widget.width - movingBallRadius / 2,
+          top: widget.top + widget.height - movingControllerAreaLength / 2,
+          left: widget.left + widget.width - movingControllerAreaLength / 2,
           child: ManipulatingBall(
             child:
                 Icon(Icons.adjust_rounded, color: Colors.grey.withOpacity(0.3)),
@@ -128,27 +139,7 @@ class _ResizableCardState extends State<ResizableCard> {
                 // left = left - mid;
               });
             },
-          ),
-        ),
-
-        // center center -> left top => move
-        Positioned(
-          left: widget.left,
-          top: widget.top,
-          child: ManipulatingBall(
-            child: Icon(
-              Icons.push_pin,
-              size: 14,
-              color: Colors.red,
-            ),
-            onDrag: (dx, dy) {
-              setState(() {
-                widget.top = (widget.top + dy) + .0;
-                widget.left = (widget.left + dx) + .0;
-                widget.top = widget.top > 0 ? widget.top : 0;
-                widget.left = widget.left > 0 ? widget.left : 0;
-              });
-            },
+            dragAreaLength: 20,
           ),
         ),
       ],
@@ -157,10 +148,11 @@ class _ResizableCardState extends State<ResizableCard> {
 }
 
 class ManipulatingBall extends StatefulWidget {
-  ManipulatingBall({Key key, this.child, this.onDrag});
+  ManipulatingBall({Key key, this.child, this.onDrag, this.dragAreaLength});
 
   final Widget child;
   final Function onDrag;
+  final double dragAreaLength;
 
   @override
   _ManipulatingBallState createState() => _ManipulatingBallState();
@@ -191,8 +183,6 @@ class _ManipulatingBallState extends State<ManipulatingBall> {
       onPanStart: _handleDrag,
       onPanUpdate: _handleUpdate,
       child: Container(
-        width: movingBallRadius,
-        height: movingBallRadius,
         child: widget.child,
       ),
     );
