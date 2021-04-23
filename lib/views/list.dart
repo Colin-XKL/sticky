@@ -75,46 +75,49 @@ class MyList2 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-        child: Obx(() => ReorderableListView.builder(
-            buildDefaultDragHandles: false,
-            onReorder: (int oldIndex, int newIndex) {
-              if (oldIndex < newIndex) newIndex -= 1;
-              var temp = c.l.removeAt(oldIndex);
-              c.l.insert(newIndex, temp);
-            },
-            itemCount: c.l.length,
-            itemBuilder: (context, index) {
-              final item = c.l[index];
-              return Dismissible(
-                  key: item.key,
-                  background: listTileBackground(),
-                  onDismissed: (direction) {
-                    c.lastDeleted = item;
-                    c.l.removeAt(index);
-                    ScaffoldMessenger.of(context).showSnackBar(msgDeleted);
-                  },
-                  child: ReorderableDelayedDragStartListener(
+        child: Scrollbar(
+            isAlwaysShown: false,
+            showTrackOnHover: false,
+            child: Obx(() => ReorderableListView.builder(
+                buildDefaultDragHandles: false,
+                onReorder: (int oldIndex, int newIndex) {
+                  if (oldIndex < newIndex) newIndex -= 1;
+                  var temp = c.l.removeAt(oldIndex);
+                  c.l.insert(newIndex, temp);
+                },
+                itemCount: c.l.length,
+                itemBuilder: (context, index) {
+                  final item = c.l[index];
+                  return Dismissible(
                       key: item.key,
-                      index: index,
-                      child: ListTile(
-                        title: Text(item.title),
-                        subtitle: Text(item.content),
-                        contentPadding: EdgeInsets.fromLTRB(16, 8, 16, 8),
-                        onTap: () {
-                          var value = item.content;
-                          if (value.isNotEmpty) {
-                            Clipboard.setData(ClipboardData(text: value));
-                            c.lastDeleted = c.l[index];
-                            c.l.removeAt(index);
-                            ScaffoldMessenger.of(context)
-                                .showSnackBar(msgCopied);
-                          } else {
-                            ScaffoldMessenger.of(context)
-                                .showSnackBar(msgEmpty);
-                          }
-                        },
-                      )));
-            })));
+                      background: listTileBackground(),
+                      onDismissed: (direction) {
+                        c.lastDeleted = item;
+                        c.l.removeAt(index);
+                        ScaffoldMessenger.of(context).showSnackBar(msgDeleted);
+                      },
+                      child: ReorderableDelayedDragStartListener(
+                          key: item.key,
+                          index: index,
+                          child: ListTile(
+                            title: Text(item.title),
+                            subtitle: Text(item.content),
+                            contentPadding: EdgeInsets.fromLTRB(16, 8, 16, 8),
+                            onTap: () {
+                              var value = item.content;
+                              if (value.isNotEmpty) {
+                                Clipboard.setData(ClipboardData(text: value));
+                                c.lastDeleted = c.l[index];
+                                c.l.removeAt(index);
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(msgCopied);
+                              } else {
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(msgEmpty);
+                              }
+                            },
+                          )));
+                }))));
   }
 }
 
