@@ -55,7 +55,7 @@ class _MyHomeState extends State<MyHome> {
       //whiteboard
       final WhiteBoardDataController wbc = Get.find();
       wbc.l.add(new ContentCard(
-        child: Text(""),
+        Text(""),
       ));
     }
   }
@@ -143,7 +143,7 @@ class _MyHomeState extends State<MyHome> {
               : StickItem("Empty ", ""));
         else if (viewType == 1)
           wbc.l.add(new ContentCard(
-            child: Text(notEmpty ? value.text : ""),
+            Text(notEmpty ? value.text : ""),
           ));
         Clipboard.setData(ClipboardData(text: ""));
         return notEmpty;

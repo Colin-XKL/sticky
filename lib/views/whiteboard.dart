@@ -3,15 +3,13 @@ import 'package:get/get.dart';
 
 class WhiteBoardDataController extends GetxController {
   List<ContentCard> l = [
+    ContentCard.text('''I've just did simple prototype to show main idea.
+    1. Draw size handlers with container;
+    2. Use GestureDetector to get new variables of sizes
+    3. Refresh the main container size.'''),
     ContentCard(
-      child: Text('''I've just did simple prototype to show main idea.
-  1. Draw size handlers with container;
-  2. Use GestureDetector to get new variables of sizes
-  3. Refresh the main container size.'''),
+      Text("Hello Widget"),
     ),
-    ContentCard(
-      child: Text("Hello Widget"),
-    )
   ].obs;
 }
 
@@ -30,7 +28,14 @@ class WhiteBoard extends StatelessWidget {
 }
 
 class ContentCard extends StatefulWidget {
-  ContentCard({this.child});
+  ContentCard(this.child);
+
+  ContentCard.text(String s)
+      : this(Scrollbar(
+            isAlwaysShown: false,
+            child: SingleChildScrollView(
+              child: SelectableText(s),
+            )));
 
   final Key key = UniqueKey();
   final Widget child;
