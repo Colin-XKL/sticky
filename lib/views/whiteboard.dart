@@ -149,12 +149,24 @@ class _ContentCardState extends State<ContentCard> {
                                       wbc.l.removeWhere((element) =>
                                           element.key == widget.key);
                                     });
-                                  }, "delete"),
-                                  _getFunctionButton(Icons.lock_open_rounded,
-                                      () {
-                                    widget.pined = true;
-                                    widget.locked = true;
-                                  }, "Lock"),
+                                  }, "Delete"),
+                                  widget.locked
+                                      ? _getFunctionButton(Icons.lock_rounded,
+                                          () {
+                                          setState(
+                                            () {
+                                              widget.locked = false;
+                                              widget.pined = false;
+                                            },
+                                          );
+                                        }, "Locked")
+                                      : _getFunctionButton(
+                                          Icons.lock_open_rounded, () {
+                                          setState(() {
+                                            widget.pined = true;
+                                            widget.locked = true;
+                                          });
+                                        }, "Lock"),
                                   widget.pined
                                       ? _getFunctionButton(
                                           Icons.push_pin_rounded, () {
@@ -190,7 +202,7 @@ class _ContentCardState extends State<ContentCard> {
                             Icons.signal_cellular_4_bar_rounded,
                             color: Colors.grey[100],
                           ),
-                          message: "Drag to resize",
+                          message: widget.locked ? "Locked" : "Drag to resize",
                         ),
                         onDrag: (dx, dy) {
                           if (!widget.locked) {
