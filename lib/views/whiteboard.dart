@@ -97,6 +97,7 @@ class _ContentCardState extends State<ContentCard> {
                     child: Row(
                       children: [
                         Padding(
+                          //icon of card type & moving controller
                           padding: const EdgeInsets.all(4.0),
                           child: Tooltip(
                               message: "Drag to move the card",
@@ -116,6 +117,7 @@ class _ContentCardState extends State<ContentCard> {
                               )),
                         ),
                         Expanded(
+                          //title of content card
                           child: Padding(
                             padding: const EdgeInsets.all(4.0),
                             child: Text(
@@ -127,6 +129,7 @@ class _ContentCardState extends State<ContentCard> {
                           ),
                         ),
                         SizedBox(
+                          //button bar
                           child: Row(
                             children: [
                               ButtonBar(
@@ -143,11 +146,9 @@ class _ContentCardState extends State<ContentCard> {
                                     });
                                   }, "delete"),
                                   _getFunctionButton(
-                                      Icons.add_a_photo_rounded, () {}, "asd"),
+                                      Icons.lock_open_rounded, () {}, "Lock"),
                                   _getFunctionButton(
-                                      Icons.airline_seat_recline_normal_sharp,
-                                      () {},
-                                      "asd"),
+                                      Icons.push_pin_rounded, () {}, "Pin"),
                                 ],
                               ),
                             ],
@@ -159,6 +160,7 @@ class _ContentCardState extends State<ContentCard> {
                   ),
                 ),
                 Expanded(
+                    //content
                     child: Stack(
                   children: [
                     Align(
@@ -188,7 +190,7 @@ class _ContentCardState extends State<ContentCard> {
                       ),
                     ),
                     Container(
-                      margin: EdgeInsets.all(10),
+                      margin: EdgeInsets.fromLTRB(14, 8, 14, 8),
                       child: widget.child,
                     ),
                   ],
