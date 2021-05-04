@@ -18,4 +18,5 @@ jobs:
           channel: 'stable' # or: 'beta', 'dev' or 'master'
       - run: flutter pub get
       - run: flutter analyze
+      - run: flutter build web # run basic build test
 #      - run: flutter test  # uncomment it if wrote unit test file
