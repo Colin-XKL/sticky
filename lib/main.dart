@@ -36,7 +36,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHome extends StatefulWidget {
-  ViewManager m = new ViewManager();
+  final ViewManager m = new ViewManager();
 
   @override
   State<StatefulWidget> createState() => _MyHomeState();
