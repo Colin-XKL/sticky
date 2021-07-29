@@ -35,6 +35,13 @@ class ListDataController extends GetxController {
     StickItem("#4 Reorder items", "Long press the item and reorder it.\n")
   ].obs;
   var lastDeleted = new StickItem("Empty", "No thing here.");
+
+  bool addNewItem(String value) {
+    //TODO: 兼容不同的内容类型
+    bool notEmpty = (value != null && value.isNotEmpty);
+    this.l.add(notEmpty ? StickItem("Text", value) : StickItem("Empty ", ""));
+    return notEmpty;
+  }
 }
 
 class MyList2 extends StatelessWidget {

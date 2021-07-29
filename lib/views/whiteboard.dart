@@ -2,7 +2,7 @@ import "package:flutter/material.dart";
 import 'package:get/get.dart';
 
 class WhiteBoardDataController extends GetxController {
-  List<ContentCard> l = [
+  RxList<ContentCard> l = [
     ContentCard.text('''I've just did simple prototype to show main idea.
     1. Draw size handlers with container;
     2. Use GestureDetector to get new variables of sizes
@@ -11,6 +11,15 @@ class WhiteBoardDataController extends GetxController {
       Text("Hello Widget"),
     ),
   ].obs;
+
+  bool addNewItem(String value) {
+    //TODO: 兼容不同的内容类型
+    bool notEmpty = (value != null && value.isNotEmpty);
+    this.l.add(new ContentCard(
+          Text(notEmpty ? value : ""),
+        ));
+    return notEmpty;
+  }
 }
 
 class WhiteBoard extends StatelessWidget {

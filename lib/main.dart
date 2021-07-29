@@ -146,13 +146,8 @@ class _MyHomeState extends State<MyHome> {
 
       if ((viewType == 0 || viewType == 1)) {
         if (viewType == 0)
-          c.l.add(notEmpty
-              ? StickItem("Text", value.text)
-              : StickItem("Empty ", ""));
-        else if (viewType == 1)
-          wbc.l.add(new ContentCard(
-            Text(notEmpty ? value.text : ""),
-          ));
+          c.addNewItem(value.text);
+        else if (viewType == 1) wbc.addNewItem(value.text);
         Clipboard.setData(ClipboardData(text: ""));
         return notEmpty;
       }
