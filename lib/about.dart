@@ -52,6 +52,7 @@ class AboutPage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 TextButton(
+                  onPressed: () {},
                   child: Text(
                     "QUESTIONS",
                   ),
@@ -66,6 +67,7 @@ class AboutPage extends StatelessWidget {
                   },
                 ),
                 TextButton(
+                  onPressed: () {},
                   child: Text(
                     "IDEAS",
                   ),
