@@ -4,9 +4,17 @@ import 'package:get/get.dart';
 import 'views/list.dart';
 import 'views/whiteboard.dart';
 import 'about.dart';
+import 'package:flutter/widgets.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 
-void main() {
-  runApp(MyApp());
+Future<void> main() async {
+  await SentryFlutter.init(
+    (options) {
+      options.dsn =
+          'https://246fb2d534314bf3935d50f4ef0afd0b@o850059.ingest.sentry.io/5884653';
+    },
+    appRunner: () => runApp(MyApp()),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -28,7 +36,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHome extends StatefulWidget {
-  ViewManager m = new ViewManager();
+  final ViewManager m = new ViewManager();
 
   @override
   State<StatefulWidget> createState() => _MyHomeState();
@@ -138,13 +146,8 @@ class _MyHomeState extends State<MyHome> {
 
       if ((viewType == 0 || viewType == 1)) {
         if (viewType == 0)
-          c.l.add(notEmpty
-              ? StickItem("Text", value.text)
-              : StickItem("Empty ", ""));
-        else if (viewType == 1)
-          wbc.l.add(new ContentCard(
-            Text(notEmpty ? value.text : ""),
-          ));
+          c.addNewItem(value.text);
+        else if (viewType == 1) wbc.addNewItem(value.text);
         Clipboard.setData(ClipboardData(text: ""));
         return notEmpty;
       }
