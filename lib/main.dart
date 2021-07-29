@@ -86,12 +86,16 @@ class _MyHomeState extends State<MyHome> {
             drawer: Drawer(
               child: new ListView(
                 children: <Widget>[
-                  UserAccountsDrawerHeader(),
+                  UserAccountsDrawerHeader(
+                    accountEmail: null,
+                    accountName: null,
+                  ),
                   ListTile(
                     title: Text("List View"),
                     leading: Icon(Icons.title),
                     trailing: IconButton(
                       icon: Icon(Icons.arrow_forward_ios),
+                      onPressed: () {},
                     ),
                     onTap: () {
                       setState(() {
@@ -105,6 +109,7 @@ class _MyHomeState extends State<MyHome> {
                     leading: Icon(Icons.dashboard_sharp),
                     trailing: IconButton(
                       icon: Icon(Icons.arrow_forward_ios),
+                      onPressed: () {},
                     ),
                     onTap: () {
                       setState(() {
@@ -117,6 +122,7 @@ class _MyHomeState extends State<MyHome> {
                     title: Text("Feedback"),
                     leading: IconButton(
                       icon: Icon(Icons.feedback_outlined),
+                      onPressed: () {},
                     ),
                     onTap: () {
                       Navigator.push(context,
