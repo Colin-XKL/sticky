@@ -70,7 +70,7 @@ class _MyHomeState extends State<MyHome> {
 
   @override
   Widget build(BuildContext context) {
-    print("view container widget build");
+    // print("view container widget build");
     view = widget.viewManager.getView().getWidget();
 
     return AreaWithKeyShortcut(

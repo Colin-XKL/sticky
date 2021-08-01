@@ -12,28 +12,38 @@ class TheBoardController extends GetxController {
     ),
   ].obs;
 
+  static RxController get to => Get.find();
+
   bool addNewItem(String value) {
     //TODO: 兼容不同的内容类型
     bool notEmpty = (value != null && value.isNotEmpty);
     this.l.add(new ContentCard(
           Text(notEmpty ? value : ""),
         ));
+    update();
     return notEmpty;
+  }
+
+  void removeItem(Key key) {
+    this.l.removeWhere((element) => element.key == key);
+    update();
   }
 }
 
 class TheBoard extends StatelessWidget {
-  final TheBoardController wbc = Get.put(TheBoardController());
+  // final TheBoardController wbc = Get.put(TheBoardController());
 
   @override
   Widget build(BuildContext context) {
-    print("board rebuild");
+    // print("board rebuild");
     return Container(
-      padding: EdgeInsets.all(24),
-      child: Obx(() => Stack(
-            children: wbc.l,
-          )),
-    );
+        padding: EdgeInsets.all(24),
+        child: GetBuilder<TheBoardController>(
+          init: TheBoardController(),
+          builder: (c) => Stack(
+            children: c.l,
+          ),
+        ));
   }
 }
 
@@ -159,9 +169,9 @@ class _ContentCardState extends State<ContentCard> {
                                       Icons.delete_outline_rounded, () {
                                     WidgetsBinding.instance
                                         .addPostFrameCallback((timeStamp) {
-                                      final TheBoardController wbc = Get.find();
-                                      wbc.l.removeWhere((element) =>
-                                          element.key == widget.key);
+                                      final TheBoardController wbc =
+                                          Get.find<TheBoardController>();
+                                      wbc.removeItem(widget.key);
                                     });
                                   }, "Delete"),
                                   widget.state.locked
@@ -221,7 +231,7 @@ class _ContentCardState extends State<ContentCard> {
                         ),
                         onDrag: (dx, dy) {
                           //resize
-                          print("resize drag $dx $dy");
+                          // print("resize drag $dx $dy");
                           if (!widget.state.locked) {
                             num newHeight = (widget.state.height + dy);
                             num newWidth = (widget.state.width + dx);
@@ -253,7 +263,7 @@ class _ContentCardState extends State<ContentCard> {
 
   @override
   Widget build(BuildContext context) {
-    print("status: $widget.cardState._top , $widget.cardState._left");
+    // print("status: $widget.cardState._top , $widget.cardState._left");
     return Positioned(
       top: widget.state.top,
       left: widget.state.left,
