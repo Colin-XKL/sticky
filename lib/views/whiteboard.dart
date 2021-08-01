@@ -37,9 +37,21 @@ class TheBoard extends StatelessWidget {
   }
 }
 
+class CardState {
+  double top = 0;
+  double left = 0;
+  double height = 320;
+  double width = 600;
+  bool locked = false;
+  bool pined = false;
+
+  CardState();
+}
+
 class ContentCard extends StatefulWidget {
   final Key key = UniqueKey();
   final Widget child;
+  final CardState state = new CardState();
 
   ContentCard(this.child);
 
@@ -59,23 +71,6 @@ class ContentCard extends StatefulWidget {
 class _ContentCardState extends State<ContentCard> {
   static const double minHeight = 128;
   static const double minWidth = 256;
-
-  double _top = 0;
-  double _left = 0;
-  double _height = 320;
-  double _width = 600;
-  bool _locked = false;
-  bool _pined = false;
-
-  // void onDrag(double dx, double dy) {
-  //   double newHeight = _height + dy;
-  //   double newWidth = _width + dx;
-  //
-  //   setState(() {
-  //     _height = newHeight > minHeight ? newHeight : minHeight;
-  //     _width = newWidth > minWidth ? newWidth : minWidth;
-  //   });
-  // }
 
   static Widget _getFunctionButton(IconData icon, Function() onPressed,
       [String tooltip]) {
@@ -118,17 +113,24 @@ class _ContentCardState extends State<ContentCard> {
                           //icon of card type & moving controller
                           padding: const EdgeInsets.all(4.0),
                           child: Tooltip(
-                              message:
-                                  _pined ? "Pinned" : "Drag to move the card",
+                              message: widget.state.pined
+                                  ? "Pinned"
+                                  : "Drag to move the card",
                               child: ManipulatingBall(
-                                child: Icon(Icons.text_fields),
+                                child: Icon(Icons.text_fields_rounded),
                                 onDrag: (dx, dy) {
-                                  if (!_pined)
+                                  if (!widget.state.pined)
                                     setState(() {
-                                      _top = (_top + dy) + .0;
-                                      _left = (_left + dx) + .0;
-                                      _top = _top > 0 ? _top : 0;
-                                      _left = _left > 0 ? _left : 0;
+                                      widget.state.top =
+                                          (widget.state.top + dy) + .0;
+                                      widget.state.left =
+                                          (widget.state.left + dx) + .0;
+                                      widget.state.top = widget.state.top > 0
+                                          ? widget.state.top
+                                          : 0;
+                                      widget.state.left = widget.state.left > 0
+                                          ? widget.state.left
+                                          : 0;
                                     });
                                 },
                                 dragAreaLength: 48,
@@ -162,34 +164,34 @@ class _ContentCardState extends State<ContentCard> {
                                           element.key == widget.key);
                                     });
                                   }, "Delete"),
-                                  _locked
+                                  widget.state.locked
                                       ? _getFunctionButton(Icons.lock_rounded,
                                           () {
                                           setState(
                                             () {
-                                              _locked = false;
-                                              _pined = false;
+                                              widget.state.locked = false;
+                                              widget.state.pined = false;
                                             },
                                           );
                                         }, "Locked")
                                       : _getFunctionButton(
                                           Icons.lock_open_rounded, () {
                                           setState(() {
-                                            _pined = true;
-                                            _locked = true;
+                                            widget.state.pined = true;
+                                            widget.state.locked = true;
                                           });
                                         }, "Lock"),
-                                  _pined
+                                  widget.state.pined
                                       ? _getFunctionButton(
                                           Icons.push_pin_rounded, () {
                                           setState(() {
-                                            _pined = false;
+                                            widget.state.pined = false;
                                           });
                                         }, "UnPin")
                                       : _getFunctionButton(
                                           Icons.push_pin_outlined, () {
                                           setState(() {
-                                            _pined = true;
+                                            widget.state.pined = true;
                                           });
                                         }, "Pin"),
                                 ],
@@ -214,20 +216,21 @@ class _ContentCardState extends State<ContentCard> {
                             Icons.signal_cellular_4_bar_rounded,
                             color: Colors.grey[100],
                           ),
-                          message: _locked ? "Locked" : "Drag to resize",
+                          message:
+                              widget.state.locked ? "Locked" : "Drag to resize",
                         ),
                         onDrag: (dx, dy) {
                           //resize
                           print("resize drag $dx $dy");
-                          if (!_locked) {
-                            num newHeight = (this._height + dy);
-                            num newWidth = (this._width + dx);
+                          if (!widget.state.locked) {
+                            num newHeight = (widget.state.height + dy);
+                            num newWidth = (widget.state.width + dx);
 
                             setState(() {
-                              this._height = newHeight > minHeight
+                              widget.state.height = newHeight > minHeight
                                   ? newHeight.toDouble()
                                   : minHeight;
-                              this._width = newWidth > minWidth
+                              widget.state.width = newWidth > minWidth
                                   ? newWidth.toDouble()
                                   : minWidth;
                             });
@@ -250,10 +253,12 @@ class _ContentCardState extends State<ContentCard> {
 
   @override
   Widget build(BuildContext context) {
+    print("status: $widget.cardState._top , $widget.cardState._left");
     return Positioned(
-      top: _top,
-      left: _left,
-      child: _getContentCard(_height, _width, widget.child),
+      top: widget.state.top,
+      left: widget.state.left,
+      child: _getContentCard(
+          widget.state.height, widget.state.width, widget.child),
     );
   }
 }
