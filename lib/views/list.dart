@@ -2,21 +2,21 @@ import "package:flutter/material.dart";
 import 'package:get/get.dart';
 import 'package:flutter/services.dart';
 
-class StickItem {
+class ListItem {
   Key key;
   String title;
   bool isBinary;
   var content;
   String notations;
 
-  StickItem(String title, String content) {
+  ListItem(String title, String content) {
     this.key = UniqueKey();
     this.title = title;
     this.isBinary = false;
     this.content = content;
   }
 
-  StickItem.binaryContent(String title, Object content, bool bin) {
+  ListItem.binaryContent(String title, Object content, bool bin) {
     this.key = UniqueKey();
     this.title = title;
     this.isBinary = true;
@@ -24,28 +24,28 @@ class StickItem {
   }
 }
 
-class ListDataController extends GetxController {
-  List<StickItem> l = [
-    StickItem("Tutorial", "Follow these steps to quickly get started."),
-    StickItem("#1 Paste from your pastebin",
+class TheListController extends GetxController {
+  List<ListItem> l = [
+    ListItem("Tutorial", "Follow these steps to quickly get started."),
+    ListItem("#1 Paste from your pastebin",
         "Tap or click the plus button to paste something.\nIf it's empty, try to get some stuff.\n"),
-    StickItem("#2 Copy from the list",
+    ListItem("#2 Copy from the list",
         "Tap or click the item in the list, and the content(not the title) will be copied to your pastebin\n"),
-    StickItem("#3 Delete item", "slide the item remove it.\n"),
-    StickItem("#4 Reorder items", "Long press the item and reorder it.\n")
+    ListItem("#3 Delete item", "slide the item remove it.\n"),
+    ListItem("#4 Reorder items", "Long press the item and reorder it.\n")
   ].obs;
-  var lastDeleted = new StickItem("Empty", "No thing here.");
+  var lastDeleted = new ListItem("Empty", "No thing here.");
 
   bool addNewItem(String value) {
     //TODO: 兼容不同的内容类型
     bool notEmpty = (value != null && value.isNotEmpty);
-    this.l.add(notEmpty ? StickItem("Text", value) : StickItem("Empty ", ""));
+    this.l.add(notEmpty ? ListItem("Text", value) : ListItem("Empty ", ""));
     return notEmpty;
   }
 }
 
-class MyList2 extends StatelessWidget {
-  final ListDataController c = Get.put(ListDataController());
+class TheList extends StatelessWidget {
+  final TheListController c = Get.put(TheListController());
 
   final msgPasted = new SnackBar(
     content: Text("Pasted"),
@@ -61,7 +61,7 @@ class MyList2 extends StatelessWidget {
     action: new SnackBarAction(
         label: 'Undo',
         onPressed: () {
-          final ListDataController c = Get.find();
+          final TheListController c = Get.find();
           c.l.add(c.lastDeleted);
           // lastDeleted=null;
         }),
@@ -73,7 +73,7 @@ class MyList2 extends StatelessWidget {
     action: new SnackBarAction(
         label: 'Undo',
         onPressed: () {
-          final ListDataController c = Get.find();
+          final TheListController c = Get.find();
           c.l.add(c.lastDeleted);
           // lastDeleted=null;
         }),

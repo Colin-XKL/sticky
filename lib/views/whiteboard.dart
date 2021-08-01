@@ -1,7 +1,7 @@
 import "package:flutter/material.dart";
 import 'package:get/get.dart';
 
-class WhiteBoardDataController extends GetxController {
+class TheBoardController extends GetxController {
   RxList<ContentCard> l = [
     ContentCard.text('''I've just did simple prototype to show main idea.
     1. Draw size handlers with container;
@@ -22,11 +22,12 @@ class WhiteBoardDataController extends GetxController {
   }
 }
 
-class WhiteBoard extends StatelessWidget {
-  final WhiteBoardDataController wbc = Get.put(WhiteBoardDataController());
+class TheBoard extends StatelessWidget {
+  final TheBoardController wbc = Get.put(TheBoardController());
 
   @override
   Widget build(BuildContext context) {
+    print("board rebuild");
     return Container(
       padding: EdgeInsets.all(24),
       child: Obx(() => Stack(
@@ -37,6 +38,9 @@ class WhiteBoard extends StatelessWidget {
 }
 
 class ContentCard extends StatefulWidget {
+  final Key key = UniqueKey();
+  final Widget child;
+
   ContentCard(this.child);
 
   ContentCard.text(String s)
@@ -46,37 +50,34 @@ class ContentCard extends StatefulWidget {
               child: SelectableText(s),
             )));
 
-  final Key key = UniqueKey();
-  final Widget child;
-
   @override
   _ContentCardState createState() => _ContentCardState();
 }
 
-const double movingControllerAreaLength = 20.0;
+// const double movingControllerAreaLength = 20.0;
 
 class _ContentCardState extends State<ContentCard> {
   static const double minHeight = 128;
   static const double minWidth = 256;
 
-  double top = 0;
-  double left = 0;
-  double height = 320;
-  double width = 600;
-  bool locked = false;
-  bool pined = false;
+  double _top = 0;
+  double _left = 0;
+  double _height = 320;
+  double _width = 600;
+  bool _locked = false;
+  bool _pined = false;
 
-  void onDrag(double dx, double dy) {
-    double newHeight = height + dy;
-    double newWidth = width + dx;
+  // void onDrag(double dx, double dy) {
+  //   double newHeight = _height + dy;
+  //   double newWidth = _width + dx;
+  //
+  //   setState(() {
+  //     _height = newHeight > minHeight ? newHeight : minHeight;
+  //     _width = newWidth > minWidth ? newWidth : minWidth;
+  //   });
+  // }
 
-    setState(() {
-      height = newHeight > minHeight ? newHeight : minHeight;
-      width = newWidth > minWidth ? newWidth : minWidth;
-    });
-  }
-
-  Widget _getFunctionButton(IconData icon, Function() onPressed,
+  static Widget _getFunctionButton(IconData icon, Function() onPressed,
       [String tooltip]) {
     return IconButton(
       icon: Icon(icon),
@@ -118,16 +119,16 @@ class _ContentCardState extends State<ContentCard> {
                           padding: const EdgeInsets.all(4.0),
                           child: Tooltip(
                               message:
-                                  pined ? "Pinned" : "Drag to move the card",
+                                  _pined ? "Pinned" : "Drag to move the card",
                               child: ManipulatingBall(
                                 child: Icon(Icons.text_fields),
                                 onDrag: (dx, dy) {
-                                  if (!pined)
+                                  if (!_pined)
                                     setState(() {
-                                      top = (top + dy) + .0;
-                                      left = (left + dx) + .0;
-                                      top = top > 0 ? top : 0;
-                                      left = left > 0 ? left : 0;
+                                      _top = (_top + dy) + .0;
+                                      _left = (_left + dx) + .0;
+                                      _top = _top > 0 ? _top : 0;
+                                      _left = _left > 0 ? _left : 0;
                                     });
                                 },
                                 dragAreaLength: 48,
@@ -156,40 +157,39 @@ class _ContentCardState extends State<ContentCard> {
                                       Icons.delete_outline_rounded, () {
                                     WidgetsBinding.instance
                                         .addPostFrameCallback((timeStamp) {
-                                      final WhiteBoardDataController wbc =
-                                          Get.find();
+                                      final TheBoardController wbc = Get.find();
                                       wbc.l.removeWhere((element) =>
                                           element.key == widget.key);
                                     });
                                   }, "Delete"),
-                                  locked
+                                  _locked
                                       ? _getFunctionButton(Icons.lock_rounded,
                                           () {
                                           setState(
                                             () {
-                                              locked = false;
-                                              pined = false;
+                                              _locked = false;
+                                              _pined = false;
                                             },
                                           );
                                         }, "Locked")
                                       : _getFunctionButton(
                                           Icons.lock_open_rounded, () {
                                           setState(() {
-                                            pined = true;
-                                            locked = true;
+                                            _pined = true;
+                                            _locked = true;
                                           });
                                         }, "Lock"),
-                                  pined
+                                  _pined
                                       ? _getFunctionButton(
                                           Icons.push_pin_rounded, () {
                                           setState(() {
-                                            pined = false;
+                                            _pined = false;
                                           });
                                         }, "UnPin")
                                       : _getFunctionButton(
                                           Icons.push_pin_outlined, () {
                                           setState(() {
-                                            pined = true;
+                                            _pined = true;
                                           });
                                         }, "Pin"),
                                 ],
@@ -214,18 +214,20 @@ class _ContentCardState extends State<ContentCard> {
                             Icons.signal_cellular_4_bar_rounded,
                             color: Colors.grey[100],
                           ),
-                          message: locked ? "Locked" : "Drag to resize",
+                          message: _locked ? "Locked" : "Drag to resize",
                         ),
                         onDrag: (dx, dy) {
-                          if (!locked) {
-                            num newHeight = (height + dy);
-                            num newWidth = (width + dx);
+                          //resize
+                          print("resize drag $dx $dy");
+                          if (!_locked) {
+                            num newHeight = (this._height + dy);
+                            num newWidth = (this._width + dx);
 
                             setState(() {
-                              height = newHeight > minHeight
+                              this._height = newHeight > minHeight
                                   ? newHeight.toDouble()
                                   : minHeight;
-                              width = newWidth > minWidth
+                              this._width = newWidth > minWidth
                                   ? newWidth.toDouble()
                                   : minWidth;
                             });
@@ -249,9 +251,9 @@ class _ContentCardState extends State<ContentCard> {
   @override
   Widget build(BuildContext context) {
     return Positioned(
-      top: top,
-      left: left,
-      child: _getContentCard(height, width, widget.child),
+      top: _top,
+      left: _left,
+      child: _getContentCard(_height, _width, widget.child),
     );
   }
 }
