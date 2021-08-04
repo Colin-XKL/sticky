@@ -31,7 +31,7 @@ class TheBoardController extends GetxController {
 }
 
 class TheBoard extends StatelessWidget {
-  // final TheBoardController wbc = Get.put(TheBoardController());
+  final TheBoardController wbc = Get.put(TheBoardController());
 
   @override
   Widget build(BuildContext context) {

@@ -61,7 +61,7 @@ class TheList extends StatelessWidget {
     action: new SnackBarAction(
         label: 'Undo',
         onPressed: () {
-          final TheListController c = Get.find();
+          final TheListController c = Get.find<TheListController>();
           c.l.add(c.lastDeleted);
           // lastDeleted=null;
         }),
@@ -73,7 +73,7 @@ class TheList extends StatelessWidget {
     action: new SnackBarAction(
         label: 'Undo',
         onPressed: () {
-          final TheListController c = Get.find();
+          final TheListController c = Get.find<TheListController>();
           c.l.add(c.lastDeleted);
           // lastDeleted=null;
         }),
