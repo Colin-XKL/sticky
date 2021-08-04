@@ -1,7 +1,7 @@
 import "package:flutter/material.dart";
 import 'package:get/get.dart';
 
-class WhiteBoardDataController extends GetxController {
+class TheBoardController extends GetxController {
   RxList<ContentCard> l = [
     ContentCard.text('''I've just did simple prototype to show main idea.
     1. Draw size handlers with container;
@@ -12,31 +12,57 @@ class WhiteBoardDataController extends GetxController {
     ),
   ].obs;
 
+  static RxController get to => Get.find();
+
   bool addNewItem(String value) {
     //TODO: 兼容不同的内容类型
     bool notEmpty = (value != null && value.isNotEmpty);
     this.l.add(new ContentCard(
           Text(notEmpty ? value : ""),
         ));
+    update();
     return notEmpty;
+  }
+
+  void removeItem(Key key) {
+    this.l.removeWhere((element) => element.key == key);
+    update();
   }
 }
 
-class WhiteBoard extends StatelessWidget {
-  final WhiteBoardDataController wbc = Get.put(WhiteBoardDataController());
+class TheBoard extends StatelessWidget {
+  final TheBoardController wbc = Get.put(TheBoardController());
 
   @override
   Widget build(BuildContext context) {
+    // print("board rebuild");
     return Container(
-      padding: EdgeInsets.all(24),
-      child: Obx(() => Stack(
-            children: wbc.l,
-          )),
-    );
+        padding: EdgeInsets.all(24),
+        child: GetBuilder<TheBoardController>(
+          init: TheBoardController(),
+          builder: (c) => Stack(
+            children: c.l,
+          ),
+        ));
   }
 }
 
+class CardState {
+  double top = 0;
+  double left = 0;
+  double height = 320;
+  double width = 600;
+  bool locked = false;
+  bool pined = false;
+
+  CardState();
+}
+
 class ContentCard extends StatefulWidget {
+  final Key key = UniqueKey();
+  final Widget child;
+  final CardState state = new CardState();
+
   ContentCard(this.child);
 
   ContentCard.text(String s)
@@ -46,37 +72,17 @@ class ContentCard extends StatefulWidget {
               child: SelectableText(s),
             )));
 
-  final Key key = UniqueKey();
-  final Widget child;
-
   @override
   _ContentCardState createState() => _ContentCardState();
 }
 
-const double movingControllerAreaLength = 20.0;
+// const double movingControllerAreaLength = 20.0;
 
 class _ContentCardState extends State<ContentCard> {
   static const double minHeight = 128;
   static const double minWidth = 256;
 
-  double top = 0;
-  double left = 0;
-  double height = 320;
-  double width = 600;
-  bool locked = false;
-  bool pined = false;
-
-  void onDrag(double dx, double dy) {
-    double newHeight = height + dy;
-    double newWidth = width + dx;
-
-    setState(() {
-      height = newHeight > minHeight ? newHeight : minHeight;
-      width = newWidth > minWidth ? newWidth : minWidth;
-    });
-  }
-
-  Widget _getFunctionButton(IconData icon, Function() onPressed,
+  static Widget _getFunctionButton(IconData icon, Function() onPressed,
       [String tooltip]) {
     return IconButton(
       icon: Icon(icon),
@@ -117,17 +123,24 @@ class _ContentCardState extends State<ContentCard> {
                           //icon of card type & moving controller
                           padding: const EdgeInsets.all(4.0),
                           child: Tooltip(
-                              message:
-                                  pined ? "Pinned" : "Drag to move the card",
+                              message: widget.state.pined
+                                  ? "Pinned"
+                                  : "Drag to move the card",
                               child: ManipulatingBall(
-                                child: Icon(Icons.text_fields),
+                                child: Icon(Icons.text_fields_rounded),
                                 onDrag: (dx, dy) {
-                                  if (!pined)
+                                  if (!widget.state.pined)
                                     setState(() {
-                                      top = (top + dy) + .0;
-                                      left = (left + dx) + .0;
-                                      top = top > 0 ? top : 0;
-                                      left = left > 0 ? left : 0;
+                                      widget.state.top =
+                                          (widget.state.top + dy) + .0;
+                                      widget.state.left =
+                                          (widget.state.left + dx) + .0;
+                                      widget.state.top = widget.state.top > 0
+                                          ? widget.state.top
+                                          : 0;
+                                      widget.state.left = widget.state.left > 0
+                                          ? widget.state.left
+                                          : 0;
                                     });
                                 },
                                 dragAreaLength: 48,
@@ -156,40 +169,39 @@ class _ContentCardState extends State<ContentCard> {
                                       Icons.delete_outline_rounded, () {
                                     WidgetsBinding.instance
                                         .addPostFrameCallback((timeStamp) {
-                                      final WhiteBoardDataController wbc =
-                                          Get.find();
-                                      wbc.l.removeWhere((element) =>
-                                          element.key == widget.key);
+                                      final TheBoardController wbc =
+                                          Get.find<TheBoardController>();
+                                      wbc.removeItem(widget.key);
                                     });
                                   }, "Delete"),
-                                  locked
+                                  widget.state.locked
                                       ? _getFunctionButton(Icons.lock_rounded,
                                           () {
                                           setState(
                                             () {
-                                              locked = false;
-                                              pined = false;
+                                              widget.state.locked = false;
+                                              widget.state.pined = false;
                                             },
                                           );
                                         }, "Locked")
                                       : _getFunctionButton(
                                           Icons.lock_open_rounded, () {
                                           setState(() {
-                                            pined = true;
-                                            locked = true;
+                                            widget.state.pined = true;
+                                            widget.state.locked = true;
                                           });
                                         }, "Lock"),
-                                  pined
+                                  widget.state.pined
                                       ? _getFunctionButton(
                                           Icons.push_pin_rounded, () {
                                           setState(() {
-                                            pined = false;
+                                            widget.state.pined = false;
                                           });
                                         }, "UnPin")
                                       : _getFunctionButton(
                                           Icons.push_pin_outlined, () {
                                           setState(() {
-                                            pined = true;
+                                            widget.state.pined = true;
                                           });
                                         }, "Pin"),
                                 ],
@@ -214,18 +226,21 @@ class _ContentCardState extends State<ContentCard> {
                             Icons.signal_cellular_4_bar_rounded,
                             color: Colors.grey[100],
                           ),
-                          message: locked ? "Locked" : "Drag to resize",
+                          message:
+                              widget.state.locked ? "Locked" : "Drag to resize",
                         ),
                         onDrag: (dx, dy) {
-                          if (!locked) {
-                            num newHeight = (height + dy);
-                            num newWidth = (width + dx);
+                          //resize
+                          // print("resize drag $dx $dy");
+                          if (!widget.state.locked) {
+                            num newHeight = (widget.state.height + dy);
+                            num newWidth = (widget.state.width + dx);
 
                             setState(() {
-                              height = newHeight > minHeight
+                              widget.state.height = newHeight > minHeight
                                   ? newHeight.toDouble()
                                   : minHeight;
-                              width = newWidth > minWidth
+                              widget.state.width = newWidth > minWidth
                                   ? newWidth.toDouble()
                                   : minWidth;
                             });
@@ -248,10 +263,12 @@ class _ContentCardState extends State<ContentCard> {
 
   @override
   Widget build(BuildContext context) {
+    // print("status: $widget.cardState._top , $widget.cardState._left");
     return Positioned(
-      top: top,
-      left: left,
-      child: _getContentCard(height, width, widget.child),
+      top: widget.state.top,
+      left: widget.state.left,
+      child: _getContentCard(
+          widget.state.height, widget.state.width, widget.child),
     );
   }
 }
