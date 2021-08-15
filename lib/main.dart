@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:localstorage/localstorage.dart';
 import 'views/list.dart';
 import 'views/whiteboard.dart';
 import 'about.dart';
 import 'package:flutter/widgets.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
+import 'package:get_storage/get_storage.dart';
 
 Future<void> main() async {
+  await GetStorage.init();
+  final LocalStorage storage = new LocalStorage('list');
+  await storage.ready;
   await SentryFlutter.init(
     (options) {
       options.dsn =
@@ -83,6 +88,17 @@ class _MyHomeState extends State<MyHome> {
             appBar: new AppBar(
               foregroundColor: Colors.white,
               title: Text("Mind Box"),
+              // actions: [
+              //   IconButton(
+              //     icon: Icon(Icons.save),
+              //     tooltip: ("Save"),
+              //     onPressed: () {
+              //       final box = GetStorage();
+              //       box.save();
+              //       print("saved");
+              //     },
+              //   )
+              // ],
             ),
             drawer: Drawer(
               child: new ListView(
@@ -154,7 +170,7 @@ class _MyHomeState extends State<MyHome> {
 
       if ((viewType != null)) {
         if (viewType == VIEW_MODE.LIST)
-          c.addNewItem(value.text);
+          c.addNewStringItem(value.text);
         else if (viewType == VIEW_MODE.CARDS) wbc.addNewItem(value.text);
         Clipboard.setData(ClipboardData(text: ""));
         return notEmpty;
