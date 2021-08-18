@@ -6,7 +6,7 @@ Your next desktop
 Desktop productivity? What is it?
 Todo list, Kan ban, Sticky notes, etc...
 All in all, they are just list and content cards.
-Introducing THE NEXT DESKTOP: The Sticky
+Introducing THE NEXT DESKTOP: The MindBox
 
 > **Flexible**: Use it in your own way  
 > **Cross-platform**: Use it in your favorite device  

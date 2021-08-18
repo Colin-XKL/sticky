@@ -11,8 +11,12 @@ import 'package:get_storage/get_storage.dart';
 
 Future<void> main() async {
   await GetStorage.init();
-  final LocalStorage storage = new LocalStorage('list');
-  await storage.ready;
+  final LocalStorage listStorage = new LocalStorage('list');
+  final LocalStorage boardStorage = new LocalStorage('board');
+
+  await listStorage.ready;
+  await boardStorage.ready;
+
   await SentryFlutter.init(
     (options) {
       options.dsn =
@@ -67,9 +71,9 @@ class _MyHomeState extends State<MyHome> {
     } else if (currentView == VIEW_MODE.CARDS) {
       //whiteboard
       final TheBoardController wbc = Get.find();
-      wbc.l.add(new ContentCard(
-        Text(""),
-      ));
+      wbc.l.add(
+        new BoardViewCard.text(""),
+      );
     }
   }
 
