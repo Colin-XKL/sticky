@@ -1,6 +1,7 @@
 import "package:flutter/material.dart";
 import 'package:get/get.dart';
 import 'package:flutter/services.dart';
+import 'package:localstorage/localstorage.dart';
 
 class ListItem {
   Key key;
@@ -22,30 +23,80 @@ class ListItem {
     this.isBinary = true;
     this.content = content;
   }
+
+  toJSONEncodable() {
+    Map<String, dynamic> m = new Map();
+    m['title'] = this.title;
+    m['isBinary'] = this.isBinary;
+    m['content'] = content;
+    return m;
+  }
 }
 
 class TheListController extends GetxController {
-  List<ListItem> l = [
-    ListItem("Tutorial", "Follow these steps to quickly get started."),
-    ListItem("#1 Paste from your pastebin",
-        "Tap or click the plus button to paste something.\nIf it's empty, try to get some stuff.\n"),
-    ListItem("#2 Copy from the list",
-        "Tap or click the item in the list, and the content(not the title) will be copied to your pastebin\n"),
-    ListItem("#3 Delete item", "slide the item remove it.\n"),
-    ListItem("#4 Reorder items", "Long press the item and reorder it.\n")
-  ].obs;
+  final LocalStorage storage = new LocalStorage('list');
+  bool initiated = false;
+  List<ListItem> l = [ListItem("Empty", "No thing here.")].obs;
   var lastDeleted = new ListItem("Empty", "No thing here.");
 
-  bool addNewItem(String value) {
-    //TODO: 兼容不同的内容类型
+  save() {
+    this.storage.setItem(
+        'list',
+        this.l.map((item) {
+          return item.toJSONEncodable();
+        }).toList());
+    // print("saved");
+  }
+
+  addNewStringItem(String value) {
     bool notEmpty = (value != null && value.isNotEmpty);
-    this.l.add(notEmpty ? ListItem("Text", value) : ListItem("Empty ", ""));
-    return notEmpty;
+    this.addNewRawItem(
+        notEmpty ? ListItem("Text", value) : ListItem("Empty ", ""));
+  }
+
+  addNewRawItem(ListItem item) {
+    this.l.add(item);
+    update();
+    save();
+  }
+
+  void removeItemAt(int index) {
+    this.lastDeleted = this.l[index];
+    this.l.removeAt(index);
+    update();
+    save();
   }
 }
 
 class TheList extends StatelessWidget {
   final TheListController c = Get.put(TheListController());
+  final LocalStorage storage = new LocalStorage('list');
+
+  TheList() {
+    var items = storage.getItem('list');
+    if (c.initiated) return;
+    if (items != null) {
+      if ((items as List).length > 0) {
+        if (c.l.length == 1) c.removeItemAt(0); //remove init item
+        c.l.addAll(List<ListItem>.from((items as List)
+            .map((item) => ListItem(item['title'], item['content']))));
+      } else
+        c.addNewStringItem("Add something here!");
+    } else {
+      var l = [
+        ListItem("Tutorial", "Follow these steps to quickly get started."),
+        ListItem("#1 Paste from your pastebin",
+            "Tap or click the plus button to paste something.\nIf it's empty, try to get some stuff.\n"),
+        ListItem("#2 Copy from the list",
+            "Tap or click the item in the list, and the content(not the title) will be copied to your pastebin\n"),
+        ListItem("#3 Delete item", "slide the item remove it.\n"),
+        ListItem("#4 Reorder items", "Long press the item and reorder it.\n")
+      ];
+      c.l.addAll(l);
+      c.save();
+    }
+    c.initiated = true;
+  }
 
   final msgPasted = new SnackBar(
     content: Text("Pasted"),
@@ -62,7 +113,8 @@ class TheList extends StatelessWidget {
         label: 'Undo',
         onPressed: () {
           final TheListController c = Get.find<TheListController>();
-          c.l.add(c.lastDeleted);
+          // c.l.add(c.lastDeleted);
+          c.addNewRawItem(c.lastDeleted);
           // lastDeleted=null;
         }),
   );
@@ -74,7 +126,8 @@ class TheList extends StatelessWidget {
         label: 'Undo',
         onPressed: () {
           final TheListController c = Get.find<TheListController>();
-          c.l.add(c.lastDeleted);
+          // c.l.add(c.lastDeleted);
+          c.addNewRawItem(c.lastDeleted);
           // lastDeleted=null;
         }),
   );
@@ -91,6 +144,7 @@ class TheList extends StatelessWidget {
                   if (oldIndex < newIndex) newIndex -= 1;
                   var temp = c.l.removeAt(oldIndex);
                   c.l.insert(newIndex, temp);
+                  c.save();
                 },
                 itemCount: c.l.length,
                 itemBuilder: (context, index) {
@@ -99,8 +153,9 @@ class TheList extends StatelessWidget {
                       key: item.key,
                       background: listTileBackground(),
                       onDismissed: (direction) {
-                        c.lastDeleted = item;
-                        c.l.removeAt(index);
+                        // c.lastDeleted = item;
+                        // c.l.removeAt(index);
+                        c.removeItemAt(index);
                         ScaffoldMessenger.of(context).showSnackBar(msgDeleted);
                       },
                       child: ReorderableDelayedDragStartListener(
@@ -114,8 +169,9 @@ class TheList extends StatelessWidget {
                               var value = item.content;
                               if (value.isNotEmpty) {
                                 Clipboard.setData(ClipboardData(text: value));
-                                c.lastDeleted = c.l[index];
-                                c.l.removeAt(index);
+                                // c.lastDeleted = c.l[index];
+                                // c.l.removeAt(index);
+                                c.removeItemAt(index);
                                 ScaffoldMessenger.of(context)
                                     .showSnackBar(msgCopied);
                               } else {

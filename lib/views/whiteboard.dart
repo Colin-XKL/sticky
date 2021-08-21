@@ -1,15 +1,13 @@
 import "package:flutter/material.dart";
 import 'package:get/get.dart';
+import 'package:localstorage/localstorage.dart';
 
 class TheBoardController extends GetxController {
-  RxList<ContentCard> l = [
-    ContentCard.text('''I've just did simple prototype to show main idea.
-    1. Draw size handlers with container;
-    2. Use GestureDetector to get new variables of sizes
-    3. Refresh the main container size.'''),
-    ContentCard(
-      Text("Hello Widget"),
-    ),
+  final LocalStorage storage = new LocalStorage('board');
+  var initiated = false;
+
+  RxList<BoardViewCard> l = [
+    BoardViewCard.text("Hello Widget"),
   ].obs;
 
   static RxController get to => Get.find();
@@ -17,21 +15,73 @@ class TheBoardController extends GetxController {
   bool addNewItem(String value) {
     //TODO: 兼容不同的内容类型
     bool notEmpty = (value != null && value.isNotEmpty);
-    this.l.add(new ContentCard(
-          Text(notEmpty ? value : ""),
-        ));
+    this.l.add(new BoardViewCard.text(notEmpty ? value : ""));
     update();
+    save();
     return notEmpty;
+  }
+
+  save() {
+    this.storage.setItem(
+        'board',
+        this.l.map((item) {
+          return item.toJsonSerializable();
+        }).toList());
+    // print('saved');
+    // print(this.l.map((item) {
+    //   return item.toJsonSerializable();
+    // }).toList());
   }
 
   void removeItem(Key key) {
     this.l.removeWhere((element) => element.key == key);
     update();
+    save();
   }
 }
 
 class TheBoard extends StatelessWidget {
+  final LocalStorage storage = new LocalStorage('board');
   final TheBoardController wbc = Get.put(TheBoardController());
+
+  TheBoard() {
+    var items = storage.getItem('board');
+    if (wbc.initiated) return;
+
+    if (items != null) {
+      if ((items as List).length > 0) {
+        if (wbc.l.length == 1) wbc.l.removeAt(0); //remove init item
+        // TODO: various card type support
+
+        // print(items['child'].runtimeType);
+        wbc.l.addAll(List<BoardViewCard>.from((items as List).map((item)
+            // Map child=item['child'];
+            {
+          var card = BoardViewCard.text(item['child']['content']);
+          var state = item['state'];
+          card.state.top = state['top'] ?? 0;
+          card.state.left = state['left'] ?? 0;
+          card.state.width = state['width'] ?? 600;
+          card.state.height = state['height'] ?? 400;
+          card.state.pined = state['pined'] ?? false;
+          card.state.locked = state['locked'] ?? false;
+          return card;
+        })));
+      } else
+        wbc.addNewItem("Add something here!");
+    } else {
+      var l = [
+        BoardViewCard.text('''I've just did simple prototype to show main idea.
+    1. Draw size handlers with container;
+    2. Use GestureDetector to get new variables of sizes
+    3. Refresh the main container size.'''),
+        BoardViewCard.text("Hello Widget"),
+      ];
+      wbc.l.addAll(l);
+      wbc.save();
+    }
+    wbc.initiated = true;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,29 +106,91 @@ class CardState {
   bool pined = false;
 
   CardState();
+
+  toJsonSerializable() {
+    Map<String, dynamic> m = new Map();
+    m['top'] = this.top;
+    m['left'] = this.left;
+    m['height'] = this.height;
+    m['width'] = this.width;
+    m['locked'] = this.locked;
+    m['pinned'] = this.pined;
+
+    return m;
+  }
 }
 
-class ContentCard extends StatefulWidget {
+abstract class ContentCard extends StatelessWidget {
   final Key key = UniqueKey();
-  final Widget child;
-  final CardState state = new CardState();
+  final CARD_TYPE type;
 
-  ContentCard(this.child);
+  ContentCard(this.type);
 
-  ContentCard.text(String s)
-      : this(Scrollbar(
-            isAlwaysShown: false,
-            child: SingleChildScrollView(
-              child: SelectableText(s),
-            )));
+  Map<String, dynamic> toJsonSerializable();
+}
+
+class TextCard extends ContentCard {
+  final String text;
+
+  TextCard(this.text) : super(CARD_TYPE.TEXT);
 
   @override
-  _ContentCardState createState() => _ContentCardState();
+  Widget build(BuildContext context) {
+    return Scrollbar(
+        isAlwaysShown: false,
+        child: SingleChildScrollView(
+          child: SelectableText(this.text),
+        ));
+  }
+
+  @override
+  toJsonSerializable() {
+    Map<String, dynamic> m = new Map();
+    m['type'] = this.type.index;
+    m['content'] = this.text;
+
+    return m;
+  }
+}
+
+enum CARD_TYPE { TEXT, IMAGE, LINK, TODO, WIDGET }
+
+class BoardViewCard extends StatefulWidget {
+  final Key key = UniqueKey();
+  final ContentCard child;
+  final CardState state = new CardState();
+
+  BoardViewCard({Key key, this.child}) : super(key: key);
+
+  BoardViewCard.text(String s) : this(child: TextCard(s));
+
+  // BoardViewCard(Widget widget) {
+  //   this.child = widget;
+  //   // this.type=CARD_TYPE.WIDGET;
+  // }
+  //
+  // BoardViewCard.text(String s) {
+  //   this.type = CARD_TYPE.TEXT;
+  //   this.child = (Scrollbar(
+  //       isAlwaysShown: false,
+  //       child: SingleChildScrollView(
+  //         child: SelectableText(s),
+  //       )));
+  // }
+  Map<String, dynamic> toJsonSerializable() {
+    Map<String, dynamic> m = new Map();
+    m['child'] = this.child.toJsonSerializable();
+    m['state'] = this.state.toJsonSerializable();
+    return m;
+  }
+
+  @override
+  _BoardViewCardState createState() => _BoardViewCardState();
 }
 
 // const double movingControllerAreaLength = 20.0;
 
-class _ContentCardState extends State<ContentCard> {
+class _BoardViewCardState extends State<BoardViewCard> {
   static const double minHeight = 128;
   static const double minWidth = 256;
 
