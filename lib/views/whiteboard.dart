@@ -1,103 +1,92 @@
 import "package:flutter/material.dart";
 import 'package:get/get.dart';
-import 'package:localstorage/localstorage.dart';
+import 'package:stickys/views/the_view.dart';
 
-class TheBoardController extends GetxController {
-  final LocalStorage storage = new LocalStorage('board');
-  var initiated = false;
-
-  RxList<BoardViewCard> l = [
-    BoardViewCard.text("Hello Widget"),
-  ].obs;
+class TheBoardController extends TheViewController {
+  TheBoardController() : super(VIEW_MODE.CARDS);
 
   static RxController get to => Get.find();
 
-  bool addNewItem(String value) {
+  @override
+  newItemFromString(String str) {
     //TODO: 兼容不同的内容类型
-    bool notEmpty = (value != null && value.isNotEmpty);
-    this.l.add(new BoardViewCard.text(notEmpty ? value : ""));
-    update();
-    save();
+    bool notEmpty = (str != null && str.isNotEmpty);
+    // this.l.add(new BoardViewCard.text(notEmpty ? value : ""));
+    newItem(
+        CardData(CARD_TYPE.TEXT, TextCardContent(notEmpty ? str : "")));
     return notEmpty;
-  }
-
-  save() {
-    this.storage.setItem(
-        'board',
-        this.l.map((item) {
-          return item.toJsonSerializable();
-        }).toList());
-    // print('saved');
-    // print(this.l.map((item) {
-    //   return item.toJsonSerializable();
-    // }).toList());
-  }
-
-  void removeItem(Key key) {
-    this.l.removeWhere((element) => element.key == key);
-    update();
-    save();
   }
 }
 
-class TheBoard extends StatelessWidget {
-  final LocalStorage storage = new LocalStorage('board');
-  final TheBoardController wbc = Get.put(TheBoardController());
-
-  TheBoard() {
-    var items = storage.getItem('board');
-    if (wbc.initiated) return;
+class TheBoard extends TheView {
+  TheBoard() : super(VIEW_MODE.CARDS, TheBoardController()) {
+    // print('board initing');
+    var items = storage.getItem(enumMapping[VIEW_MODE.CARDS]);
+    if (this.ctl.initDone) return;
 
     if (items != null) {
       if ((items as List).length > 0) {
-        if (wbc.l.length == 1) wbc.l.removeAt(0); //remove init item
+        if (this.ctl.l.length == 1) this.ctl.l.removeAt(0); //remove init item
         // TODO: various card type support
 
-        // print(items['child'].runtimeType);
-        wbc.l.addAll(List<BoardViewCard>.from((items as List).map((item)
-            // Map child=item['child'];
-            {
-          var card = BoardViewCard.text(item['child']['content']);
-          var state = item['state'];
-          card.state.top = state['top'] ?? 0;
-          card.state.left = state['left'] ?? 0;
-          card.state.width = state['width'] ?? 600;
-          card.state.height = state['height'] ?? 400;
-          card.state.pined = state['pined'] ?? false;
-          card.state.locked = state['locked'] ?? false;
-          return card;
-        })));
+        this.ctl.l.addAll(List<CardData>.from((items as List).map((item) {
+              // check item save and load
+              var content = TextCardContent(item['content']['text']);
+              var state = item['state'];
+              CardState cardState = new CardState();
+              cardState.top = state['top'] ?? 0;
+              cardState.left = state['left'] ?? 0;
+              cardState.width = state['width'] ?? 600;
+              cardState.height = state['height'] ?? 400;
+              cardState.pined = state['pined'] ?? false;
+              cardState.locked = state['locked'] ?? false;
+              return CardData(CARD_TYPE.TEXT,
+                  new TextCardContent(content.toString()), cardState);
+            })));
       } else
-        wbc.addNewItem("Add something here!");
+        // ctl.addNewItem("Add something here!");
+        this.ctl.newItem(
+            CardData(CARD_TYPE.TEXT, TextCardContent(("Add something here!"))));
     } else {
       var l = [
-        BoardViewCard.text('''I've just did simple prototype to show main idea.
+        TextCardContent('''I've just did simple prototype to show main idea.
     1. Draw size handlers with container;
     2. Use GestureDetector to get new variables of sizes
     3. Refresh the main container size.'''),
-        BoardViewCard.text("Hello Widget"),
+        TextCardContent("Hello Widget"),
       ];
-      wbc.l.addAll(l);
-      wbc.save();
+      this
+          .ctl
+          .l
+          .addAll(l.map((e) => CardData(CARD_TYPE.TEXT, e, new CardState())));
+      this.ctl.save();
     }
-    wbc.initiated = true;
+    this.ctl.initDone = true;
+    // print('board init done');
   }
 
   @override
   Widget build(BuildContext context) {
     // print("board rebuild");
     return Container(
-        padding: EdgeInsets.all(24),
-        child: GetBuilder<TheBoardController>(
+      padding: EdgeInsets.all(24),
+      child: GetBuilder<TheBoardController>(
           init: TheBoardController(),
-          builder: (c) => Stack(
-            children: c.l,
-          ),
-        ));
+          builder: (ctl) => Stack(
+              // TODO data list render func
+              children: ctl.l
+                  .map((element) => BoardViewCard(element as CardData))
+                  .toList())),
+    );
+  }
+
+  @override
+  String newItemFromCustomInput() {
+    return "";
   }
 }
 
-class CardState {
+class CardState extends Serializable {
   double top = 0;
   double left = 0;
   double height = 320;
@@ -107,7 +96,8 @@ class CardState {
 
   CardState();
 
-  toJsonSerializable() {
+  @override
+  Map<String, dynamic> serialize() {
     Map<String, dynamic> m = new Map();
     m['top'] = this.top;
     m['left'] = this.left;
@@ -120,19 +110,68 @@ class CardState {
   }
 }
 
-abstract class ContentCard extends StatelessWidget {
+abstract class CardBody extends StatelessWidget {
   final Key key = UniqueKey();
   final CARD_TYPE type;
 
-  ContentCard(this.type);
-
-  Map<String, dynamic> toJsonSerializable();
+  CardBody(this.type);
 }
 
-class TextCard extends ContentCard {
+class CardData extends ViewDataListItem {
+  final CARD_TYPE type;
+  final CardContent content;
+  final CardState state;
+
+  CardData(this.type, this.content, [CardState cardState])
+      : state = cardState ?? new CardState();
+
+  @override
+  Map<String, dynamic> serialize() {
+    Map<String, dynamic> m = new Map();
+    m['type'] = this.type.index;
+    m['content'] = this.content.serialize();
+    m['state'] = this.state.serialize();
+    return m;
+  }
+
+  @override
+  String toString() {
+    return "<CardData> Type: $type\tContent: $content";
+  }
+}
+
+abstract class CardContent extends Serializable {
+  final CARD_TYPE cardType;
+
+  CardContent(this.cardType);
+}
+
+class TextCardContent extends CardContent {
   final String text;
 
-  TextCard(this.text) : super(CARD_TYPE.TEXT);
+  TextCardContent(this.text) : super(CARD_TYPE.TEXT);
+
+  @override
+  Map<String, dynamic> serialize() {
+    Map<String, dynamic> m = new Map();
+    m['text'] = this.text;
+    return m;
+  }
+
+  @override
+  String toString() {
+    return this.text;
+  }
+}
+
+class TextCard extends CardBody {
+  final TextCardContent data;
+
+  TextCard(String str)
+      : data = new TextCardContent(str),
+        super(CARD_TYPE.TEXT);
+
+  String get text => this.data.text;
 
   @override
   Widget build(BuildContext context) {
@@ -142,27 +181,34 @@ class TextCard extends ContentCard {
           child: SelectableText(this.text),
         ));
   }
-
-  @override
-  toJsonSerializable() {
-    Map<String, dynamic> m = new Map();
-    m['type'] = this.type.index;
-    m['content'] = this.text;
-
-    return m;
-  }
 }
 
 enum CARD_TYPE { TEXT, IMAGE, LINK, TODO, WIDGET }
 
 class BoardViewCard extends StatefulWidget {
   final Key key = UniqueKey();
-  final ContentCard child;
-  final CardState state = new CardState();
 
-  BoardViewCard({Key key, this.child}) : super(key: key);
+  // final CardData data;
+  final CardBody child;
+  final CardState state;
+  final Key dataKey;
 
-  BoardViewCard.text(String s) : this(child: TextCard(s));
+  BoardViewCard(CardData cardData)
+      : state = cardData.state ?? new CardState(),
+        child = BoardViewCard.getCardWidget(cardData.content),
+        dataKey = cardData.dataKey,
+        super();
+
+  static Widget getCardWidget(CardContent content) {
+    if (content.cardType == CARD_TYPE.TEXT)
+      return TextCard((content as TextCardContent).text);
+    else {
+      // TODO implement other kind of card
+      return TextCard("unimplemented");
+    }
+  }
+
+  // BoardViewCard.text(String s) : this(child: TextCard(s));
 
   // BoardViewCard(Widget widget) {
   //   this.child = widget;
@@ -177,12 +223,12 @@ class BoardViewCard extends StatefulWidget {
   //         child: SelectableText(s),
   //       )));
   // }
-  Map<String, dynamic> toJsonSerializable() {
-    Map<String, dynamic> m = new Map();
-    m['child'] = this.child.toJsonSerializable();
-    m['state'] = this.state.toJsonSerializable();
-    return m;
-  }
+  // Map<String, dynamic> toJsonSerializable() {
+  //   Map<String, dynamic> m = new Map();
+  //   m['child'] = this.child.toJsonSerializable();
+  //   m['state'] = this.state.toJsonSerializable();
+  //   return m;
+  // }
 
   @override
   _BoardViewCardState createState() => _BoardViewCardState();
@@ -283,7 +329,7 @@ class _BoardViewCardState extends State<BoardViewCard> {
                                         .addPostFrameCallback((timeStamp) {
                                       final TheBoardController wbc =
                                           Get.find<TheBoardController>();
-                                      wbc.removeItem(widget.key);
+                                      wbc.removeItem(widget.dataKey);
                                     });
                                   }, "Delete"),
                                   widget.state.locked

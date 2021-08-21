@@ -99,7 +99,7 @@ packages:
       name: get
       url: "https://mirrors.tuna.tsinghua.edu.cn/dart-pub"
     source: hosted
-    version: "4.3.4"
+    version: "4.3.8"
   get_storage:
     dependency: "direct main"
     description:
@@ -155,7 +155,7 @@ packages:
       name: package_info_plus
       url: "https://mirrors.tuna.tsinghua.edu.cn/dart-pub"
     source: hosted
-    version: "1.0.4"
+    version: "1.0.5"
   package_info_plus_linux:
     dependency: transitive
     description:
@@ -246,7 +246,7 @@ packages:
       name: platform
       url: "https://mirrors.tuna.tsinghua.edu.cn/dart-pub"
     source: hosted
-    version: "3.0.0"
+    version: "3.0.2"
   plugin_platform_interface:
     dependency: transitive
     description:
