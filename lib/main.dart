@@ -158,27 +158,19 @@ class _MyHomeState extends State<MyHome> {
   }
 
   Future<bool> pasteFromPastebin() async {
-    final TheListController c = Get.find();
-    final TheBoardController wbc = Get.find();
+    var controller = view.ctl;
     return Clipboard.getData(Clipboard.kTextPlain).then((value) {
-      VIEW_MODE viewType = widget.viewManager.getCurrentViewType();
       bool notEmpty =
           (value != null && value.text != null && value.text.isNotEmpty);
+      controller.newItemFromString(value?.text ?? "");
 
-      if ((viewType != null)) {
-        if (viewType == VIEW_MODE.LIST)
-          c.newItemFromString(value.text);
-        else if (viewType == VIEW_MODE.CARDS) wbc.newItemFromString(value.text);
-        Clipboard.setData(ClipboardData(text: ""));
-        return notEmpty;
-      }
-      return false;
+      Clipboard.setData(ClipboardData(text: ""));
+      return notEmpty;
     });
   }
 }
 
 class ViewManager {
-  // 0 => list view  1 => card
   int currentViewIndex = 0;
   List<TheView> views = [new TheList(), new TheBoard()];
 
