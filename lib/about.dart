@@ -1,26 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
+import 'package:stickys/utils/platform.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-String encodeQueryParameters(Map<String, String> params) {
-  return params.entries
-      .map((e) =>
-          '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}')
-      .join('&');
-}
+class AppInfoController extends GetxController {
+  Map info = {
+    'appName': "unknown",
+    'packageName': "unknown",
+    'version': "unknown",
+    'buildNumber': "unknown"
+  }.obs;
 
-final Uri emailLaunchUri = Uri(
-  scheme: 'mailto',
-  path: 'Colin_XKL@outlook.com',
-  query: encodeQueryParameters(
-      <String, String>{'subject': 'Mind Box App Feedback'}),
-);
+  updateData(String version, String buildNumber) {
+    this.info['version'] = version;
+    this.info['buildNumber'] = buildNumber;
+    update();
+  }
+}
 
 class AboutPage extends StatelessWidget {
   final uri = emailLaunchUri.toString();
+  final AppInfoController ctl = Get.find<AppInfoController>();
 
   void _newEmail() async =>
       await canLaunch(uri) ? await launch(uri) : throw 'Could not launch $uri';
+
+  Widget _infoTile(String title, String subtitle) {
+    return Text(
+      "$title:  $subtitle",
+      style: TextStyle(color: Colors.grey[300]),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,6 +65,9 @@ class AboutPage extends StatelessWidget {
                   textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 14, color: Colors.grey),
                 ),
+                _infoTile("Platform", PlatformInfo.getPlatformString()),
+                _infoTile('App version', ctl.info['version']),
+                _infoTile('Build number', ctl.info['buildNumber']),
               ],
             ),
           ),
@@ -97,4 +111,18 @@ class AboutPage extends StatelessWidget {
       )),
     );
   }
+}
+
+final Uri emailLaunchUri = Uri(
+  scheme: 'mailto',
+  path: 'Colin_XKL@outlook.com',
+  query: encodeQueryParameters(
+      <String, String>{'subject': 'Mind Box App Feedback'}),
+);
+
+String encodeQueryParameters(Map<String, String> params) {
+  return params.entries
+      .map((e) =>
+          '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}')
+      .join('&');
 }

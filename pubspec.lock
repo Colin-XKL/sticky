@@ -150,7 +150,7 @@ packages:
     source: hosted
     version: "1.3.0"
   package_info_plus:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: package_info_plus
       url: "https://mirrors.tuna.tsinghua.edu.cn/dart-pub"

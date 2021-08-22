@@ -4,7 +4,10 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:localstorage/localstorage.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:sentry/sentry.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
+import 'package:stickys/utils/platform.dart';
 import 'package:stickys/views/the_view.dart';
 import 'views/list.dart';
 import 'views/whiteboard.dart';
@@ -15,9 +18,23 @@ Future<void> main() async {
   final LocalStorage listStorage = new LocalStorage('list');
   final LocalStorage boardStorage = new LocalStorage('cards');
 
+  PackageInfo packageInfo = await PackageInfo.fromPlatform();
+
   await listStorage.ready;
   await boardStorage.ready;
 
+  Sentry.configureScope((scope) {
+    Map appInfo = {
+      'appName': packageInfo.appName,
+      'packageName': packageInfo.packageName,
+      'version': packageInfo.version,
+      'buildNumber': packageInfo.buildNumber,
+    };
+    scope.setTag('Platform', PlatformInfo.getPlatformString());
+    scope.setContexts('AppInfo', appInfo);
+
+    return scope;
+  });
   await SentryFlutter.init(
     (options) {
       options.dsn =
@@ -25,6 +42,9 @@ Future<void> main() async {
     },
     appRunner: () => runApp(MyApp()),
   );
+  Get.put<AppInfoController>(AppInfoController());
+  final AppInfoController ctl = Get.find<AppInfoController>();
+  ctl.updateData(packageInfo.version, packageInfo.buildNumber);
 }
 
 class MyApp extends StatelessWidget {
@@ -33,7 +53,6 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: "Mind Box",
       theme: ThemeData(
-          //TODO: set color
           primarySwatch: Colors.teal,
           primaryColor: Colors.white,
           primaryColorLight: Colors.teal,
