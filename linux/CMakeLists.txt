@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 project(runner LANGUAGES CXX)
 
 set(BINARY_NAME "stickys")
-set(APPLICATION_ID "com.example.stickys")
+set(APPLICATION_ID "one.colinx.stickys")
 
 cmake_policy(SET CMP0063 NEW)
 

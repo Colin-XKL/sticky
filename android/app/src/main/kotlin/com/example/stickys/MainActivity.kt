@@ -1,4 +1,4 @@
-package com.example.stickys
+package one.colinx.stickys
 
 import io.flutter.embedding.android.FlutterActivity
 
