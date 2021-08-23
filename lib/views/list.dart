@@ -13,6 +13,11 @@ class TheListController extends TheViewController {
     bool notEmpty = (str != null && str.isNotEmpty);
     this.newItem(notEmpty ? ListItem("Text", str) : ListItem("Empty ", ""));
   }
+
+  @override
+  reverseSerialize(Map<dynamic, dynamic> item) {
+    return ListItem(item['title'], item['content']);
+  }
 }
 
 class ListItem extends ViewDataListItem {
@@ -126,52 +131,51 @@ class TheList extends TheView {
                 child: Scrollbar(
                     isAlwaysShown: false,
                     showTrackOnHover: false,
-                    child: Obx(() =>
-                        ReorderableListView.builder(
-                            buildDefaultDragHandles: false,
-                            onReorder: (int oldIndex, int newIndex) {
-                              if (oldIndex < newIndex) newIndex -= 1;
-                              var temp = ctl.l.removeAt(oldIndex);
-                              ctl.l.insert(newIndex, temp);
-                              ctl.save();
-                            },
-                            itemCount: ctl.l.length,
-                            itemBuilder: (context, index) {
-                              // print(ctl.l[index]);
-                              final item = ctl.l[index] as ListItem;
-                              return Dismissible(
+                    child: Obx(() => ReorderableListView.builder(
+                        buildDefaultDragHandles: false,
+                        onReorder: (int oldIndex, int newIndex) {
+                          if (oldIndex < newIndex) newIndex -= 1;
+                          var temp = ctl.l.removeAt(oldIndex);
+                          ctl.l.insert(newIndex, temp);
+                          ctl.save();
+                        },
+                        itemCount: ctl.l.length,
+                        itemBuilder: (context, index) {
+                          // print(ctl.l[index]);
+                          final item = ctl.l[index] as ListItem;
+                          return Dismissible(
+                              key: item.key,
+                              background: listTileBackground(),
+                              onDismissed: (direction) {
+                                // c.lastDeleted = item;
+                                // c.l.removeAt(index);
+                                ctl.removeItemAt(index);
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(msgDeleted);
+                              },
+                              child: ReorderableDelayedDragStartListener(
                                   key: item.key,
-                                  background: listTileBackground(),
-                                  onDismissed: (direction) {
-                                    // c.lastDeleted = item;
-                                    // c.l.removeAt(index);
-                                    ctl.removeItemAt(index);
-                                    ScaffoldMessenger.of(context)
-                                        .showSnackBar(msgDeleted);
-                                  },
-                                  child: ReorderableDelayedDragStartListener(
-                                      key: item.key,
-                                      index: index,
-                                      child: ListTile(
-                                        title: Text(item.title),
-                                        subtitle: Text(item.content),
-                                        contentPadding:
+                                  index: index,
+                                  child: ListTile(
+                                    title: Text(item.title),
+                                    subtitle: Text(item.content),
+                                    contentPadding:
                                         EdgeInsets.fromLTRB(16, 8, 16, 8),
-                                        onTap: () {
-                                          var value = item.content;
-                                          if (value.isNotEmpty) {
-                                            Clipboard.setData(
-                                                ClipboardData(text: value));
-                                            ctl.removeItemAt(index);
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(msgCopied);
-                                          } else {
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(msgEmpty);
-                                          }
-                                        },
-                                      )));
-                            })))),
+                                    onTap: () {
+                                      var value = item.content;
+                                      if (value.isNotEmpty) {
+                                        Clipboard.setData(
+                                            ClipboardData(text: value));
+                                        ctl.removeItemAt(index);
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(msgCopied);
+                                      } else {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(msgEmpty);
+                                      }
+                                    },
+                                  )));
+                        })))),
             Container(
                 margin: EdgeInsets.all(16),
                 child: Container(
@@ -180,14 +184,12 @@ class TheList extends TheView {
                     color: Colors.blueGrey[50],
                   ),
                   child: TextField(
-
                     controller: inputController,
                     autofocus: true,
                     onSubmitted: (value) {
                       ctl.newItemFromString(value);
                       inputController.clear();
-                      ScaffoldMessenger.of(context)
-                          .showSnackBar(msgPasted);
+                      ScaffoldMessenger.of(context).showSnackBar(msgPasted);
                     },
                     cursorRadius: Radius.circular(4),
                     decoration: InputDecoration(

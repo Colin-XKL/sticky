@@ -12,9 +12,23 @@ class TheBoardController extends TheViewController {
     //TODO: 兼容不同的内容类型
     bool notEmpty = (str != null && str.isNotEmpty);
     // this.l.add(new BoardViewCard.text(notEmpty ? value : ""));
-    newItem(
-        CardData(CARD_TYPE.TEXT, TextCardContent(notEmpty ? str : "")));
+    newItem(CardData(CARD_TYPE.TEXT, TextCardContent(notEmpty ? str : "")));
     return notEmpty;
+  }
+
+  @override
+  ViewDataListItem reverseSerialize(Map item) {
+    var content = TextCardContent(item['content']['text']);
+    var state = item['state'];
+    CardState cardState = new CardState();
+    cardState.top = state['top'] ?? 0;
+    cardState.left = state['left'] ?? 0;
+    cardState.width = state['width'] ?? 600;
+    cardState.height = state['height'] ?? 400;
+    cardState.pined = state['pined'] ?? false;
+    cardState.locked = state['locked'] ?? false;
+    return CardData(
+        CARD_TYPE.TEXT, new TextCardContent(content.toString()), cardState);
   }
 }
 
