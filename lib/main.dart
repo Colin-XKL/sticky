@@ -286,7 +286,7 @@ class AreaWithKeyShortcut extends StatelessWidget {
   }
 }
 
-final newEmptyItemKeySet = LogicalKeySet(LogicalKeyboardKey.keyN);
+final newEmptyItemKeySet = LogicalKeySet(LogicalKeyboardKey.keyN,LogicalKeyboardKey.control);
 final pasteKeySet = LogicalKeySet(LogicalKeyboardKey.paste);
 
 class PasteIntent extends Intent {}
