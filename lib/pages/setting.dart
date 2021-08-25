@@ -35,7 +35,7 @@ class SettingsPage extends StatelessWidget {
               constraints: BoxConstraints(maxWidth: 600),
               child: Column(
                 children: [
-                  Text("WebDAV settings"),
+                  Text("WebDAV settings ( Default Provider: NutStore )"),
                   Divider(),
                   TextField(
                     controller: _accountCtl,
