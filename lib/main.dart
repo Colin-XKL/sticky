@@ -1,29 +1,55 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:localstorage/localstorage.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:sentry/sentry.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
+import 'package:stickys/pages/setting.dart';
+
+import 'package:stickys/utils/platform.dart';
+import 'package:stickys/views/the_view.dart';
 import 'views/list.dart';
 import 'views/whiteboard.dart';
-import 'about.dart';
-import 'package:flutter/widgets.dart';
-import 'package:sentry_flutter/sentry_flutter.dart';
-import 'package:get_storage/get_storage.dart';
+import 'pages/about.dart';
 
 Future<void> main() async {
+  GetStorage g = GetStorage('Settings');
   await GetStorage.init();
+  g.write("WebDavEntrypoint", "https://dav.jianguoyun.com/dav/");
+
   final LocalStorage listStorage = new LocalStorage('list');
-  final LocalStorage boardStorage = new LocalStorage('board');
+  final LocalStorage boardStorage = new LocalStorage('cards');
+
+  PackageInfo packageInfo = await PackageInfo.fromPlatform();
 
   await listStorage.ready;
   await boardStorage.ready;
 
+  Sentry.configureScope((scope) {
+    Map appInfo = {
+      'appName': packageInfo.appName,
+      'packageName': packageInfo.packageName,
+      'version': packageInfo.version,
+      'buildNumber': packageInfo.buildNumber,
+    };
+    scope.setTag('Platform', PlatformInfo.getPlatformString());
+    scope.setContexts('AppInfo', appInfo);
+
+    return scope;
+  });
   await SentryFlutter.init(
-    (options) {
+        (options) {
       options.dsn =
-          'https://246fb2d534314bf3935d50f4ef0afd0b@o850059.ingest.sentry.io/5884653';
+      'https://246fb2d534314bf3935d50f4ef0afd0b@o850059.ingest.sentry.io/5884653';
     },
     appRunner: () => runApp(MyApp()),
   );
+  Get.put<AppInfoController>(AppInfoController());
+  final AppInfoController ctl = Get.find<AppInfoController>();
+  ctl.updateData(packageInfo.version, packageInfo.buildNumber);
 }
 
 class MyApp extends StatelessWidget {
@@ -32,13 +58,12 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: "Mind Box",
       theme: ThemeData(
-        //TODO: set color
-        // primarySwatch: Colors.lightGreen,
-        primaryColor: Colors.white,
-        primaryColorLight: Colors.teal,
-        primaryColorDark: Colors.yellow,
-        focusColor: Colors.lightGreen,
-      ),
+          primarySwatch: Colors.teal,
+          primaryColor: Colors.white,
+          primaryColorLight: Colors.teal,
+          primaryColorDark: Colors.yellow,
+          focusColor: Colors.lightGreen,
+          fontFamily: 'Sans'),
       home: MyHome(),
     );
   }
@@ -60,7 +85,7 @@ class _MyHomeState extends State<MyHome> {
     content: Text("Pasted"),
     duration: Duration(milliseconds: 300),
   );
-  Widget view;
+  TheView view;
 
   void newItemTriggeredByKey() {
     VIEW_MODE currentView = widget.viewManager.getCurrentViewType();
@@ -72,7 +97,7 @@ class _MyHomeState extends State<MyHome> {
       //whiteboard
       final TheBoardController wbc = Get.find();
       wbc.l.add(
-        new BoardViewCard.text(""),
+        new CardData(CARD_TYPE.TEXT, TextCardContent("empty")),
       );
     }
   }
@@ -80,7 +105,7 @@ class _MyHomeState extends State<MyHome> {
   @override
   Widget build(BuildContext context) {
     // print("view container widget build");
-    view = widget.viewManager.getView().getWidget();
+    view = widget.viewManager.getView();
 
     return AreaWithKeyShortcut(
         onPasteDetected: () async {
@@ -92,72 +117,101 @@ class _MyHomeState extends State<MyHome> {
             appBar: new AppBar(
               foregroundColor: Colors.white,
               title: Text("Mind Box"),
-              // actions: [
-              //   IconButton(
-              //     icon: Icon(Icons.save),
-              //     tooltip: ("Save"),
-              //     onPressed: () {
-              //       final box = GetStorage();
-              //       box.save();
-              //       print("saved");
-              //     },
-              //   )
-              // ],
+              actions: [
+                IconButton(
+                  onPressed: () => view.download(),
+                  icon: Icon(Icons.download),
+                ),
+                IconButton(
+                    onPressed: () => view.upload(), icon: Icon(Icons.save)),
+              ],
             ),
             drawer: Drawer(
-              child: new ListView(
-                children: <Widget>[
-                  UserAccountsDrawerHeader(
-                    accountEmail: null,
-                    accountName: null,
+                child: SingleChildScrollView(
+                  child: new Column(
+                    children: <Widget>[
+                      UserAccountsDrawerHeader(
+                        accountEmail: null,
+                        accountName: null,
+                      ),
+                      ListTile(
+                        title: Text("List View"),
+                        leading: Icon(Icons.format_list_bulleted_rounded),
+                        trailing: IconButton(
+                          icon: Icon(Icons.arrow_forward_ios),
+                          onPressed: () {},
+                        ),
+                        onTap: () {
+                          setState(() {
+                            widget.viewManager.setCurrentViewIndex(0);
+                          });
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                      ListTile(
+                        title: Text("Whiteboard"),
+                        leading: Icon(Icons.dashboard_sharp),
+                        trailing: IconButton(
+                          icon: Icon(Icons.arrow_forward_ios),
+                          onPressed: () {},
+                        ),
+                        onTap: () {
+                          setState(() {
+                            widget.viewManager.setCurrentViewIndex(1);
+                          });
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                      Divider(),
+                      ListTile(
+                        title: Text("Settings"),
+                        // leading: Icon(Icons.settings,size: 24,),
+                        dense: true,
+                        onTap: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => SettingsPage()));
+                        },
+                      ),
+                      ListTile(
+                        title: Text("Feedback"),
+                        dense: true,
+                        onTap: () {
+                          Navigator.push(context,
+                              MaterialPageRoute(
+                                  builder: (context) => AboutPage()));
+                        },
+                      ),
+                      ListTile(
+                        title: Text("About Us"),
+                        dense: true,
+                        onTap: () {},
+                      ),
+                      ListTile(
+                        title: Text("Give us a star!"),
+                        dense: true,
+                        onTap: () {},
+                      ),
+                      Padding(
+                        padding: EdgeInsets.fromLTRB(0, 32, 0, 0),
+                        child: Text(
+                          "MindBox, your last productivity app",
+                          softWrap: true,
+                          style: TextStyle(
+                              color: Colors.grey[500], fontSize: 12),
+                        ),
+                      )
+                    ],
                   ),
-                  ListTile(
-                    title: Text("List View"),
-                    leading: Icon(Icons.format_list_bulleted_rounded),
-                    trailing: IconButton(
-                      icon: Icon(Icons.arrow_forward_ios),
-                      onPressed: () {},
-                    ),
-                    onTap: () {
-                      setState(() {
-                        widget.viewManager.setCurrentViewIndex(0);
-                      });
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                  ListTile(
-                    title: Text("Whiteboard"),
-                    leading: Icon(Icons.dashboard_sharp),
-                    trailing: IconButton(
-                      icon: Icon(Icons.arrow_forward_ios),
-                      onPressed: () {},
-                    ),
-                    onTap: () {
-                      setState(() {
-                        widget.viewManager.setCurrentViewIndex(1);
-                      });
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                  ListTile(
-                    title: Text("Feedback"),
-                    leading: IconButton(
-                      icon: Icon(Icons.feedback_outlined),
-                      onPressed: () {},
-                    ),
-                    onTap: () {
-                      Navigator.push(context,
-                          MaterialPageRoute(builder: (context) => AboutPage()));
-                    },
-                  ),
-                  AboutListTile(),
-                ],
-              ),
-            ),
+                )),
             floatingActionButton: FloatingActionButton(
               child: Icon(Icons.add),
               onPressed: () async {
-                if (await pasteFromPastebin()) //hasContent
+                String ret = view.newItemFromCustomInput().toString();
+                if (ret.length > 0)
+                  view.ctl.newItemFromString(ret);
+                else if (await pasteFromPastebin()) //hasContent
                   ScaffoldMessenger.of(context).showSnackBar(msgPasted);
               },
             ),
@@ -165,66 +219,27 @@ class _MyHomeState extends State<MyHome> {
   }
 
   Future<bool> pasteFromPastebin() async {
-    final TheListController c = Get.find();
-    final TheBoardController wbc = Get.find();
+    var controller = view.ctl;
     return Clipboard.getData(Clipboard.kTextPlain).then((value) {
-      VIEW_MODE viewType = widget.viewManager.getCurrentViewType();
       bool notEmpty =
-          (value != null && value.text != null && value.text.isNotEmpty);
+      (value != null && value.text != null && value.text.isNotEmpty);
+      controller.newItemFromString(value?.text ?? "");
 
-      if ((viewType != null)) {
-        if (viewType == VIEW_MODE.LIST)
-          c.addNewStringItem(value.text);
-        else if (viewType == VIEW_MODE.CARDS) wbc.addNewItem(value.text);
-        Clipboard.setData(ClipboardData(text: ""));
-        return notEmpty;
-      }
-      return false;
+      Clipboard.setData(ClipboardData(text: ""));
+      return notEmpty;
     });
   }
 }
 
-enum VIEW_MODE { LIST, CARDS }
-
-class View {
-  Key key = UniqueKey();
-  VIEW_MODE viewMode;
-
-  Widget child;
-
-  View.list(TheList list) {
-    this.key = UniqueKey();
-    this.child = list;
-    this.viewMode = VIEW_MODE.LIST;
-  }
-
-  View.whiteboard(TheBoard board) {
-    this.key = UniqueKey();
-    this.child = board;
-    this.viewMode = VIEW_MODE.CARDS;
-  }
-
-  Widget getWidget() {
-    if (this.viewMode == VIEW_MODE.LIST || this.viewMode == VIEW_MODE.CARDS) {
-      return this.child;
-    } else
-      return Text("Wrong view mode");
-  }
-}
-
 class ViewManager {
-  // 0 => list view  1 => card
   int currentViewIndex = 0;
-  var views = [
-    new View.list(new TheList()),
-    new View.whiteboard(new TheBoard())
-  ];
+  List<TheView> views = [new TheList(), new TheBoard()];
 
-  View getView() {
+  TheView getView() {
     if (currentViewIndex >= 0 && currentViewIndex < views.length)
       return views[currentViewIndex];
     else
-      this.views.add(View.list(new TheList()));
+      this.views.add(new TheList());
     return this.views[0];
   }
 
@@ -241,6 +256,7 @@ class ViewManager {
   }
 }
 
+// KEY SHORTCUT RESPONSE
 class AreaWithKeyShortcut extends StatelessWidget {
   const AreaWithKeyShortcut({
     Key key,
@@ -263,15 +279,15 @@ class AreaWithKeyShortcut extends StatelessWidget {
       actions: {
         PasteIntent: CallbackAction(onInvoke: (e) => onPasteDetected?.call()),
         NewEmptyItemIntent:
-            CallbackAction(onInvoke: (e) => onNewEmptyItemDetected?.call()),
+        CallbackAction(onInvoke: (e) => onNewEmptyItemDetected?.call()),
       },
       child: child,
     );
   }
 }
 
-final newEmptyItemKeySet = LogicalKeySet(LogicalKeyboardKey.keyN);
-final pasteKeySet = LogicalKeySet(LogicalKeyboardKey.space);
+final newEmptyItemKeySet = LogicalKeySet(LogicalKeyboardKey.keyN,LogicalKeyboardKey.control);
+final pasteKeySet = LogicalKeySet(LogicalKeyboardKey.paste);
 
 class PasteIntent extends Intent {}
 

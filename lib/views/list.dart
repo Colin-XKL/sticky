@@ -1,9 +1,26 @@
 import "package:flutter/material.dart";
 import 'package:get/get.dart';
 import 'package:flutter/services.dart';
-import 'package:localstorage/localstorage.dart';
+import 'package:stickys/views/the_view.dart';
 
-class ListItem {
+class TheListController extends TheViewController {
+  ListItem lastDeleted = new ListItem("Empty", "No thing here.");
+
+  TheListController() : super(VIEW_MODE.LIST);
+
+  @override
+  newItemFromString(String str) {
+    bool notEmpty = (str != null && str.isNotEmpty);
+    this.newItem(notEmpty ? ListItem("Text", str) : ListItem("Empty ", ""));
+  }
+
+  @override
+  reverseSerialize(Map<dynamic, dynamic> item) {
+    return ListItem(item['title'], item['content']);
+  }
+}
+
+class ListItem extends ViewDataListItem {
   Key key;
   String title;
   bool isBinary;
@@ -24,64 +41,35 @@ class ListItem {
     this.content = content;
   }
 
-  toJSONEncodable() {
+  @override
+  Map<String, dynamic> serialize() {
     Map<String, dynamic> m = new Map();
     m['title'] = this.title;
     m['isBinary'] = this.isBinary;
     m['content'] = content;
     return m;
   }
-}
 
-class TheListController extends GetxController {
-  final LocalStorage storage = new LocalStorage('list');
-  bool initiated = false;
-  List<ListItem> l = [ListItem("Empty", "No thing here.")].obs;
-  var lastDeleted = new ListItem("Empty", "No thing here.");
-
-  save() {
-    this.storage.setItem(
-        'list',
-        this.l.map((item) {
-          return item.toJSONEncodable();
-        }).toList());
-    // print("saved");
-  }
-
-  addNewStringItem(String value) {
-    bool notEmpty = (value != null && value.isNotEmpty);
-    this.addNewRawItem(
-        notEmpty ? ListItem("Text", value) : ListItem("Empty ", ""));
-  }
-
-  addNewRawItem(ListItem item) {
-    this.l.add(item);
-    update();
-    save();
-  }
-
-  void removeItemAt(int index) {
-    this.lastDeleted = this.l[index];
-    this.l.removeAt(index);
-    update();
-    save();
+  @override
+  String toString() {
+    return "<ListItem> T: $title\tC:$content";
   }
 }
 
-class TheList extends StatelessWidget {
-  final TheListController c = Get.put(TheListController());
-  final LocalStorage storage = new LocalStorage('list');
+class TheList extends TheView {
+  final TextEditingController inputController = TextEditingController();
 
-  TheList() {
-    var items = storage.getItem('list');
-    if (c.initiated) return;
+  TheList() : super(VIEW_MODE.LIST, TheListController()) {
+    // print('list initing');
+    var items = storage.getItem(enumMapping[VIEW_MODE.LIST]);
+    if (this.ctl.initDone) return;
     if (items != null) {
       if ((items as List).length > 0) {
-        if (c.l.length == 1) c.removeItemAt(0); //remove init item
-        c.l.addAll(List<ListItem>.from((items as List)
+        if (this.ctl.l.length == 1) this.ctl.removeItemAt(0); //remove init item
+        this.ctl.l.addAll(List<ListItem>.from((items as List)
             .map((item) => ListItem(item['title'], item['content']))));
       } else
-        c.addNewStringItem("Add something here!");
+        this.ctl.newItem(ListItem("Add something here!", ""));
     } else {
       var l = [
         ListItem("Tutorial", "Follow these steps to quickly get started."),
@@ -92,10 +80,11 @@ class TheList extends StatelessWidget {
         ListItem("#3 Delete item", "slide the item remove it.\n"),
         ListItem("#4 Reorder items", "Long press the item and reorder it.\n")
       ];
-      c.l.addAll(l);
-      c.save();
+      this.ctl.l.addAll(l);
+      this.ctl.save();
     }
-    c.initiated = true;
+    this.ctl.initDone = true;
+    // print('list init done');
   }
 
   final msgPasted = new SnackBar(
@@ -114,7 +103,7 @@ class TheList extends StatelessWidget {
         onPressed: () {
           final TheListController c = Get.find<TheListController>();
           // c.l.add(c.lastDeleted);
-          c.addNewRawItem(c.lastDeleted);
+          c.newItem(c.lastDeleted);
           // lastDeleted=null;
         }),
   );
@@ -127,7 +116,7 @@ class TheList extends StatelessWidget {
         onPressed: () {
           final TheListController c = Get.find<TheListController>();
           // c.l.add(c.lastDeleted);
-          c.addNewRawItem(c.lastDeleted);
+          c.newItem(c.lastDeleted);
           // lastDeleted=null;
         }),
   );
@@ -135,52 +124,89 @@ class TheList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-        child: Scrollbar(
-            isAlwaysShown: false,
-            showTrackOnHover: false,
-            child: Obx(() => ReorderableListView.builder(
-                buildDefaultDragHandles: false,
-                onReorder: (int oldIndex, int newIndex) {
-                  if (oldIndex < newIndex) newIndex -= 1;
-                  var temp = c.l.removeAt(oldIndex);
-                  c.l.insert(newIndex, temp);
-                  c.save();
-                },
-                itemCount: c.l.length,
-                itemBuilder: (context, index) {
-                  final item = c.l[index];
-                  return Dismissible(
-                      key: item.key,
-                      background: listTileBackground(),
-                      onDismissed: (direction) {
-                        // c.lastDeleted = item;
-                        // c.l.removeAt(index);
-                        c.removeItemAt(index);
-                        ScaffoldMessenger.of(context).showSnackBar(msgDeleted);
-                      },
-                      child: ReorderableDelayedDragStartListener(
-                          key: item.key,
-                          index: index,
-                          child: ListTile(
-                            title: Text(item.title),
-                            subtitle: Text(item.content),
-                            contentPadding: EdgeInsets.fromLTRB(16, 8, 16, 8),
-                            onTap: () {
-                              var value = item.content;
-                              if (value.isNotEmpty) {
-                                Clipboard.setData(ClipboardData(text: value));
-                                // c.lastDeleted = c.l[index];
+        padding: EdgeInsets.all(4),
+        child: Column(
+          children: [
+            Expanded(
+                child: Scrollbar(
+                    isAlwaysShown: false,
+                    showTrackOnHover: false,
+                    child: Obx(() => ReorderableListView.builder(
+                        buildDefaultDragHandles: false,
+                        onReorder: (int oldIndex, int newIndex) {
+                          if (oldIndex < newIndex) newIndex -= 1;
+                          var temp = ctl.l.removeAt(oldIndex);
+                          ctl.l.insert(newIndex, temp);
+                          ctl.save();
+                        },
+                        itemCount: ctl.l.length,
+                        itemBuilder: (context, index) {
+                          // print(ctl.l[index]);
+                          final item = ctl.l[index] as ListItem;
+                          return Dismissible(
+                              key: item.key,
+                              background: listTileBackground(),
+                              onDismissed: (direction) {
+                                // c.lastDeleted = item;
                                 // c.l.removeAt(index);
-                                c.removeItemAt(index);
+                                ctl.removeItemAt(index);
                                 ScaffoldMessenger.of(context)
-                                    .showSnackBar(msgCopied);
-                              } else {
-                                ScaffoldMessenger.of(context)
-                                    .showSnackBar(msgEmpty);
-                              }
-                            },
-                          )));
-                }))));
+                                    .showSnackBar(msgDeleted);
+                              },
+                              child: ReorderableDelayedDragStartListener(
+                                  key: item.key,
+                                  index: index,
+                                  child: ListTile(
+                                    title: Text(item.title),
+                                    subtitle: Text(item.content),
+                                    contentPadding:
+                                        EdgeInsets.fromLTRB(16, 8, 16, 8),
+                                    onTap: () {
+                                      var value = item.content;
+                                      if (value.isNotEmpty) {
+                                        Clipboard.setData(
+                                            ClipboardData(text: value));
+                                        ctl.removeItemAt(index);
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(msgCopied);
+                                      } else {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(msgEmpty);
+                                      }
+                                    },
+                                  )));
+                        })))),
+            Container(
+                margin: EdgeInsets.all(16),
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8.0),
+                    color: Colors.blueGrey[50],
+                  ),
+                  child: TextField(
+                    controller: inputController,
+                    autofocus: true,
+                    onSubmitted: (value) {
+                      ctl.newItemFromString(value);
+                      inputController.clear();
+                      ScaffoldMessenger.of(context).showSnackBar(msgPasted);
+                    },
+                    cursorRadius: Radius.circular(4),
+                    decoration: InputDecoration(
+                        hintText: "Add your idea",
+                        prefixIcon: Icon(Icons.radio_button_checked_rounded),
+                        border: InputBorder.none),
+                  ),
+                ))
+          ],
+        ));
+  }
+
+  @override
+  Object newItemFromCustomInput() {
+    String value = inputController.text;
+    inputController.clear();
+    return value ?? "";
   }
 }
 

@@ -8,7 +8,7 @@
 PRODUCT_NAME = stickys
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = com.example.stickys
+PRODUCT_BUNDLE_IDENTIFIER = one.colinx.stickys
 
 // The copyright displayed in application information
 PRODUCT_COPYRIGHT = Copyright © 2021 com.example. All rights reserved.
