@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:stickys/views/the_view.dart';
 
@@ -222,8 +223,6 @@ class BoardViewCard extends StatefulWidget {
     }
   }
 
-  // BoardViewCard.text(String s) : this(child: TextCard(s));
-
   // BoardViewCard(Widget widget) {
   //   this.child = widget;
   //   // this.type=CARD_TYPE.WIDGET;
@@ -236,12 +235,6 @@ class BoardViewCard extends StatefulWidget {
   //       child: SingleChildScrollView(
   //         child: SelectableText(s),
   //       )));
-  // }
-  // Map<String, dynamic> toJsonSerializable() {
-  //   Map<String, dynamic> m = new Map();
-  //   m['child'] = this.child.toJsonSerializable();
-  //   m['state'] = this.state.toJsonSerializable();
-  //   return m;
   // }
 
   @override
@@ -263,10 +256,6 @@ class _BoardViewCardState extends State<BoardViewCard> {
       tooltip: tooltip,
       splashRadius: 18,
       color: Colors.grey[700],
-
-      // splashColor: Theme.of(context).accentColor,
-      // focusColor: Theme.of(context).accentColor,
-      // hoverColor: Theme.of(context).accentColor,
     );
   }
 
@@ -337,6 +326,26 @@ class _BoardViewCardState extends State<BoardViewCard> {
                               ButtonBar(
                                 buttonPadding: EdgeInsets.zero,
                                 children: [
+                                  _getFunctionButton(
+                                      widget.state.locked
+                                          ? Icons.copy
+                                          : Icons.cut_rounded, () {
+                                    final TheBoardController wbc =
+                                        Get.find<TheBoardController>();
+                                    final item = wbc.findItem(widget.dataKey);
+                                    var value = item.content.toString();
+                                    // if (value.isNotEmpty) {
+                                    Clipboard.setData(
+                                        ClipboardData(text: value));
+                                    if (!widget.state.locked)
+                                      wbc.removeItem(widget.dataKey);
+
+                                    ScaffoldMessenger.of(context)
+                                        .showSnackBar(SnackBar(
+                                      content: Text('Copied!'),
+                                      duration: Duration(milliseconds: 300),
+                                    ));
+                                  }),
                                   _getFunctionButton(
                                       Icons.delete_outline_rounded, () {
                                     WidgetsBinding.instance

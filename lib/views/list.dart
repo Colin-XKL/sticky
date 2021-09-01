@@ -24,7 +24,7 @@ class ListItem extends ViewDataListItem {
   Key key;
   String title;
   bool isBinary;
-  var content;
+  // var content;
   String notations;
 
   ListItem(String title, String content) {

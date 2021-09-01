@@ -82,6 +82,10 @@ abstract class TheViewController extends DataController {
     return deleted;
   }
 
+  ViewDataListItem findItem(Key dataKey) {
+    return this.l.firstWhere((element) => element.dataKey == dataKey);
+  }
+
   removeItem(Key dataKey) {
     this.l.removeWhere((element) => element.dataKey == dataKey);
     update();
@@ -117,4 +121,5 @@ abstract class Serializable {
 
 abstract class ViewDataListItem extends Serializable {
   final Key dataKey = UniqueKey();
+  var content;
 }
