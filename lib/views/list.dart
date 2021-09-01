@@ -24,6 +24,7 @@ class ListItem extends ViewDataListItem {
   Key key;
   String title;
   bool isBinary;
+
   // var content;
   String notations;
 
@@ -163,16 +164,14 @@ class TheList extends TheView {
                                         EdgeInsets.fromLTRB(16, 8, 16, 8),
                                     onTap: () {
                                       var value = item.content;
-                                      if (value.isNotEmpty) {
+                                      if (value.isNotEmpty)
                                         Clipboard.setData(
                                             ClipboardData(text: value));
-                                        ctl.removeItemAt(index);
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(msgCopied);
-                                      } else {
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(msgEmpty);
-                                      }
+                                      ctl.removeItemAt(index);
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(value.isNotEmpty
+                                              ? msgCopied
+                                              : msgDeleted);
                                     },
                                   )));
                         })))),
