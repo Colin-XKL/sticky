@@ -248,9 +248,12 @@ class _BoardViewCardState extends State<BoardViewCard> {
   static const double minWidth = 256;
 
   static Widget _getFunctionButton(IconData icon, Function() onPressed,
-      [String tooltip]) {
+      [String tooltip, double iconSize]) {
     return IconButton(
-      icon: Icon(icon),
+      icon: Icon(
+        icon,
+        size: iconSize,
+      ),
       onPressed: onPressed,
       padding: EdgeInsets.zero,
       tooltip: tooltip,
@@ -288,7 +291,10 @@ class _BoardViewCardState extends State<BoardViewCard> {
                                   ? "Pinned"
                                   : "Drag to move the card",
                               child: ManipulatingBall(
-                                child: Icon(Icons.text_fields_rounded),
+                                child: Icon(
+                                  Icons.text_fields_rounded,
+                                  size: 26,
+                                ),
                                 onDrag: (dx, dy) {
                                   if (!widget.state.pined)
                                     setState(() {
@@ -345,7 +351,7 @@ class _BoardViewCardState extends State<BoardViewCard> {
                                       content: Text('Copied!'),
                                       duration: Duration(milliseconds: 300),
                                     ));
-                                  }),
+                                  }, "Copy", 20),
                                   _getFunctionButton(
                                       Icons.delete_outline_rounded, () {
                                     WidgetsBinding.instance
@@ -364,27 +370,27 @@ class _BoardViewCardState extends State<BoardViewCard> {
                                               widget.state.pined = false;
                                             },
                                           );
-                                        }, "Locked")
+                                        }, "Locked", 22)
                                       : _getFunctionButton(
                                           Icons.lock_open_rounded, () {
                                           setState(() {
                                             widget.state.pined = true;
                                             widget.state.locked = true;
                                           });
-                                        }, "Lock"),
+                                        }, "Lock", 22),
                                   widget.state.pined
                                       ? _getFunctionButton(
                                           Icons.push_pin_rounded, () {
                                           setState(() {
                                             widget.state.pined = false;
                                           });
-                                        }, "UnPin")
+                                        }, "UnPin", 22)
                                       : _getFunctionButton(
                                           Icons.push_pin_outlined, () {
                                           setState(() {
                                             widget.state.pined = true;
                                           });
-                                        }, "Pin"),
+                                        }, "Pin", 22),
                                 ],
                               ),
                             ],
