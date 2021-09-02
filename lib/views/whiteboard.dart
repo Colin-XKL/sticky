@@ -333,6 +333,11 @@ class _BoardViewCardState extends State<BoardViewCard> {
                                 buttonPadding: EdgeInsets.zero,
                                 children: [
                                   _getFunctionButton(
+                                      Icons.edit_rounded,
+                                      () => {this.showEditDialog(context)},
+                                      "Edit",
+                                      22),
+                                  _getFunctionButton(
                                       widget.state.locked
                                           ? Icons.copy
                                           : Icons.cut_rounded, () {
@@ -457,6 +462,46 @@ class _BoardViewCardState extends State<BoardViewCard> {
       child: _getContentCard(
           widget.state.height, widget.state.width, widget.child),
     );
+  }
+
+  void showEditDialog(BuildContext ctx) {
+    showDialog(
+        context: ctx,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Edit Content'),
+            actions: [
+              TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text("CANCEL")),
+              TextButton(onPressed: () {}, child: Text("SAVE")),
+            ],
+            content: Container(
+                constraints: BoxConstraints(maxWidth: 800, maxHeight: 600),
+                child: AspectRatio(
+                  aspectRatio: 1 / 0.618,
+                  child: Column(
+                    children: [
+                      Expanded(
+                          child: TextField(
+                        maxLines: null,
+                        autofocus: true,
+                        decoration: InputDecoration(
+                          hintText: "Input multi-line content here",
+                          labelText: "Content Text",
+                          suffix: Icon(Icons.text_format_rounded),
+                          // contentPadding: EdgeInsets.fromLTRB(16, 20, 16, 20),
+                          // border: InputBorder.none
+                        ),
+                        // ),
+                      )),
+                    ],
+                  ),
+                )),
+          );
+        });
   }
 }
 
