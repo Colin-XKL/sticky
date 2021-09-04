@@ -5,6 +5,7 @@ import 'package:stickys/views/the_view.dart';
 
 class TheBoardController extends TheViewController {
   TheBoardController() : super(VIEW_MODE.CARDS);
+  Map<Key, CardState> states = new Map();
 
   static RxController get to => Get.find();
 
@@ -15,6 +16,13 @@ class TheBoardController extends TheViewController {
     // this.l.add(new BoardViewCard.text(notEmpty ? value : ""));
     newItem(CardData(CARD_TYPE.TEXT, TextCardContent(notEmpty ? str : "")));
     return notEmpty;
+  }
+
+  replaceItem(Key dataKey, CardData cardData) {
+    int index = this.l.indexWhere((element) => element.dataKey==dataKey);
+    this.l[index]=cardData;
+    update();
+    save();
   }
 
   @override
@@ -45,19 +53,19 @@ class TheBoard extends TheView {
         // TODO: various card type support
 
         this.ctl.l.addAll(List<CardData>.from((items as List).map((item) {
-              // check item save and load
-              var content = TextCardContent(item['content']['text']);
-              var state = item['state'];
-              CardState cardState = new CardState();
-              cardState.top = state['top'] ?? 0;
-              cardState.left = state['left'] ?? 0;
-              cardState.width = state['width'] ?? 600;
-              cardState.height = state['height'] ?? 400;
-              cardState.pined = state['pined'] ?? false;
-              cardState.locked = state['locked'] ?? false;
-              return CardData(CARD_TYPE.TEXT,
-                  new TextCardContent(content.toString()), cardState);
-            })));
+          // check item save and load
+          var content = TextCardContent(item['content']['text']);
+          var state = item['state'];
+          CardState cardState = new CardState();
+          cardState.top = state['top'] ?? 0;
+          cardState.left = state['left'] ?? 0;
+          cardState.width = state['width'] ?? 600;
+          cardState.height = state['height'] ?? 400;
+          cardState.pined = state['pined'] ?? false;
+          cardState.locked = state['locked'] ?? false;
+          return CardData(CARD_TYPE.TEXT,
+              new TextCardContent(content.toString()), cardState);
+        })));
       } else
         // ctl.addNewItem("Add something here!");
         this.ctl.newItem(
@@ -87,11 +95,12 @@ class TheBoard extends TheView {
       padding: EdgeInsets.all(24),
       child: GetBuilder<TheBoardController>(
           init: TheBoardController(),
-          builder: (ctl) => Stack(
-              // TODO data list render func
-              children: ctl.l
+          builder: (ctl) =>
+              Stack(
+                // TODO data list render func
+                  children: ctl.l
                   .map((element) => BoardViewCard(element as CardData))
-                  .toList())),
+                      .toList())),
     );
   }
 
@@ -135,7 +144,7 @@ abstract class CardBody extends StatelessWidget {
 class CardData extends ViewDataListItem {
   final CARD_TYPE type;
   final CardContent content;
-  final CardState state;
+  CardState state;
 
   CardData(this.type, this.content, [CardState cardState])
       : state = cardState ?? new CardState();
@@ -162,7 +171,7 @@ abstract class CardContent extends Serializable {
 }
 
 class TextCardContent extends CardContent {
-  final String text;
+  String text;
 
   TextCardContent(this.text) : super(CARD_TYPE.TEXT);
 
@@ -246,6 +255,7 @@ class BoardViewCard extends StatefulWidget {
 class _BoardViewCardState extends State<BoardViewCard> {
   static const double minHeight = 128;
   static const double minWidth = 256;
+  TextEditingController inputCtl = new TextEditingController();
 
   static Widget _getFunctionButton(IconData icon, Function() onPressed,
       [String tooltip, double iconSize]) {
@@ -332,17 +342,23 @@ class _BoardViewCardState extends State<BoardViewCard> {
                               ButtonBar(
                                 buttonPadding: EdgeInsets.zero,
                                 children: [
-                                  _getFunctionButton(
-                                      Icons.edit_rounded,
-                                      () => {this.showEditDialog(context)},
-                                      "Edit",
-                                      22),
+                                  _getFunctionButton(Icons.edit_rounded, () {
+                                    TheBoardController controller =
+                                    Get.find<TheBoardController>();
+                                    this.inputCtl = new TextEditingController(
+                                        text: controller
+                                            .findItem(widget.dataKey)
+                                            .content
+                                            .toString());
+                                    this.showEditDialog(
+                                        context, widget.dataKey);
+                                  }, "Edit", 22),
                                   _getFunctionButton(
                                       widget.state.locked
                                           ? Icons.copy
                                           : Icons.cut_rounded, () {
                                     final TheBoardController wbc =
-                                        Get.find<TheBoardController>();
+                                    Get.find<TheBoardController>();
                                     final item = wbc.findItem(widget.dataKey);
                                     var value = item.content.toString();
                                     // if (value.isNotEmpty) {
@@ -362,40 +378,40 @@ class _BoardViewCardState extends State<BoardViewCard> {
                                     WidgetsBinding.instance
                                         .addPostFrameCallback((timeStamp) {
                                       final TheBoardController wbc =
-                                          Get.find<TheBoardController>();
+                                      Get.find<TheBoardController>();
                                       wbc.removeItem(widget.dataKey);
                                     });
                                   }, "Delete"),
                                   widget.state.locked
                                       ? _getFunctionButton(Icons.lock_rounded,
                                           () {
-                                          setState(
-                                            () {
-                                              widget.state.locked = false;
-                                              widget.state.pined = false;
-                                            },
-                                          );
-                                        }, "Locked", 22)
+                                        setState(
+                                              () {
+                                            widget.state.locked = false;
+                                            widget.state.pined = false;
+                                          },
+                                        );
+                                      }, "Locked", 22)
                                       : _getFunctionButton(
-                                          Icons.lock_open_rounded, () {
-                                          setState(() {
-                                            widget.state.pined = true;
-                                            widget.state.locked = true;
-                                          });
-                                        }, "Lock", 22),
+                                      Icons.lock_open_rounded, () {
+                                    setState(() {
+                                      widget.state.pined = true;
+                                      widget.state.locked = true;
+                                    });
+                                  }, "Lock", 22),
                                   widget.state.pined
                                       ? _getFunctionButton(
-                                          Icons.push_pin_rounded, () {
-                                          setState(() {
-                                            widget.state.pined = false;
-                                          });
-                                        }, "UnPin", 22)
+                                      Icons.push_pin_rounded, () {
+                                    setState(() {
+                                      widget.state.pined = false;
+                                    });
+                                  }, "UnPin", 22)
                                       : _getFunctionButton(
-                                          Icons.push_pin_outlined, () {
-                                          setState(() {
-                                            widget.state.pined = true;
-                                          });
-                                        }, "Pin", 22),
+                                      Icons.push_pin_outlined, () {
+                                    setState(() {
+                                      widget.state.pined = true;
+                                    });
+                                  }, "Pin", 22),
                                 ],
                               ),
                             ],
@@ -407,46 +423,46 @@ class _BoardViewCardState extends State<BoardViewCard> {
                   ),
                 ),
                 Expanded(
-                    //content
+                  //content
                     child: Stack(
-                  children: [
-                    Align(
-                      alignment: Alignment.bottomRight,
-                      child: ManipulatingBall(
-                        child: Tooltip(
-                          child: Icon(
-                            Icons.signal_cellular_4_bar_rounded,
-                            color: Colors.grey[100],
-                          ),
-                          message:
+                      children: [
+                        Align(
+                          alignment: Alignment.bottomRight,
+                          child: ManipulatingBall(
+                            child: Tooltip(
+                              child: Icon(
+                                Icons.signal_cellular_4_bar_rounded,
+                                color: Colors.grey[100],
+                              ),
+                              message:
                               widget.state.locked ? "Locked" : "Drag to resize",
-                        ),
-                        onDrag: (dx, dy) {
-                          //resize
-                          // print("resize drag $dx $dy");
-                          if (!widget.state.locked) {
-                            num newHeight = (widget.state.height + dy);
-                            num newWidth = (widget.state.width + dx);
+                            ),
+                            onDrag: (dx, dy) {
+                              //resize
+                              // print("resize drag $dx $dy");
+                              if (!widget.state.locked) {
+                                num newHeight = (widget.state.height + dy);
+                                num newWidth = (widget.state.width + dx);
 
-                            setState(() {
-                              widget.state.height = newHeight > minHeight
-                                  ? newHeight.toDouble()
-                                  : minHeight;
-                              widget.state.width = newWidth > minWidth
-                                  ? newWidth.toDouble()
-                                  : minWidth;
-                            });
-                          }
-                        },
-                        dragAreaLength: 20,
-                      ),
-                    ),
-                    Container(
-                      margin: EdgeInsets.fromLTRB(14, 8, 14, 8),
-                      child: widget.child,
-                    ),
-                  ],
-                ))
+                                setState(() {
+                                  widget.state.height = newHeight > minHeight
+                                      ? newHeight.toDouble()
+                                      : minHeight;
+                                  widget.state.width = newWidth > minWidth
+                                      ? newWidth.toDouble()
+                                      : minWidth;
+                                });
+                              }
+                            },
+                            dragAreaLength: 20,
+                          ),
+                        ),
+                        Container(
+                          margin: EdgeInsets.fromLTRB(14, 8, 14, 8),
+                          child: widget.child,
+                        ),
+                      ],
+                    ))
               ],
             ),
           ),
@@ -464,7 +480,7 @@ class _BoardViewCardState extends State<BoardViewCard> {
     );
   }
 
-  void showEditDialog(BuildContext ctx) {
+  void showEditDialog(BuildContext ctx, Key dataKey) {
     showDialog(
         context: ctx,
         builder: (BuildContext context) {
@@ -476,7 +492,16 @@ class _BoardViewCardState extends State<BoardViewCard> {
                     Navigator.of(context).pop();
                   },
                   child: Text("CANCEL")),
-              TextButton(onPressed: () {}, child: Text("SAVE")),
+              TextButton(
+                  onPressed: () {
+                    TheBoardController controller =
+                    Get.find<TheBoardController>();
+                    var item = controller.findItem(dataKey) as CardData;
+                    (item.content as TextCardContent).text=inputCtl.text;
+                    controller.replaceItem(dataKey, item);
+                    Navigator.of(context).pop();
+                  },
+                  child: Text("SAVE")),
             ],
             content: Container(
                 constraints: BoxConstraints(maxWidth: 800, maxHeight: 600),
@@ -486,17 +511,18 @@ class _BoardViewCardState extends State<BoardViewCard> {
                     children: [
                       Expanded(
                           child: TextField(
-                        maxLines: null,
-                        autofocus: true,
-                        decoration: InputDecoration(
-                          hintText: "Input multi-line content here",
-                          labelText: "Content Text",
-                          suffix: Icon(Icons.text_format_rounded),
-                          // contentPadding: EdgeInsets.fromLTRB(16, 20, 16, 20),
-                          // border: InputBorder.none
-                        ),
-                        // ),
-                      )),
+                            controller: this.inputCtl,
+                            maxLines: null,
+                            autofocus: true,
+                            decoration: InputDecoration(
+                              hintText: "Input multi-line content here",
+                              labelText: "Content Text",
+                              suffix: Icon(Icons.text_format_rounded),
+                              // contentPadding: EdgeInsets.fromLTRB(16, 20, 16, 20),
+                              // border: InputBorder.none
+                            ),
+                            // ),
+                          )),
                     ],
                   ),
                 )),
