@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import "package:flutter/material.dart";
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -15,7 +17,6 @@ class TheBoardController extends TheViewController {
     bool notEmpty = (str.isNotEmpty);
     // this.l.add(new BoardViewCard.text(notEmpty ? value : ""));
     newItem(CardData(CARD_TYPE.TEXT, TextCardContent(notEmpty ? str : "")));
-    return notEmpty;
   }
 
   replaceItem(Key dataKey, CardData cardData) {
@@ -115,7 +116,7 @@ class CardState extends Serializable {
   double top = 0;
   double left = 0;
   double height = 320;
-  double width = 600;
+  double width = min(600, Get.width-40);
   bool locked = false;
   bool pined = false;
 
