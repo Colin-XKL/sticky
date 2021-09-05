@@ -26,7 +26,7 @@ class AboutPage extends StatelessWidget {
   void _newEmail() async =>
       await canLaunch(uri) ? await launch(uri) : throw 'Could not launch $uri';
 
-  Widget _infoTile(String title, String subtitle) {
+  Widget _infoTile(String title, String? subtitle) {
     return Text(
       "$title:  $subtitle",
       style: TextStyle(color: Colors.grey[300]),

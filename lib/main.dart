@@ -35,10 +35,8 @@ Future<void> main() async {
       'version': packageInfo.version,
       'buildNumber': packageInfo.buildNumber,
     };
-    scope.setTag('Platform', PlatformInfo.getPlatformString());
+    scope.setTag('Platform', PlatformInfo.getPlatformString()!);
     scope.setContexts('AppInfo', appInfo);
-
-    return scope;
   });
   await SentryFlutter.init(
         (options) {
@@ -85,7 +83,7 @@ class _MyHomeState extends State<MyHome> {
     content: Text("Pasted"),
     duration: Duration(milliseconds: 300),
   );
-  TheView view;
+  TheView? view;
 
   void newItemTriggeredByKey() {
     VIEW_MODE currentView = widget.viewManager.getCurrentViewType();
@@ -119,11 +117,11 @@ class _MyHomeState extends State<MyHome> {
               title: Text("Mind Box"),
               actions: [
                 IconButton(
-                  onPressed: () => view.download(),
+                  onPressed: () => view!.download(),
                   icon: Icon(Icons.download),
                 ),
                 IconButton(
-                    onPressed: () => view.upload(), icon: Icon(Icons.save)),
+                    onPressed: () => view!.upload(), icon: Icon(Icons.save)),
               ],
             ),
             drawer: Drawer(
@@ -208,9 +206,9 @@ class _MyHomeState extends State<MyHome> {
             floatingActionButton: FloatingActionButton(
               child: Icon(Icons.add),
               onPressed: () async {
-                String ret = view.newItemFromCustomInput().toString();
+                String ret = view!.newItemFromCustomInput().toString();
                 if (ret.length > 0)
-                  view.ctl.newItemFromString(ret);
+                  view!.ctl.newItemFromString(ret);
                 else if (await pasteFromPastebin()) //hasContent
                   ScaffoldMessenger.of(context).showSnackBar(msgPasted);
               },
@@ -219,10 +217,10 @@ class _MyHomeState extends State<MyHome> {
   }
 
   Future<bool> pasteFromPastebin() async {
-    var controller = view.ctl;
+    var controller = view!.ctl;
     return Clipboard.getData(Clipboard.kTextPlain).then((value) {
       bool notEmpty =
-      (value != null && value.text != null && value.text.isNotEmpty);
+      (value != null && value.text != null && value.text!.isNotEmpty);
       controller.newItemFromString(value?.text ?? "");
 
       Clipboard.setData(ClipboardData(text: ""));
@@ -259,10 +257,10 @@ class ViewManager {
 // KEY SHORTCUT RESPONSE
 class AreaWithKeyShortcut extends StatelessWidget {
   const AreaWithKeyShortcut({
-    Key key,
-    @required this.child,
-    @required this.onPasteDetected,
-    @required this.onNewEmptyItemDetected,
+    Key? key,
+    required this.child,
+    required this.onPasteDetected,
+    required this.onNewEmptyItemDetected,
   }) : super(key: key);
   final Widget child;
   final VoidCallback onPasteDetected;
@@ -277,9 +275,9 @@ class AreaWithKeyShortcut extends StatelessWidget {
         pasteKeySet: PasteIntent(),
       },
       actions: {
-        PasteIntent: CallbackAction(onInvoke: (e) => onPasteDetected?.call()),
+        PasteIntent: CallbackAction(onInvoke: (e) => onPasteDetected.call()),
         NewEmptyItemIntent:
-        CallbackAction(onInvoke: (e) => onNewEmptyItemDetected?.call()),
+        CallbackAction(onInvoke: (e) => onNewEmptyItemDetected.call()),
       },
       child: child,
     );

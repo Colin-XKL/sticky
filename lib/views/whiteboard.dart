@@ -12,7 +12,7 @@ class TheBoardController extends TheViewController {
   @override
   newItemFromString(String str) {
     //TODO: 兼容不同的内容类型
-    bool notEmpty = (str != null && str.isNotEmpty);
+    bool notEmpty = (str.isNotEmpty);
     // this.l.add(new BoardViewCard.text(notEmpty ? value : ""));
     newItem(CardData(CARD_TYPE.TEXT, TextCardContent(notEmpty ? str : "")));
     return notEmpty;
@@ -44,7 +44,7 @@ class TheBoardController extends TheViewController {
 class TheBoard extends TheView {
   TheBoard() : super(VIEW_MODE.CARDS, TheBoardController()) {
     // print('board initing');
-    var items = storage.getItem(enumMapping[VIEW_MODE.CARDS]);
+    var items = storage.getItem(enumMapping[VIEW_MODE.CARDS]!);
     if (this.ctl.initDone) return;
 
     if (items != null) {
@@ -52,7 +52,7 @@ class TheBoard extends TheView {
         if (this.ctl.l.length == 1) this.ctl.l.removeAt(0); //remove init item
         // TODO: various card type support
 
-        this.ctl.l.addAll(List<CardData>.from((items as List).map((item) {
+        this.ctl.l.addAll(List<CardData>.from(items.map((item) {
           // check item save and load
           var content = TextCardContent(item['content']['text']);
           var state = item['state'];
@@ -146,7 +146,7 @@ class CardData extends ViewDataListItem {
   final CardContent content;
   CardState state;
 
-  CardData(this.type, this.content, [CardState cardState])
+  CardData(this.type, this.content, [CardState? cardState])
       : state = cardState ?? new CardState();
 
   @override
@@ -171,7 +171,7 @@ abstract class CardContent extends Serializable {
 }
 
 class TextCardContent extends CardContent {
-  String text;
+  String? text;
 
   TextCardContent(this.text) : super(CARD_TYPE.TEXT);
 
@@ -184,25 +184,25 @@ class TextCardContent extends CardContent {
 
   @override
   String toString() {
-    return this.text;
+    return this.text!;
   }
 }
 
 class TextCard extends CardBody {
   final TextCardContent data;
 
-  TextCard(String str)
+  TextCard(String? str)
       : data = new TextCardContent(str),
         super(CARD_TYPE.TEXT);
 
-  String get text => this.data.text;
+  String? get text => this.data.text;
 
   @override
   Widget build(BuildContext context) {
     return Scrollbar(
         isAlwaysShown: false,
         child: SingleChildScrollView(
-          child: SelectableText(this.text),
+          child: SelectableText(this.text!),
         ));
   }
 }
@@ -218,8 +218,8 @@ class BoardViewCard extends StatefulWidget {
   final Key dataKey;
 
   BoardViewCard(CardData cardData)
-      : state = cardData.state ?? new CardState(),
-        child = BoardViewCard.getCardWidget(cardData.content),
+      : state = cardData.state,
+        child = BoardViewCard.getCardWidget(cardData.content) as CardBody,
         dataKey = cardData.dataKey,
         super();
 
@@ -258,7 +258,7 @@ class _BoardViewCardState extends State<BoardViewCard> {
   TextEditingController inputCtl = new TextEditingController();
 
   static Widget _getFunctionButton(IconData icon, Function() onPressed,
-      [String tooltip, double iconSize]) {
+      [String? tooltip, double? iconSize]) {
     return IconButton(
       icon: Icon(
         icon,
@@ -375,7 +375,7 @@ class _BoardViewCardState extends State<BoardViewCard> {
                                   }, "Copy", 20),
                                   _getFunctionButton(
                                       Icons.delete_outline_rounded, () {
-                                    WidgetsBinding.instance
+                                    WidgetsBinding.instance!
                                         .addPostFrameCallback((timeStamp) {
                                       final TheBoardController wbc =
                                       Get.find<TheBoardController>();
@@ -532,19 +532,19 @@ class _BoardViewCardState extends State<BoardViewCard> {
 }
 
 class ManipulatingBall extends StatefulWidget {
-  ManipulatingBall({Key key, this.child, this.onDrag, this.dragAreaLength});
+  ManipulatingBall({Key? key, this.child, this.onDrag, this.dragAreaLength});
 
-  final Widget child;
-  final Function onDrag;
-  final double dragAreaLength;
+  final Widget? child;
+  final Function? onDrag;
+  final double? dragAreaLength;
 
   @override
   _ManipulatingBallState createState() => _ManipulatingBallState();
 }
 
 class _ManipulatingBallState extends State<ManipulatingBall> {
-  double initX;
-  double initY;
+  double? initX;
+  double? initY;
 
   _handleDrag(details) {
     setState(() {
@@ -558,7 +558,7 @@ class _ManipulatingBallState extends State<ManipulatingBall> {
     var dy = details.globalPosition.dy - initY;
     initX = details.globalPosition.dx;
     initY = details.globalPosition.dy;
-    widget.onDrag(dx, dy);
+    widget.onDrag!(dx, dy);
   }
 
   @override

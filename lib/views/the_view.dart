@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:localstorage/localstorage.dart';
@@ -22,9 +24,9 @@ abstract class TheView extends StatelessWidget {
 
   TheView(this.viewMode, TheViewController controller)
       : this.ctl = controller.runtimeType == TheListController
-            ? Get.put<TheListController>(controller)
-            : Get.put<TheBoardController>(controller),
-        this.storage = LocalStorage(enumMapping[viewMode]);
+            ? Get.put<TheListController>(controller as TheListController)
+            : Get.put<TheBoardController>(controller as TheBoardController),
+        this.storage = LocalStorage(enumMapping[viewMode]!);
 
   Object newItemFromCustomInput();
 
@@ -37,7 +39,7 @@ abstract class TheView extends StatelessWidget {
     // print('last modify - server $lastModify');
     // print('last modify - client ${ctl.lastModifyTime}');
 
-    Map data = await sync.downloadData(enumMapping[viewMode]);
+    Map data = await (sync.downloadData(enumMapping[viewMode]) as FutureOr<Map<dynamic, dynamic>>);
     // print('got data');
     // print(data);
     if (data['data'] != null) ctl.replaceBy(data['data']);
@@ -52,12 +54,12 @@ abstract class TheViewController extends DataController {
   bool initDone = false;
 
   TheViewController(this.type)
-      : this.storage = new LocalStorage(enumMapping[type]),
+      : this.storage = new LocalStorage(enumMapping[type]!),
         this.l = new RxList<ViewDataListItem>();
 
   save() {
     this.storage.setItem(
-        enumMapping[type],
+        enumMapping[type]!,
         this.l.map((item) {
           return item.serialize();
         }).toList());
@@ -114,7 +116,7 @@ abstract class DataController extends GetxController {
 }
 
 abstract class Serializable {
-  final Key key = UniqueKey();
+  final Key? key = UniqueKey();
 
   Map<String, dynamic> serialize();
 }

@@ -10,7 +10,7 @@ class TheListController extends TheViewController {
 
   @override
   newItemFromString(String str) {
-    bool notEmpty = (str != null && str.isNotEmpty);
+    bool notEmpty = (str.isNotEmpty);
     this.newItem(notEmpty ? ListItem("Text", str) : ListItem("Empty ", ""));
   }
 
@@ -21,22 +21,20 @@ class TheListController extends TheViewController {
 }
 
 class ListItem extends ViewDataListItem {
-  Key key;
-  String title;
-  bool isBinary;
+  Key key=UniqueKey();
+  String? title;
+  bool? isBinary;
 
   // var content;
-  String notations;
+  String? notations;
 
-  ListItem(String title, String content) {
-    this.key = UniqueKey();
+  ListItem(String title, String? content) {
     this.title = title;
     this.isBinary = false;
     this.content = content;
   }
 
   ListItem.binaryContent(String title, Object content, bool bin) {
-    this.key = UniqueKey();
     this.title = title;
     this.isBinary = true;
     this.content = content;
@@ -62,12 +60,12 @@ class TheList extends TheView {
 
   TheList() : super(VIEW_MODE.LIST, TheListController()) {
     // print('list initing');
-    var items = storage.getItem(enumMapping[VIEW_MODE.LIST]);
+    var items = storage.getItem(enumMapping[VIEW_MODE.LIST]!);
     if (this.ctl.initDone) return;
     if (items != null) {
       if ((items as List).length > 0) {
         if (this.ctl.l.length == 1) this.ctl.removeItemAt(0); //remove init item
-        this.ctl.l.addAll(List<ListItem>.from((items as List)
+        this.ctl.l.addAll(List<ListItem>.from(items
             .map((item) => ListItem(item['title'], item['content']))));
       } else
         this.ctl.newItem(ListItem("Add something here!", ""));
@@ -158,7 +156,7 @@ class TheList extends TheView {
                                   key: item.key,
                                   index: index,
                                   child: ListTile(
-                                    title: Text(item.title),
+                                    title: Text(item.title!),
                                     subtitle: Text(item.content),
                                     contentPadding:
                                         EdgeInsets.fromLTRB(16, 8, 16, 8),
@@ -205,7 +203,7 @@ class TheList extends TheView {
   Object newItemFromCustomInput() {
     String value = inputController.text;
     inputController.clear();
-    return value ?? "";
+    return value;
   }
 }
 
