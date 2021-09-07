@@ -11,4 +11,4 @@ PRODUCT_NAME = stickys
 PRODUCT_BUNDLE_IDENTIFIER = one.colinx.stickys
 
 // The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2021 com.example. All rights reserved.
+PRODUCT_COPYRIGHT = Copyright © 2021 one.colinx. All rights reserved.
