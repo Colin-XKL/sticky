@@ -178,7 +178,8 @@ class TheList extends TheView {
                 child: Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(8.0),
-                    color: Colors.blueGrey[50],
+                    color:Theme.of(context).hoverColor,
+                    // color: Colors.blueGrey[50],
                   ),
                   child: TextField(
                     controller: inputController,

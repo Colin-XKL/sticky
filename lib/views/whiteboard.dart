@@ -274,7 +274,7 @@ class _BoardViewCardState extends State<BoardViewCard> {
                   decoration: BoxDecoration(
                       border: Border(
                           bottom: BorderSide(
-                              color: Colors.grey.shade200,
+                              color: Theme.of(context).dividerColor,
                               width: 1,
                               style: BorderStyle.solid))),
                   child: Padding(
@@ -422,7 +422,7 @@ class _BoardViewCardState extends State<BoardViewCard> {
                         child: Tooltip(
                           child: Icon(
                             Icons.signal_cellular_4_bar_rounded,
-                            color: Colors.grey[100],
+                            color: Theme.of(context).dividerColor,
                           ),
                           message:
                               widget.state.locked ? "Locked" : "Drag to resize",
