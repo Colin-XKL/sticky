@@ -95,7 +95,7 @@ class TheBoard extends TheView {
   Widget build(BuildContext context) {
     // print("board rebuild");
     return Container(
-      padding: EdgeInsets.all(24),
+      padding: EdgeInsets.fromLTRB(12, 8, 12, 8),
       child: GetBuilder<TheBoardController>(
           init: TheBoardController(),
           builder: (ctl) => Stack(
@@ -116,7 +116,7 @@ class CardState extends Serializable {
   double top = 0;
   double left = 0;
   double height = 320;
-  double width = min(600, Get.width-40);
+  double width = min(600, Get.width - 40);
   bool locked = false;
   bool pined = false;
 
@@ -173,7 +173,7 @@ abstract class CardContent extends Serializable {
 }
 
 class TextCardContent extends CardContent {
-  String? text;
+  String text;
 
   TextCardContent(this.text) : super(CARD_TYPE.TEXT);
 
@@ -186,7 +186,7 @@ class TextCardContent extends CardContent {
 
   @override
   String toString() {
-    return this.text!;
+    return this.text;
   }
 }
 
@@ -194,7 +194,7 @@ class TextCard extends CardBody {
   final TextCardContent data;
 
   TextCard(String? str)
-      : data = new TextCardContent(str),
+      : data = new TextCardContent(str??""),
         super(CARD_TYPE.TEXT);
 
   String? get text => this.data.text;
@@ -242,7 +242,7 @@ class BoardViewCard extends StatefulWidget {
 
 class _BoardViewCardState extends State<BoardViewCard> {
   static const double minHeight = 128;
-  static const double minWidth = 256;
+  static const double minWidth = 300;
   TextEditingController inputCtl = new TextEditingController();
 
   static Widget _getFunctionButton(IconData icon, Function() onPressed,
@@ -256,8 +256,7 @@ class _BoardViewCardState extends State<BoardViewCard> {
       padding: EdgeInsets.zero,
       tooltip: tooltip,
       splashRadius: 18,
-      color: Get.isDarkMode?Colors.grey[200]:Colors.grey[700],
-      // color: Colors.grey[700],
+      color: Get.isDarkMode ? Colors.grey[200] : Colors.grey[700],
     );
   }
 
@@ -361,7 +360,7 @@ class _BoardViewCardState extends State<BoardViewCard> {
                                       content: Text('Copied!'),
                                       duration: Duration(milliseconds: 300),
                                     ));
-                                  }, "Copy", 20),
+                                  }, widget.state.locked ? "Copy" : "Cut", 20),
                                   _getFunctionButton(
                                       Icons.delete_outline_rounded, () {
                                     WidgetsBinding.instance!
