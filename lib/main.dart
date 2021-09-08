@@ -73,7 +73,7 @@ class MyApp extends StatelessWidget {
           // focusColor: Colors.blueGrey,
           fontFamily: 'Sans'
       ),
-      themeMode: ThemeMode.system,
+      // themeMode: ThemeMode.system,
 
       // theme: ThemeData(
       //    ),

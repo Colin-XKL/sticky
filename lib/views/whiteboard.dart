@@ -256,7 +256,8 @@ class _BoardViewCardState extends State<BoardViewCard> {
       padding: EdgeInsets.zero,
       tooltip: tooltip,
       splashRadius: 18,
-      color: Colors.grey[700],
+      color: Get.isDarkMode?Colors.grey[200]:Colors.grey[700],
+      // color: Colors.grey[700],
     );
   }
 

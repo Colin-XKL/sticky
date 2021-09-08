@@ -94,9 +94,9 @@ class SettingsPage extends StatelessWidget {
                             value: Get.isDarkMode,
                             onChanged: (darkMode) {
                               // print("Clicked");
-                              Get.changeTheme(Get.isDarkMode
-                                  ? ThemeData.light()
-                                  : ThemeData.dark());
+                              Get.changeThemeMode(Get.isDarkMode
+                                  ? ThemeMode.light
+                                  : ThemeMode.dark);
                               ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                       content: Text("Switching theme...")));
