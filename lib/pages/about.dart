@@ -67,7 +67,6 @@ class AboutPage extends StatelessWidget {
                 ),
                 _infoTile("Platform", PlatformInfo.getPlatformString()),
                 _infoTile('App version', ctl.info['version']),
-                _infoTile('Build number', ctl.info['buildNumber']),
               ],
             ),
           ),

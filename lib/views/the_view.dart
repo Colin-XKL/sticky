@@ -116,12 +116,10 @@ abstract class DataController extends GetxController {
 }
 
 abstract class Serializable {
-  final Key? key = UniqueKey();
-
   Map<String, dynamic> serialize();
 }
 
-abstract class ViewDataListItem extends Serializable {
+abstract class ViewDataListItem implements Serializable {
   final Key dataKey = UniqueKey();
   var content;
 }

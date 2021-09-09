@@ -112,7 +112,7 @@ class TheBoard extends TheView {
   }
 }
 
-class CardState extends Serializable {
+class CardState implements Serializable {
   double top = 0;
   double left = 0;
   double height = 320;
@@ -166,7 +166,7 @@ class CardData extends ViewDataListItem {
   }
 }
 
-abstract class CardContent extends Serializable {
+abstract class CardContent implements Serializable {
   final CARD_TYPE cardType;
 
   CardContent(this.cardType);
@@ -194,7 +194,7 @@ class TextCard extends CardBody {
   final TextCardContent data;
 
   TextCard(String? str)
-      : data = new TextCardContent(str??""),
+      : data = new TextCardContent(str ?? ""),
         super(CARD_TYPE.TEXT);
 
   String? get text => this.data.text;
@@ -245,7 +245,7 @@ class _BoardViewCardState extends State<BoardViewCard> {
   static const double minWidth = 300;
   TextEditingController inputCtl = new TextEditingController();
 
-  static Widget _getFunctionButton(IconData icon, Function() onPressed,
+  static Widget funcButton(IconData icon, Function() onPressed,
       [String? tooltip, double? iconSize]) {
     return IconButton(
       icon: Icon(
@@ -261,6 +261,61 @@ class _BoardViewCardState extends State<BoardViewCard> {
   }
 
   Widget _getContentCard(double height, double width, Widget child) {
+    var actions = [
+      funcButton(Icons.edit_rounded, () {
+        TheBoardController controller = Get.find<TheBoardController>();
+        this.inputCtl = new TextEditingController(
+            text: controller.findItem(widget.dataKey).content.toString());
+        this.showEditDialog(context, widget.dataKey);
+      }, "Edit", 22),
+      funcButton(widget.state.locked ? Icons.copy : Icons.cut_rounded, () {
+        final TheBoardController wbc = Get.find<TheBoardController>();
+        final item = wbc.findItem(widget.dataKey);
+        var value = item.content.toString();
+
+        Clipboard.setData(ClipboardData(text: value));
+        if (!widget.state.locked) wbc.removeItem(widget.dataKey);
+
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Copied!'),
+          duration: Duration(milliseconds: 300),
+        ));
+      }, widget.state.locked ? "Copy" : "Cut", 20),
+      funcButton(Icons.delete_outline_rounded, () {
+        WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+          final TheBoardController wbc = Get.find<TheBoardController>();
+          wbc.removeItem(widget.dataKey);
+        });
+      }, "Delete"),
+      widget.state.locked
+          ? funcButton(Icons.lock_rounded, () {
+              setState(
+                () {
+                  widget.state
+                    ..locked = false
+                    ..pined = false;
+                },
+              );
+            }, "Locked", 22)
+          : funcButton(Icons.lock_open_rounded, () {
+              setState(() {
+                widget.state
+                  ..pined = true
+                  ..locked = true;
+              });
+            }, "Lock", 22),
+      widget.state.pined
+          ? funcButton(Icons.push_pin_rounded, () {
+              setState(() {
+                widget.state.pined = false;
+              });
+            }, "UnPin", 22)
+          : funcButton(Icons.push_pin_outlined, () {
+              setState(() {
+                widget.state.pined = true;
+              });
+            }, "Pin", 22),
+    ];
     return Container(
         height: height,
         width: width,
@@ -296,16 +351,13 @@ class _BoardViewCardState extends State<BoardViewCard> {
                                 onDrag: (dx, dy) {
                                   if (!widget.state.pined)
                                     setState(() {
-                                      widget.state.top =
-                                          (widget.state.top + dy) + .0;
+                                      widget.state.top = widget.state.top + dy;
                                       widget.state.left =
-                                          (widget.state.left + dx) + .0;
-                                      widget.state.top = widget.state.top > 0
-                                          ? widget.state.top
-                                          : 0;
-                                      widget.state.left = widget.state.left > 0
-                                          ? widget.state.left
-                                          : 0;
+                                          widget.state.left + dx;
+                                      widget.state.top =
+                                          max(widget.state.top, 0);
+                                      widget.state.left =
+                                          max(widget.state.left, 0);
                                     });
                                 },
                                 dragAreaLength: 48,
@@ -319,93 +371,21 @@ class _BoardViewCardState extends State<BoardViewCard> {
                               "Text",
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: TextStyle(fontWeight: FontWeight.w600),
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.w600),
                             ),
                           ),
                         ),
                         SizedBox(
                           //button bar
-                          child: Row(
-                            children: [
+                          child:
+                              // Row(
+                              //   children: [
                               ButtonBar(
-                                buttonPadding: EdgeInsets.zero,
-                                children: [
-                                  _getFunctionButton(Icons.edit_rounded, () {
-                                    TheBoardController controller =
-                                        Get.find<TheBoardController>();
-                                    this.inputCtl = new TextEditingController(
-                                        text: controller
-                                            .findItem(widget.dataKey)
-                                            .content
-                                            .toString());
-                                    this.showEditDialog(
-                                        context, widget.dataKey);
-                                  }, "Edit", 22),
-                                  _getFunctionButton(
-                                      widget.state.locked
-                                          ? Icons.copy
-                                          : Icons.cut_rounded, () {
-                                    final TheBoardController wbc =
-                                        Get.find<TheBoardController>();
-                                    final item = wbc.findItem(widget.dataKey);
-                                    var value = item.content.toString();
-                                    // if (value.isNotEmpty) {
-                                    Clipboard.setData(
-                                        ClipboardData(text: value));
-                                    if (!widget.state.locked)
-                                      wbc.removeItem(widget.dataKey);
-
-                                    ScaffoldMessenger.of(context)
-                                        .showSnackBar(SnackBar(
-                                      content: Text('Copied!'),
-                                      duration: Duration(milliseconds: 300),
-                                    ));
-                                  }, widget.state.locked ? "Copy" : "Cut", 20),
-                                  _getFunctionButton(
-                                      Icons.delete_outline_rounded, () {
-                                    WidgetsBinding.instance!
-                                        .addPostFrameCallback((timeStamp) {
-                                      final TheBoardController wbc =
-                                          Get.find<TheBoardController>();
-                                      wbc.removeItem(widget.dataKey);
-                                    });
-                                  }, "Delete"),
-                                  widget.state.locked
-                                      ? _getFunctionButton(Icons.lock_rounded,
-                                          () {
-                                          setState(
-                                            () {
-                                              widget.state
-                                                ..locked = false
-                                                ..pined = false;
-                                            },
-                                          );
-                                        }, "Locked", 22)
-                                      : _getFunctionButton(
-                                          Icons.lock_open_rounded, () {
-                                          setState(() {
-                                            widget.state
-                                              ..pined = true
-                                              ..locked = true;
-                                          });
-                                        }, "Lock", 22),
-                                  widget.state.pined
-                                      ? _getFunctionButton(
-                                          Icons.push_pin_rounded, () {
-                                          setState(() {
-                                            widget.state.pined = false;
-                                          });
-                                        }, "UnPin", 22)
-                                      : _getFunctionButton(
-                                          Icons.push_pin_outlined, () {
-                                          setState(() {
-                                            widget.state.pined = true;
-                                          });
-                                        }, "Pin", 22),
-                                ],
-                              ),
-                            ],
-                          ),
+                                  buttonPadding: EdgeInsets.zero,
+                                  children: actions),
+                          // ],
+                          // ),
                         ),
                       ],
                       // dense: true,
@@ -431,16 +411,11 @@ class _BoardViewCardState extends State<BoardViewCard> {
                           //resize
                           // print("resize drag $dx $dy");
                           if (!widget.state.locked) {
-                            num newHeight = (widget.state.height + dy);
-                            num newWidth = (widget.state.width + dx);
-
+                            double newHeight = (widget.state.height + dy);
+                            double newWidth = (widget.state.width + dx);
                             setState(() {
-                              widget.state.height = newHeight > minHeight
-                                  ? newHeight.toDouble()
-                                  : minHeight;
-                              widget.state.width = newWidth > minWidth
-                                  ? newWidth.toDouble()
-                                  : minWidth;
+                              widget.state.height = max(newHeight, minHeight);
+                              widget.state.width = max(newWidth, minWidth);
                             });
                           }
                         },
@@ -461,7 +436,6 @@ class _BoardViewCardState extends State<BoardViewCard> {
 
   @override
   Widget build(BuildContext context) {
-    // print("status: $widget.cardState._top , $widget.cardState._left");
     return Positioned(
       top: widget.state.top,
       left: widget.state.left,
@@ -471,48 +445,49 @@ class _BoardViewCardState extends State<BoardViewCard> {
   }
 
   void showEditDialog(BuildContext ctx, Key dataKey) {
+    var dialogActions = [
+      TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: Text("CANCEL")),
+      TextButton(
+        onPressed: () {
+          TheBoardController controller = Get.find<TheBoardController>();
+          var item = controller.findItem(dataKey) as CardData;
+          (item.content as TextCardContent).text = inputCtl.text;
+          controller.replaceItem(dataKey, item);
+          Navigator.of(context).pop();
+        },
+        child: Text("SAVE"),
+      ),
+    ];
+    Widget editArea = TextField(
+      controller: this.inputCtl,
+      maxLines: null,
+      autofocus: true,
+      decoration: InputDecoration(
+        hintText: "Input multi-line content here",
+        labelText: "Content Text",
+        suffix: Icon(Icons.text_format_rounded),
+        // contentPadding: EdgeInsets.fromLTRB(16, 20, 16, 20),
+        // border: InputBorder.none
+      ),
+      // ),
+    );
     showDialog(
         context: ctx,
         builder: (BuildContext context) {
           return AlertDialog(
             title: Text('Edit Content'),
-            actions: [
-              TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: Text("CANCEL")),
-              TextButton(
-                  onPressed: () {
-                    TheBoardController controller =
-                        Get.find<TheBoardController>();
-                    var item = controller.findItem(dataKey) as CardData;
-                    (item.content as TextCardContent).text = inputCtl.text;
-                    controller.replaceItem(dataKey, item);
-                    Navigator.of(context).pop();
-                  },
-                  child: Text("SAVE")),
-            ],
+            actions: dialogActions,
             content: Container(
                 constraints: BoxConstraints(maxWidth: 800, maxHeight: 600),
                 child: AspectRatio(
                   aspectRatio: 1 / 0.618,
                   child: Column(
                     children: [
-                      Expanded(
-                          child: TextField(
-                        controller: this.inputCtl,
-                        maxLines: null,
-                        autofocus: true,
-                        decoration: InputDecoration(
-                          hintText: "Input multi-line content here",
-                          labelText: "Content Text",
-                          suffix: Icon(Icons.text_format_rounded),
-                          // contentPadding: EdgeInsets.fromLTRB(16, 20, 16, 20),
-                          // border: InputBorder.none
-                        ),
-                        // ),
-                      )),
+                      Expanded(child: editArea),
                     ],
                   ),
                 )),
@@ -522,10 +497,14 @@ class _BoardViewCardState extends State<BoardViewCard> {
 }
 
 class ManipulatingBall extends StatefulWidget {
-  ManipulatingBall({Key? key, this.child, this.onDrag, this.dragAreaLength});
+  ManipulatingBall(
+      {Key? key,
+      required this.child,
+      required this.onDrag,
+      this.dragAreaLength});
 
-  final Widget? child;
-  final Function? onDrag;
+  final Widget child;
+  final Function onDrag;
   final double? dragAreaLength;
 
   @override
@@ -544,11 +523,11 @@ class _ManipulatingBallState extends State<ManipulatingBall> {
   }
 
   _handleUpdate(details) {
-    var dx = details.globalPosition.dx - initX;
-    var dy = details.globalPosition.dy - initY;
+    double dx = details.globalPosition.dx - initX;
+    double dy = details.globalPosition.dy - initY;
     initX = details.globalPosition.dx;
     initY = details.globalPosition.dy;
-    widget.onDrag!(dx, dy);
+    widget.onDrag(dx, dy);
   }
 
   @override

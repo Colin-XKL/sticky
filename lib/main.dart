@@ -7,8 +7,8 @@ import 'package:localstorage/localstorage.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:sentry/sentry.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
-import 'package:stickys/pages/setting.dart';
 
+import 'package:stickys/pages/setting.dart';
 import 'package:stickys/utils/platform.dart';
 import 'package:stickys/views/the_view.dart';
 import 'views/list.dart';
@@ -33,9 +33,8 @@ Future<void> main() async {
       'appName': packageInfo.appName,
       'packageName': packageInfo.packageName,
       'version': packageInfo.version,
-      'buildNumber': packageInfo.buildNumber,
     };
-    scope.setTag('Platform', PlatformInfo.getPlatformString()!);
+    scope.setTag('Platform', PlatformInfo.getPlatformString() ?? "Unknown");
     scope.setContexts('AppInfo', appInfo);
   });
   await SentryFlutter.init(
@@ -61,23 +60,16 @@ class MyApp extends StatelessWidget {
           primaryColorLight: Colors.teal,
           // primaryColorDark: Colors.yellow,
           // focusColor: Colors.lightGreen,
-          fontFamily: 'Sans'
-        ),
+          fontFamily: 'Sans'),
       darkTheme: ThemeData(
-        brightness: ThemeData.dark().brightness,
+          brightness: ThemeData.dark().brightness,
           accentColor: Colors.teal,
           primarySwatch: Colors.teal,
           // primaryColor: Colors.blueGrey,
           // primaryColorLight: Colors.teal,
           // primaryColorDark: Colors.yellow,
           // focusColor: Colors.blueGrey,
-          fontFamily: 'Sans'
-      ),
-      // themeMode: ThemeMode.system,
-
-      // theme: ThemeData(
-      //    ),
-
+          fontFamily: 'Sans'),
       home: MyHome(),
     );
   }
@@ -99,7 +91,15 @@ class _MyHomeState extends State<MyHome> {
     content: Text("Pasted"),
     duration: Duration(milliseconds: 300),
   );
-  TheView? view;
+  late TheView view;
+
+  @override
+  void initState() {
+    super.initState();
+    this.view = widget.viewManager.getView();
+  }
+
+  // _MyHomeState() :this.view = widget.viewManager.getView();
 
   void newItemTriggeredByKey() {
     VIEW_MODE currentView = widget.viewManager.getCurrentViewType();
@@ -119,7 +119,7 @@ class _MyHomeState extends State<MyHome> {
   @override
   Widget build(BuildContext context) {
     // print("view container widget build");
-    view = widget.viewManager.getView();
+    // view = widget.viewManager.getView();
 
     return AreaWithKeyShortcut(
         onPasteDetected: () async {
@@ -133,11 +133,11 @@ class _MyHomeState extends State<MyHome> {
               title: Text("Mind Box"),
               actions: [
                 IconButton(
-                  onPressed: () => view!.download(),
+                  onPressed: () => view.download(),
                   icon: Icon(Icons.download),
                 ),
                 IconButton(
-                    onPressed: () => view!.upload(), icon: Icon(Icons.save)),
+                    onPressed: () => view.upload(), icon: Icon(Icons.save)),
               ],
             ),
             drawer: Drawer(
@@ -158,6 +158,7 @@ class _MyHomeState extends State<MyHome> {
                     onTap: () {
                       setState(() {
                         widget.viewManager.setCurrentViewIndex(0);
+                        this.view = widget.viewManager.getView();
                       });
                       Navigator.of(context).pop();
                     },
@@ -172,6 +173,7 @@ class _MyHomeState extends State<MyHome> {
                     onTap: () {
                       setState(() {
                         widget.viewManager.setCurrentViewIndex(1);
+                        this.view = widget.viewManager.getView();
                       });
                       Navigator.of(context).pop();
                     },
@@ -220,9 +222,9 @@ class _MyHomeState extends State<MyHome> {
             floatingActionButton: FloatingActionButton(
               child: Icon(Icons.add),
               onPressed: () async {
-                String ret = view!.newItemFromCustomInput().toString();
+                String ret = view.newItemFromCustomInput().toString();
                 if (ret.length > 0)
-                  view!.ctl.newItemFromString(ret);
+                  view.ctl.newItemFromString(ret);
                 else if (await pasteFromPastebin()) //hasContent
                   ScaffoldMessenger.of(context).showSnackBar(msgPasted);
               },
@@ -231,7 +233,7 @@ class _MyHomeState extends State<MyHome> {
   }
 
   Future<bool> pasteFromPastebin() async {
-    var controller = view!.ctl;
+    var controller = view.ctl;
     return Clipboard.getData(Clipboard.kTextPlain).then((value) {
       bool notEmpty =
           (value != null && value.text != null && value.text!.isNotEmpty);
@@ -263,8 +265,8 @@ class ViewManager {
     if (i >= 0 && i < views.length) {
       this.currentViewIndex = i;
       return true;
-    } else
-      return false;
+    }
+    return false;
   }
 }
 

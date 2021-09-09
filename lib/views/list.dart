@@ -21,9 +21,9 @@ class TheListController extends TheViewController {
 }
 
 class ListItem extends ViewDataListItem {
-  Key key=UniqueKey();
-  String? title;
-  bool? isBinary;
+  final Key key=UniqueKey();
+  late String title;
+  bool isBinary=false;
 
   // var content;
   String? notations;
@@ -146,8 +146,6 @@ class TheList extends TheView {
                               key: item.key,
                               background: listTileBackground(),
                               onDismissed: (direction) {
-                                // c.lastDeleted = item;
-                                // c.l.removeAt(index);
                                 ctl.removeItemAt(index);
                                 ScaffoldMessenger.of(context)
                                     .showSnackBar(msgDeleted);
@@ -156,7 +154,7 @@ class TheList extends TheView {
                                   key: item.key,
                                   index: index,
                                   child: ListTile(
-                                    title: Text(item.title!),
+                                    title: Text(item.title),
                                     subtitle: Text(item.content),
                                     contentPadding:
                                         EdgeInsets.fromLTRB(16, 8, 16, 8),
