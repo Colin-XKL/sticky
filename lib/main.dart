@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -57,15 +59,15 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
           primarySwatch: Colors.teal,
           primaryColor: Colors.white,
-          primaryColorLight: Colors.teal,
+          // primaryColorLight: Colors.teal,
           // primaryColorDark: Colors.yellow,
           // focusColor: Colors.lightGreen,
           fontFamily: 'Sans'),
       darkTheme: ThemeData(
           brightness: ThemeData.dark().brightness,
+          secondaryHeaderColor: Colors.teal,
           accentColor: Colors.teal,
           primarySwatch: Colors.teal,
-          // primaryColor: Colors.blueGrey,
           // primaryColorLight: Colors.teal,
           // primaryColorDark: Colors.yellow,
           // focusColor: Colors.blueGrey,
@@ -207,6 +209,11 @@ class _MyHomeState extends State<MyHome> {
                     title: Text("Give us a star!"),
                     dense: true,
                     onTap: () {},
+                  ),
+                  ListTile(
+                    title: Text('Exit'),
+                    dense: true,
+                    onTap: () => {exit(0)},
                   ),
                   Padding(
                     padding: EdgeInsets.fromLTRB(0, 32, 0, 0),
