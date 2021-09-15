@@ -21,9 +21,9 @@ class TheListController extends TheViewController {
 }
 
 class ListItem extends ViewDataListItem {
-  final Key key=UniqueKey();
+  final Key key = UniqueKey();
   late String title;
-  bool isBinary=false;
+  bool isBinary = false;
 
   // var content;
   String? notations;
@@ -57,6 +57,7 @@ class ListItem extends ViewDataListItem {
 
 class TheList extends TheView {
   final TextEditingController inputController = TextEditingController();
+  final FocusNode focus = new FocusNode();
 
   TheList() : super(VIEW_MODE.LIST, TheListController()) {
     // print('list initing');
@@ -65,8 +66,8 @@ class TheList extends TheView {
     if (items != null) {
       if ((items as List).length > 0) {
         if (this.ctl.l.length == 1) this.ctl.removeItemAt(0); //remove init item
-        this.ctl.l.addAll(List<ListItem>.from(items
-            .map((item) => ListItem(item['title'], item['content']))));
+        this.ctl.l.addAll(List<ListItem>.from(
+            items.map((item) => ListItem(item['title'], item['content']))));
       } else
         this.ctl.newItem(ListItem("Add something here!", ""));
     } else {
@@ -137,6 +138,7 @@ class TheList extends TheView {
                           var temp = ctl.l.removeAt(oldIndex);
                           ctl.l.insert(newIndex, temp);
                           ctl.save();
+                          this.focus.unfocus();
                         },
                         itemCount: ctl.l.length,
                         itemBuilder: (context, index) {
@@ -149,6 +151,7 @@ class TheList extends TheView {
                                 ctl.removeItemAt(index);
                                 ScaffoldMessenger.of(context)
                                     .showSnackBar(msgDeleted);
+                                this.focus.unfocus();
                               },
                               child: ReorderableDelayedDragStartListener(
                                   key: item.key,
@@ -168,6 +171,7 @@ class TheList extends TheView {
                                           .showSnackBar(value.isNotEmpty
                                               ? msgCopied
                                               : msgDeleted);
+                                      this.focus.unfocus();
                                     },
                                   )));
                         })))),
@@ -176,16 +180,19 @@ class TheList extends TheView {
                 child: Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(8.0),
-                    color:Theme.of(context).hoverColor,
+                    color: Theme.of(context).hoverColor,
                     // color: Colors.blueGrey[50],
                   ),
                   child: TextField(
                     controller: inputController,
-                    autofocus: true,
+                    focusNode: this.focus,
+                    // mobile platform keyboard should not show up when opening the app
+                    autofocus: false,
                     onSubmitted: (value) {
                       ctl.newItemFromString(value);
                       inputController.clear();
                       ScaffoldMessenger.of(context).showSnackBar(msgPasted);
+                      this.focus.unfocus();
                     },
                     cursorRadius: Radius.circular(4),
                     decoration: InputDecoration(
@@ -202,6 +209,7 @@ class TheList extends TheView {
   Object newItemFromCustomInput() {
     String value = inputController.text;
     inputController.clear();
+    this.focus.unfocus();
     return value;
   }
 }
