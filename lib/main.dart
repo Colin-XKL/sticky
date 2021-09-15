@@ -49,6 +49,8 @@ Future<void> main() async {
   Get.put<AppInfoController>(AppInfoController());
   final AppInfoController ctl = Get.find<AppInfoController>();
   ctl.updateData(packageInfo.version, packageInfo.buildNumber);
+  Get.put(ListInputOptionsController());
+
 }
 
 class MyApp extends StatelessWidget {

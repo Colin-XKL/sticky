@@ -20,6 +20,20 @@ class TheListController extends TheViewController {
   }
 }
 
+class ListInputOptionsController extends GetxController {
+  RxBool multiLineMode = false.obs;
+  RxBool trim = true.obs;
+
+  switchMode() {
+    this.multiLineMode.value = !this.multiLineMode.value;
+  }
+
+  switchTrim() {
+    this.trim.value = !this.trim.value;
+    update();
+  }
+}
+
 class ListItem extends ViewDataListItem {
   final Key key = UniqueKey();
   late String title;
@@ -57,6 +71,8 @@ class ListItem extends ViewDataListItem {
 
 class TheList extends TheView {
   final TextEditingController inputController = TextEditingController();
+  final ListInputOptionsController optionsCtl =
+      Get.find<ListInputOptionsController>();
   final FocusNode focus = new FocusNode();
 
   TheList() : super(VIEW_MODE.LIST, TheListController()) {
@@ -177,29 +193,55 @@ class TheList extends TheView {
                         })))),
             Container(
                 margin: EdgeInsets.all(16),
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8.0),
-                    color: Theme.of(context).hoverColor,
-                    // color: Colors.blueGrey[50],
-                  ),
-                  child: TextField(
-                    controller: inputController,
-                    focusNode: this.focus,
-                    // mobile platform keyboard should not show up when opening the app
-                    autofocus: false,
-                    onSubmitted: (value) {
-                      ctl.newItemFromString(value);
-                      inputController.clear();
-                      ScaffoldMessenger.of(context).showSnackBar(msgPasted);
-                      this.focus.unfocus();
-                    },
-                    cursorRadius: Radius.circular(4),
-                    decoration: InputDecoration(
-                        hintText: "Add your idea",
-                        prefixIcon: Icon(Icons.radio_button_checked_rounded),
-                        border: InputBorder.none),
-                  ),
+                child: Column(
+                  children: [
+                    Obx(
+                      () => Row(
+                        children: [
+                          ChoiceChip(
+                              label: Text("MultiLineMode"),
+                              selected: this.optionsCtl.multiLineMode.value,
+                              selectedColor: Theme.of(context).accentColor,
+                              onSelected: (bool selected) {
+                                this.optionsCtl.switchMode();
+                              }),
+                          ChoiceChip(
+                            label: Text("Trim Text"),
+                            selected: this.optionsCtl.trim.value,
+                            selectedColor: Theme.of(context).accentColor,
+                            onSelected: (bool selected) {
+                              this.optionsCtl.switchTrim();
+                            },
+                          )
+                        ],
+                      ),
+                    ),
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8.0),
+                        color: Theme.of(context).hoverColor,
+                        // color: Colors.blueGrey[50],
+                      ),
+                      child: TextField(
+                        controller: inputController,
+                        focusNode: this.focus,
+                        // mobile platform keyboard should not show up when opening the app
+                        autofocus: false,
+                        onSubmitted: (value) {
+                          ctl.newItemFromString(value);
+                          inputController.clear();
+                          ScaffoldMessenger.of(context).showSnackBar(msgPasted);
+                          this.focus.unfocus();
+                        },
+                        cursorRadius: Radius.circular(4),
+                        decoration: InputDecoration(
+                            hintText: "Add your idea",
+                            prefixIcon:
+                                Icon(Icons.radio_button_checked_rounded),
+                            border: InputBorder.none),
+                      ),
+                    )
+                  ],
                 ))
           ],
         ));
