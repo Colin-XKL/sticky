@@ -23,15 +23,6 @@ class TheListController extends TheViewController {
 class ListInputOptionsController extends GetxController {
   RxBool multiLineMode = false.obs;
   RxBool trim = true.obs;
-
-  switchMode() {
-    this.multiLineMode.value = !this.multiLineMode.value;
-  }
-
-  switchTrim() {
-    this.trim.value = !this.trim.value;
-    update();
-  }
 }
 
 class ListItem extends ViewDataListItem {
@@ -194,51 +185,80 @@ class TheList extends TheView {
             Container(
                 margin: EdgeInsets.all(16),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Obx(
-                      () => Row(
+                      () => Wrap(
+                        spacing: 8,
+                        runSpacing: 4,
                         children: [
                           ChoiceChip(
-                              label: Text("MultiLineMode"),
+                              label: Text("MultiLine Mode"),
+                              avatar: Icon(
+                                Icons.format_list_numbered_rounded,
+                                size: this.optionsCtl.multiLineMode.value
+                                    ? 22
+                                    : 0,
+                                color: Colors.white,
+                              ),
+                              padding: this.optionsCtl.multiLineMode.value
+                                  ? const EdgeInsets.fromLTRB(8, 0, 6, 0)
+                                  : const EdgeInsets.fromLTRB(-24, 0, 6, 0),
                               selected: this.optionsCtl.multiLineMode.value,
                               selectedColor: Theme.of(context).accentColor,
                               onSelected: (bool selected) {
-                                this.optionsCtl.switchMode();
+                                this.optionsCtl.multiLineMode.value =
+                                    !this.optionsCtl.multiLineMode.value;
                               }),
                           ChoiceChip(
                             label: Text("Trim Text"),
+                            avatar: Icon(
+                              Icons.compare_arrows_rounded,
+                              size: this.optionsCtl.trim.value ? 22 : 0,
+                              color: Colors.white,
+                            ),
+                            padding: this.optionsCtl.trim.value
+                                ? const EdgeInsets.fromLTRB(8, 0, 6, 0)
+                                : const EdgeInsets.fromLTRB(-24, 0, 6, 0),
                             selected: this.optionsCtl.trim.value,
                             selectedColor: Theme.of(context).accentColor,
                             onSelected: (bool selected) {
-                              this.optionsCtl.switchTrim();
+                              this.optionsCtl.trim.value =
+                                  !this.optionsCtl.trim.value;
                             },
                           )
                         ],
                       ),
                     ),
                     Container(
+                      margin: EdgeInsets.fromLTRB(0, 8, 0, 0),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(8.0),
                         color: Theme.of(context).hoverColor,
                         // color: Colors.blueGrey[50],
                       ),
-                      child: TextField(
-                        controller: inputController,
-                        focusNode: this.focus,
-                        // mobile platform keyboard should not show up when opening the app
-                        autofocus: false,
-                        onSubmitted: (value) {
-                          ctl.newItemFromString(value);
-                          inputController.clear();
-                          ScaffoldMessenger.of(context).showSnackBar(msgPasted);
-                          this.focus.unfocus();
-                        },
-                        cursorRadius: Radius.circular(4),
-                        decoration: InputDecoration(
-                            hintText: "Add your idea",
-                            prefixIcon:
-                                Icon(Icons.radio_button_checked_rounded),
-                            border: InputBorder.none),
+                      child: Obx(
+                        () => TextField(
+                          controller: inputController,
+                          focusNode: this.focus,
+                          maxLines:
+                              this.optionsCtl.multiLineMode.isTrue ? null : 1,
+                          // mobile platform keyboard should not show up when opening the app
+                          autofocus: false,
+                          onSubmitted: (value) {
+                            ctl.newItemFromString(value);
+                            inputController.clear();
+                            ScaffoldMessenger.of(context)
+                                .showSnackBar(msgPasted);
+                            this.focus.unfocus();
+                          },
+                          cursorRadius: Radius.circular(4),
+                          decoration: InputDecoration(
+                              hintText: "Add your idea",
+                              prefixIcon:
+                                  Icon(Icons.radio_button_checked_rounded),
+                              border: InputBorder.none),
+                        ),
                       ),
                     )
                   ],
@@ -250,6 +270,7 @@ class TheList extends TheView {
   @override
   Object newItemFromCustomInput() {
     String value = inputController.text;
+    if (this.optionsCtl.trim.value) value = value.trim();
     inputController.clear();
     this.focus.unfocus();
     return value;
