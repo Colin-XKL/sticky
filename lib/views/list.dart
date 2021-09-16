@@ -10,19 +10,30 @@ class TheListController extends TheViewController {
 
   @override
   newItemFromString(String str) {
-    bool notEmpty = (str.isNotEmpty);
-    this.newItem(notEmpty ? ListItem("Text", str) : ListItem("Empty ", ""));
+    this.newItem(
+        str.isNotEmpty ? ListItem("Text", str) : ListItem("Empty ", ""));
   }
 
   @override
   reverseSerialize(Map<dynamic, dynamic> item) {
     return ListItem(item['title'], item['content']);
   }
+
+  @override
+  newItemsFromString(List<String> l) {
+    l.forEach((str) {
+      this.l.add(
+          str.isNotEmpty ? ListItem("Text", str) : ListItem("Empty ", ""));
+    });
+    update();
+    save();
+  }
 }
 
 class ListInputOptionsController extends GetxController {
   RxBool multiLineMode = false.obs;
   RxBool trim = true.obs;
+  RxBool multiLineToList = false.obs;
 }
 
 class ListItem extends ViewDataListItem {
@@ -207,8 +218,9 @@ class TheList extends TheView {
                               selected: this.optionsCtl.multiLineMode.value,
                               selectedColor: Theme.of(context).accentColor,
                               onSelected: (bool selected) {
-                                this.optionsCtl.multiLineMode.value =
-                                    !this.optionsCtl.multiLineMode.value;
+                                this.optionsCtl.multiLineMode.value = selected;
+                                if (!selected)
+                                  this.optionsCtl.multiLineToList.value = false;
                               }),
                           ChoiceChip(
                             label: Text("Trim Text"),
@@ -223,10 +235,29 @@ class TheList extends TheView {
                             selected: this.optionsCtl.trim.value,
                             selectedColor: Theme.of(context).accentColor,
                             onSelected: (bool selected) {
-                              this.optionsCtl.trim.value =
-                                  !this.optionsCtl.trim.value;
+                              this.optionsCtl.trim.value = selected;
                             },
-                          )
+                          ),
+                          ChoiceChip(
+                            label: Text("MultiLine To List"),
+                            avatar: Icon(
+                              Icons.library_add_check_rounded,
+                              size: this.optionsCtl.multiLineToList.value
+                                  ? 22
+                                  : 0,
+                              color: Colors.white,
+                            ),
+                            padding: this.optionsCtl.multiLineToList.value
+                                ? const EdgeInsets.fromLTRB(8, 0, 6, 0)
+                                : const EdgeInsets.fromLTRB(-24, 0, 6, 0),
+                            selected: this.optionsCtl.multiLineToList.value,
+                            selectedColor: Theme.of(context).accentColor,
+                            onSelected: (bool selected) {
+                              this.optionsCtl.multiLineToList.value = selected;
+                              if (selected)
+                                this.optionsCtl.multiLineMode.value = true;
+                            },
+                          ),
                         ],
                       ),
                     ),
@@ -268,12 +299,18 @@ class TheList extends TheView {
   }
 
   @override
-  Object newItemFromCustomInput() {
+  List<String> newItemsFromCustomInput() {
     String value = inputController.text;
-    if (this.optionsCtl.trim.value) value = value.trim();
     inputController.clear();
     this.focus.unfocus();
-    return value;
+    List<String> ret = [];
+    if (this.optionsCtl.multiLineToList.isTrue)
+      ret = value.split('\n');
+    else if (value.isNotEmpty) ret.add(value);
+    if (this.optionsCtl.trim.isTrue)
+      for (int i = 0; i < ret.length; i++) ret[i] = ret[i].trim();
+
+    return ret;
   }
 }
 

@@ -50,7 +50,6 @@ Future<void> main() async {
   final AppInfoController ctl = Get.find<AppInfoController>();
   ctl.updateData(packageInfo.version, packageInfo.buildNumber);
   Get.put(ListInputOptionsController());
-
 }
 
 class MyApp extends StatelessWidget {
@@ -231,9 +230,9 @@ class _MyHomeState extends State<MyHome> {
             floatingActionButton: FloatingActionButton(
               child: Icon(Icons.add),
               onPressed: () async {
-                String ret = view.newItemFromCustomInput().toString();
+                List<String> ret = view.newItemsFromCustomInput();
                 if (ret.length > 0)
-                  view.ctl.newItemFromString(ret);
+                  view.ctl.newItemsFromString(ret);
                 else if (await pasteFromPastebin()) //hasContent
                   ScaffoldMessenger.of(context).showSnackBar(msgPasted);
               },

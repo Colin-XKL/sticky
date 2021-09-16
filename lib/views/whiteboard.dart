@@ -41,6 +41,17 @@ class TheBoardController extends TheViewController {
     return CardData(
         CARD_TYPE.TEXT, new TextCardContent(content.toString()), cardState);
   }
+
+  @override
+  newItemsFromString(List<String> l) {
+    //TODO: 兼容不同的内容类型
+    l.forEach((str) {
+      this.l.add(
+          CardData(CARD_TYPE.TEXT, TextCardContent(str.isNotEmpty ? str : "")));
+    });
+    update();
+    save();
+  }
 }
 
 class TheBoard extends TheView {
@@ -107,8 +118,8 @@ class TheBoard extends TheView {
   }
 
   @override
-  String newItemFromCustomInput() {
-    return "";
+  List<String> newItemsFromCustomInput() {
+    return [""];
   }
 }
 

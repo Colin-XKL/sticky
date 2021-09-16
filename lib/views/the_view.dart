@@ -28,7 +28,7 @@ abstract class TheView extends StatelessWidget {
             : Get.put<TheBoardController>(controller as TheBoardController),
         this.storage = LocalStorage(enumMapping[viewMode]!);
 
-  Object newItemFromCustomInput();
+  List<String> newItemsFromCustomInput();
 
   upload() => sync.uploadData(enumMapping[viewMode],
       {'data': ctl.l.map((element) => element.serialize()).toList()});
@@ -74,6 +74,8 @@ abstract class TheViewController extends DataController {
   }
 
   newItemFromString(String str);
+  newItemsFromString(List<String> l);
+
 
   ViewDataListItem reverseSerialize(Map map);
 
