@@ -216,7 +216,7 @@ class TheList extends TheView {
                                   ? const EdgeInsets.fromLTRB(8, 0, 6, 0)
                                   : const EdgeInsets.fromLTRB(-24, 0, 6, 0),
                               selected: this.optionsCtl.multiLineMode.value,
-                              selectedColor: Theme.of(context).accentColor,
+                              selectedColor: Theme.of(context).colorScheme.secondary,
                               onSelected: (bool selected) {
                                 this.optionsCtl.multiLineMode.value = selected;
                                 if (!selected)
@@ -233,7 +233,7 @@ class TheList extends TheView {
                                 ? const EdgeInsets.fromLTRB(8, 0, 6, 0)
                                 : const EdgeInsets.fromLTRB(-24, 0, 6, 0),
                             selected: this.optionsCtl.trim.value,
-                            selectedColor: Theme.of(context).accentColor,
+                            selectedColor: Theme.of(context).colorScheme.secondary,
                             onSelected: (bool selected) {
                               this.optionsCtl.trim.value = selected;
                             },
@@ -251,7 +251,7 @@ class TheList extends TheView {
                                 ? const EdgeInsets.fromLTRB(8, 0, 6, 0)
                                 : const EdgeInsets.fromLTRB(-24, 0, 6, 0),
                             selected: this.optionsCtl.multiLineToList.value,
-                            selectedColor: Theme.of(context).accentColor,
+                            selectedColor: Theme.of(context).colorScheme.secondary,
                             onSelected: (bool selected) {
                               this.optionsCtl.multiLineToList.value = selected;
                               if (selected)
