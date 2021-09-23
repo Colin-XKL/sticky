@@ -57,8 +57,8 @@ class TheBoardController extends TheViewController {
 class TheBoard extends TheView {
   TheBoard() : super(VIEW_MODE.CARDS, TheBoardController()) {
     // print('board initing');
-    var items = storage.getItem(enumMapping[VIEW_MODE.CARDS]!);
-    if (this.ctl.initDone) return;
+    var items = bucket.getItem(storageBucketNameMapping[VIEW_MODE.CARDS]!);
+    if (this.ctl.initiated) return;
 
     if (items != null) {
       if ((items as List).length > 0) {
@@ -98,7 +98,7 @@ class TheBoard extends TheView {
           .addAll(l.map((e) => CardData(CARD_TYPE.TEXT, e, new CardState())));
       this.ctl.save();
     }
-    this.ctl.initDone = true;
+    this.ctl.initiated = true;
     // print('board init done');
   }
 

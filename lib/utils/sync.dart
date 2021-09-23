@@ -3,12 +3,12 @@ import 'dart:typed_data';
 import 'package:get_storage/get_storage.dart';
 import 'package:webdav_client/webdav_client.dart';
 
-class DataSync {
+class Syncer {
   static const rootURI = "/MindBox";
   static const lastModifyDataURI = '/MindBox/lastModifyTime';
   final Client client;
 
-  DataSync()
+  Syncer()
       : this.client = (() {
           final GetStorage g = GetStorage('Settings');
 

@@ -79,8 +79,8 @@ class TheList extends TheView {
 
   TheList() : super(VIEW_MODE.LIST, TheListController()) {
     // print('list initing');
-    var items = storage.getItem(enumMapping[VIEW_MODE.LIST]!);
-    if (this.ctl.initDone) return;
+    var items = bucket.getItem(storageBucketNameMapping[VIEW_MODE.LIST]!);
+    if (this.ctl.initiated) return;
     if (items != null) {
       if ((items as List).length > 0) {
         if (this.ctl.l.length == 1) this.ctl.removeItemAt(0); //remove init item
@@ -101,7 +101,7 @@ class TheList extends TheView {
       this.ctl.l.addAll(l);
       this.ctl.save();
     }
-    this.ctl.initDone = true;
+    this.ctl.initiated = true;
     // print('list init done');
   }
 
