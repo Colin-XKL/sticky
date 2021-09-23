@@ -104,8 +104,6 @@ class _MyHomeState extends State<MyHome> {
     this.view = widget.viewManager.getView();
   }
 
-  // _MyHomeState() :this.view = widget.viewManager.getView();
-
   void newItemTriggeredByKey() {
     VIEW_MODE currentView = widget.viewManager.getCurrentViewType();
     if (currentView == VIEW_MODE.LIST) {
@@ -123,9 +121,6 @@ class _MyHomeState extends State<MyHome> {
 
   @override
   Widget build(BuildContext context) {
-    // print("view container widget build");
-    // view = widget.viewManager.getView();
-
     return AreaWithKeyShortcut(
         onPasteDetected: () async {
           if (await pasteFromPastebin()) //has content
@@ -147,7 +142,7 @@ class _MyHomeState extends State<MyHome> {
             ),
             drawer: Drawer(
                 child: SingleChildScrollView(
-              child: new Column(
+              child: Column(
                 children: <Widget>[
                   UserAccountsDrawerHeader(
                     accountEmail: null,
