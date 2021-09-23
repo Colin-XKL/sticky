@@ -58,20 +58,15 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       title: "Mind Box",
       theme: ThemeData(
-          primarySwatch: Colors.teal,
           primaryColor: Colors.white,
-          colorScheme: ThemeData().colorScheme.copyWith(
-                brightness: Brightness.light,
+          colorScheme: ThemeData.light().colorScheme.copyWith(
+                primary: Colors.teal,
                 secondary: Colors.teal,
               ),
           fontFamily: 'Sans'),
       darkTheme: ThemeData(
-          brightness: ThemeData.dark().brightness,
-          secondaryHeaderColor: Colors.teal,
-          accentColor: Colors.teal,
-          primarySwatch: Colors.teal,
-          colorScheme: ThemeData().colorScheme.copyWith(
-                brightness: Brightness.dark,
+          colorScheme: ThemeData.dark().colorScheme.copyWith(
+                primary: Colors.teal,
                 secondary: Colors.teal,
               ),
           fontFamily: 'Sans'),
