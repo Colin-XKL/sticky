@@ -22,8 +22,9 @@ class TheListController extends TheViewController {
   @override
   newItemsFromString(List<String> l) {
     l.forEach((str) {
-      this.l.add(
-          str.isNotEmpty ? ListItem("Text", str) : ListItem("Empty ", ""));
+      this
+          .l
+          .add(str.isNotEmpty ? ListItem("Text", str) : ListItem("Empty ", ""));
     });
     update();
     save();
@@ -107,15 +108,15 @@ class TheList extends TheView {
 
   final msgPasted = new SnackBar(
     content: Text("Pasted"),
-    duration: Duration(milliseconds: 300),
+    duration: const Duration(milliseconds: 300),
   );
   final msgEmpty = new SnackBar(
     content: Text("Empty"),
-    duration: Duration(milliseconds: 300),
+    duration: const Duration(milliseconds: 300),
   );
   final msgCopied = new SnackBar(
     content: Text("Copied"),
-    duration: Duration(milliseconds: 300),
+    duration: const Duration(milliseconds: 300),
     action: new SnackBarAction(
         label: 'Undo',
         onPressed: () {
@@ -142,7 +143,7 @@ class TheList extends TheView {
   @override
   Widget build(BuildContext context) {
     return Container(
-        padding: EdgeInsets.all(4),
+        padding: const EdgeInsets.all(4),
         child: Column(
           children: [
             Expanded(
@@ -194,7 +195,7 @@ class TheList extends TheView {
                                   )));
                         })))),
             Container(
-                margin: EdgeInsets.all(16),
+                margin: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -203,66 +204,62 @@ class TheList extends TheView {
                         spacing: 8,
                         runSpacing: 4,
                         children: [
-                          ChoiceChip(
+                          FilterChip(
                               label: Text("MultiLine Mode"),
-                              avatar: Icon(
-                                Icons.format_list_numbered_rounded,
-                                size: this.optionsCtl.multiLineMode.value
-                                    ? 22
-                                    : 0,
-                                color: Colors.white,
-                              ),
-                              padding: this.optionsCtl.multiLineMode.value
-                                  ? const EdgeInsets.fromLTRB(8, 0, 6, 0)
-                                  : const EdgeInsets.fromLTRB(-24, 0, 6, 0),
+                              showCheckmark: false,
+                              avatar: this.optionsCtl.multiLineMode.value
+                                  ? Icon(Icons.format_list_numbered_rounded,
+                                      size: 20)
+                                  : null,
+                              padding: const EdgeInsets.fromLTRB(8, 0, 6, 0),
                               selected: this.optionsCtl.multiLineMode.value,
-                              selectedColor: Theme.of(context).colorScheme.secondary,
+                              selectedColor:
+                                  Theme.of(context).colorScheme.secondary,
                               onSelected: (bool selected) {
                                 this.optionsCtl.multiLineMode.value = selected;
                                 if (!selected)
                                   this.optionsCtl.multiLineToList.value = false;
                               }),
-                          ChoiceChip(
+                          FilterChip(
                             label: Text("Trim Text"),
-                            avatar: Icon(
-                              Icons.compare_arrows_rounded,
-                              size: this.optionsCtl.trim.value ? 22 : 0,
-                              color: Colors.white,
-                            ),
-                            padding: this.optionsCtl.trim.value
-                                ? const EdgeInsets.fromLTRB(8, 0, 6, 0)
-                                : const EdgeInsets.fromLTRB(-24, 0, 6, 0),
+                            showCheckmark: false,
+                            avatar: this.optionsCtl.trim.value
+                                ? Icon(
+                                    Icons.compare_arrows_rounded,
+                                  )
+                                : null,
+                            padding: const EdgeInsets.fromLTRB(8, 0, 6, 0),
                             selected: this.optionsCtl.trim.value,
-                            selectedColor: Theme.of(context).colorScheme.secondary,
+                            selectedColor:
+                                Theme.of(context).colorScheme.secondary,
                             onSelected: (bool selected) {
                               this.optionsCtl.trim.value = selected;
                             },
                           ),
-                          ChoiceChip(
+                          FilterChip(
                             label: Text("MultiLine To List"),
-                            avatar: Icon(
-                              Icons.library_add_check_rounded,
-                              size: this.optionsCtl.multiLineToList.value
-                                  ? 22
-                                  : 0,
-                              color: Colors.white,
-                            ),
-                            padding: this.optionsCtl.multiLineToList.value
-                                ? const EdgeInsets.fromLTRB(8, 0, 6, 0)
-                                : const EdgeInsets.fromLTRB(-24, 0, 6, 0),
+                            showCheckmark: false,
+                            avatar: this.optionsCtl.multiLineToList.value
+                                ? Icon(
+                                    Icons.library_add_check_rounded,
+                                    size: 20,
+                                  )
+                                : null,
+                            padding: const EdgeInsets.fromLTRB(8, 0, 6, 0),
                             selected: this.optionsCtl.multiLineToList.value,
-                            selectedColor: Theme.of(context).colorScheme.secondary,
+                            selectedColor:
+                                Theme.of(context).colorScheme.secondary,
                             onSelected: (bool selected) {
                               this.optionsCtl.multiLineToList.value = selected;
                               if (selected)
                                 this.optionsCtl.multiLineMode.value = true;
                             },
-                          ),
+                          )
                         ],
                       ),
                     ),
                     Container(
-                      margin: EdgeInsets.fromLTRB(0, 8, 0, 0),
+                      margin: const EdgeInsets.fromLTRB(0, 8, 0, 0),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(8.0),
                         color: Theme.of(context).hoverColor,
