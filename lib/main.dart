@@ -15,6 +15,7 @@ import 'package:stickys/utils/platform.dart';
 import 'package:stickys/views/the_view.dart';
 import 'views/list.dart';
 import 'views/whiteboard.dart';
+import 'views/block.dart';
 import 'pages/about.dart';
 
 Future<void> main() async {
@@ -171,6 +172,13 @@ class _MyHomeState extends State<MyHome> {
                         this.view = widget.viewManager.getView();
                       });
                       Navigator.of(context).pop();
+                    },
+                  ),
+                  ListTile(
+                    title: Text("Block"),
+                    onTap: () {
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) => BlockPage()));
                     },
                   ),
                   Divider(),
