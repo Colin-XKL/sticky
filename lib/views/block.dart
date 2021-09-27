@@ -67,41 +67,47 @@ class _BlockViewState extends State<BlockView> {
     addNewList(l1);
     addNewList(l2);
     super.initState();
-    print(this.itemLists.length);
+    // print(this.itemLists.length);
   }
 
   Widget board(ItemList l) {
-    print(l.list.toString());
     return Container(
         width: 200,
         height: 400,
+        margin: const EdgeInsets.all(4),
         child: ListView.builder(
           itemBuilder: (context, index) {
-            // print(ctl.l[index]);
-            Block block = Block(l.list[index].str.toString());
+            Block block = Block((index < l.list.length)
+                ? l.list[index].str.toString()
+                : "New Item");
             return ConstrainedBox(
                 constraints: BoxConstraints(maxHeight: 600, maxWidth: 400),
                 child: IntrinsicHeight(
                   child: Stack(
                     children: [
-                      Draggable(
-                        data: l.list[index],
-                        child: Container(
-                          child: block,
-                        ),
-                        feedback: Container(
-                          child: block,
-                          color: Colors.yellow.shade400,
-                        ),
-                        childWhenDragging: Container(
-                            child: block, color: Colors.blue.shade200),
-                      ),
+                      (index < l.list.length)
+                          ? Draggable(
+                              data: l.list[index],
+                              child: Container(
+                                child: block,
+                              ),
+                              feedback: Container(
+                                child: block,
+                                color: Colors.yellow.shade400,
+                              ),
+                              childWhenDragging: Container(
+                                  child: block, color: Colors.blue.shade200),
+                            )
+                          : Container(
+                              height: 100,
+                              // color: Colors.black12,
+                            ),
                       genDropTarget(l.key, index)
                     ],
                   ),
                 ));
           },
-          itemCount: l.list.length,
+          itemCount: l.list.length + 1,
         ));
   }
 
@@ -113,11 +119,15 @@ class _BlockViewState extends State<BlockView> {
         List<dynamic> rejected,
       ) {
         return Container(
-            // width: 300,
-            // height: 70,
-            // color: Colors.green.withAlpha(25),
-
-            );
+          decoration: (accepted.length > 0)
+              ? BoxDecoration(
+                  color: Theme.of(context).colorScheme.secondary.withAlpha(15),
+                  border: Border(
+                      top: BorderSide(
+                          color: Theme.of(context).colorScheme.secondary,
+                          width: 4)))
+              : null,
+        );
       },
       onWillAccept: (data) {
         print(data);
@@ -142,39 +152,12 @@ class _BlockViewState extends State<BlockView> {
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> a = (this.itemLists.map((e) => board(e)).toList());
-
     return Container(
       child: Center(
         child: Wrap(
           // mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            ...a,
-            Draggable<String>(
-              // Data is the value this Draggable stores.
-              data: 'red',
-              child: Container(
-                height: 120.0,
-                width: 120.0,
-                child: Card(
-                  child: Icon(Icons.library_add_check_rounded),
-                ),
-              ),
-              feedback: Container(
-                height: 120.0,
-                width: 120.0,
-                child: Card(
-                  child: Icon(Icons.add),
-                ),
-              ),
-              childWhenDragging: Container(
-                height: 120.0,
-                width: 120.0,
-                child: Center(
-                  child: Icon(Icons.compare),
-                ),
-              ),
-            ),
+            ...(this.itemLists.map((e) => board(e)).toList()),
           ],
         ),
       ),
