@@ -75,35 +75,41 @@ class _BlockViewState extends State<BlockView> {
         width: 200,
         height: 400,
         margin: const EdgeInsets.all(4),
+        padding: const EdgeInsets.all(4),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(
+              color: Theme.of(context).dividerColor.withAlpha(15), width: 2),
+        ),
         child: ListView.builder(
           itemBuilder: (context, index) {
-            Block block = Block((index < l.list.length)
-                ? l.list[index].str.toString()
-                : "New Item");
+            Widget content;
+            if (index < l.list.length) {
+              Block block = Block(l.list[index].str.toString());
+              content = Draggable(
+                data: l.list[index],
+                child: Container(
+                  margin: const EdgeInsets.all(1),
+                  child: block,
+                ),
+                feedback: Container(
+                  margin: const EdgeInsets.all(1),
+                  child: block,
+                  color: Colors.yellow.shade400,
+                ),
+                childWhenDragging:
+                    Container(child: block, color: Colors.blue.shade200),
+              );
+            } else
+              content = Container(
+                height: 100,
+                // color: Colors.black12,
+              );
             return ConstrainedBox(
                 constraints: BoxConstraints(maxHeight: 600, maxWidth: 400),
                 child: IntrinsicHeight(
                   child: Stack(
-                    children: [
-                      (index < l.list.length)
-                          ? Draggable(
-                              data: l.list[index],
-                              child: Container(
-                                child: block,
-                              ),
-                              feedback: Container(
-                                child: block,
-                                color: Colors.yellow.shade400,
-                              ),
-                              childWhenDragging: Container(
-                                  child: block, color: Colors.blue.shade200),
-                            )
-                          : Container(
-                              height: 100,
-                              // color: Colors.black12,
-                            ),
-                      genDropTarget(l.key, index)
-                    ],
+                    children: [content, genDropTarget(l.key, index)],
                   ),
                 ));
           },
