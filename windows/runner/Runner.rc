@@ -90,10 +90,10 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "one.colinx" "\0"
-            VALUE "FileDescription", "Mind Box." "\0"
+            VALUE "FileDescription", "Mind Box" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "stickys" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2021 one.colinx. All rights reserved." "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2018-2021 one.colinx. All rights reserved." "\0"
             VALUE "OriginalFilename", "stickys.exe" "\0"
             VALUE "ProductName", "stickys" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
