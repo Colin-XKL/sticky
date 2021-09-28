@@ -327,6 +327,29 @@ class _BoardViewCardState extends State<BoardViewCard> {
               });
             }, "Pin", 22),
     ];
+    moveFunc(double dx, double dy) {
+      if (!widget.state.pinned)
+        setState(() {
+          widget.state.top = widget.state.top + dy;
+          widget.state.left = widget.state.left + dx;
+          widget.state.top = max(widget.state.top, 0);
+          widget.state.left = max(widget.state.left, 0);
+        });
+    }
+
+    resizeFunc(double dx, double dy) {
+      //resize
+
+      if (!widget.state.locked) {
+        double newHeight = (widget.state.height + dy);
+        double newWidth = (widget.state.width + dx);
+        setState(() {
+          widget.state.height = max(newHeight, minHeight);
+          widget.state.width = max(newWidth, minWidth);
+        });
+      }
+    }
+
     return Container(
         height: height,
         width: width,
@@ -350,29 +373,20 @@ class _BoardViewCardState extends State<BoardViewCard> {
                         Padding(
                           //icon of card type & moving controller
                           padding: const EdgeInsets.all(4.0),
-                          child: Tooltip(
-                              message: widget.state.pinned
-                                  ? "Pinned"
-                                  : "Drag to move the card",
-                              child: ManipulatingBall(
-                                child: Icon(
-                                  Icons.text_fields_rounded,
-                                  size: 26,
-                                ),
-                                onDrag: (dx, dy) {
-                                  if (!widget.state.pinned)
-                                    setState(() {
-                                      widget.state.top = widget.state.top + dy;
-                                      widget.state.left =
-                                          widget.state.left + dx;
-                                      widget.state.top =
-                                          max(widget.state.top, 0);
-                                      widget.state.left =
-                                          max(widget.state.left, 0);
-                                    });
-                                },
-                                dragAreaLength: 48,
-                              )),
+                          child: MouseRegion(
+                              cursor: SystemMouseCursors.move,
+                              child: Tooltip(
+                                  message: widget.state.pinned
+                                      ? "Pinned"
+                                      : "Drag to move the card",
+                                  child: ManipulatingBall(
+                                    child: Icon(
+                                      Icons.text_fields_rounded,
+                                      size: 26,
+                                    ),
+                                    onDrag: moveFunc,
+                                    dragAreaLength: 48,
+                                  ))),
                         ),
                         Expanded(
                           //title of content card
@@ -410,26 +424,18 @@ class _BoardViewCardState extends State<BoardViewCard> {
                     Align(
                       alignment: Alignment.bottomRight,
                       child: ManipulatingBall(
-                        child: Tooltip(
-                          child: Icon(
-                            Icons.signal_cellular_4_bar_rounded,
-                            color: Theme.of(context).dividerColor,
-                          ),
-                          message:
-                              widget.state.locked ? "Locked" : "Drag to resize",
-                        ),
-                        onDrag: (dx, dy) {
-                          //resize
-                          // print("resize drag $dx $dy");
-                          if (!widget.state.locked) {
-                            double newHeight = (widget.state.height + dy);
-                            double newWidth = (widget.state.width + dx);
-                            setState(() {
-                              widget.state.height = max(newHeight, minHeight);
-                              widget.state.width = max(newWidth, minWidth);
-                            });
-                          }
-                        },
+                        child: SimpleHover(
+                            cursorOnHover: SystemMouseCursors.resizeDownRight,
+                            builder: (isHovered) {
+                              return Tooltip(
+                                child: Icon(Icons.signal_cellular_4_bar_rounded,
+                                    color: Theme.of(context).dividerColor),
+                                message: widget.state.locked
+                                    ? "Locked"
+                                    : "Drag to resize",
+                              );
+                            }),
+                        onDrag: resizeFunc,
                         dragAreaLength: 20,
                       ),
                     ),
@@ -548,6 +554,47 @@ class _ManipulatingBallState extends State<ManipulatingBall> {
       onPanUpdate: _handleUpdate,
       child: Container(
         child: widget.child,
+      ),
+    );
+  }
+}
+
+class SimpleHover extends StatefulWidget {
+  final Widget Function(bool isHovered) builder;
+  final MouseCursor cursorOnHover;
+  final double noHoverOpacity;
+  final double hoverOpacity;
+
+  const SimpleHover(
+      {Key? key,
+      required this.builder,
+      this.cursorOnHover = MouseCursor.defer,
+      this.noHoverOpacity = 0.3,
+      this.hoverOpacity = 0.95})
+      : super(key: key);
+
+  @override
+  _SimpleHoverState createState() => _SimpleHoverState();
+}
+
+class _SimpleHoverState extends State<SimpleHover> {
+  bool isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      cursor: widget.cursorOnHover,
+      onEnter: (_) => setState(() {
+        this.isHovered = true;
+      }),
+      onExit: (_) => setState(() {
+        this.isHovered = false;
+      }),
+      child: AnimatedOpacity(
+        duration: const Duration(milliseconds: 100),
+        curve: Curves.easeInOut,
+        opacity: this.isHovered ? widget.hoverOpacity : widget.noHoverOpacity,
+        child: widget.builder(isHovered),
       ),
     );
   }
