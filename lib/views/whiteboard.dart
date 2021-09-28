@@ -36,7 +36,7 @@ class TheBoardController extends TheViewController {
       ..left = state['left'] ?? 0
       ..width = state['width'] ?? 600
       ..height = state['height'] ?? 400
-      ..pined = state['pined'] ?? false
+      ..pinned = state['pinned'] ?? false
       ..locked = state['locked'] ?? false;
     return CardData(
         CARD_TYPE.TEXT, new TextCardContent(content.toString()), cardState);
@@ -75,7 +75,7 @@ class TheBoard extends TheView {
             ..left = state['left'] ?? 0
             ..width = state['width'] ?? 600
             ..height = state['height'] ?? 400
-            ..pined = state['pined'] ?? false
+            ..pinned = state['pinned'] ?? false
             ..locked = state['locked'] ?? false;
           return CardData(CARD_TYPE.TEXT,
               new TextCardContent(content.toString()), cardState);
@@ -129,7 +129,7 @@ class CardState implements Serializable {
   double height = 320;
   double width = min(600, Get.width - 40);
   bool locked = false;
-  bool pined = false;
+  bool pinned = false;
 
   CardState();
 
@@ -141,7 +141,7 @@ class CardState implements Serializable {
     m['height'] = this.height;
     m['width'] = this.width;
     m['locked'] = this.locked;
-    m['pinned'] = this.pined;
+    m['pinned'] = this.pinned;
 
     return m;
   }
@@ -304,26 +304,26 @@ class _BoardViewCardState extends State<BoardViewCard> {
                 () {
                   widget.state
                     ..locked = false
-                    ..pined = false;
+                    ..pinned = false;
                 },
               );
             }, "Locked", 22)
           : funcButton(Icons.lock_open_rounded, () {
               setState(() {
                 widget.state
-                  ..pined = true
+                  ..pinned = true
                   ..locked = true;
               });
             }, "Lock", 22),
-      widget.state.pined
+      widget.state.pinned
           ? funcButton(Icons.push_pin_rounded, () {
               setState(() {
-                widget.state.pined = false;
+                widget.state.pinned = false;
               });
             }, "UnPin", 22)
           : funcButton(Icons.push_pin_outlined, () {
               setState(() {
-                widget.state.pined = true;
+                widget.state.pinned = true;
               });
             }, "Pin", 22),
     ];
@@ -351,7 +351,7 @@ class _BoardViewCardState extends State<BoardViewCard> {
                           //icon of card type & moving controller
                           padding: const EdgeInsets.all(4.0),
                           child: Tooltip(
-                              message: widget.state.pined
+                              message: widget.state.pinned
                                   ? "Pinned"
                                   : "Drag to move the card",
                               child: ManipulatingBall(
@@ -360,7 +360,7 @@ class _BoardViewCardState extends State<BoardViewCard> {
                                   size: 26,
                                 ),
                                 onDrag: (dx, dy) {
-                                  if (!widget.state.pined)
+                                  if (!widget.state.pinned)
                                     setState(() {
                                       widget.state.top = widget.state.top + dy;
                                       widget.state.left =
@@ -434,7 +434,7 @@ class _BoardViewCardState extends State<BoardViewCard> {
                       ),
                     ),
                     Container(
-                      margin: EdgeInsets.fromLTRB(14, 8, 14, 8),
+                      margin: const EdgeInsets.fromLTRB(14, 8, 14, 8),
                       child: widget.child,
                     ),
                   ],
