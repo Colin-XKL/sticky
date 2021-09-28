@@ -119,7 +119,7 @@ class TheBoard extends TheView {
 
   @override
   List<String> newItemsFromCustomInput() {
-    return [""];
+    return [];
   }
 }
 

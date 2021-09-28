@@ -14,7 +14,6 @@ const Map<VIEW_MODE, String> storageBucketNameMapping = {
   VIEW_MODE.CARDS: 'cards'
 };
 
-
 abstract class TheView extends StatelessWidget {
   final Key key = UniqueKey();
   final TheViewController ctl;
@@ -40,11 +39,10 @@ abstract class TheView extends StatelessWidget {
     // print('last modify - server $lastModify');
     // print('last modify - client ${ctl.lastModifyTime}');
 
-    Map data = await (syncer.downloadData(storageBucketNameMapping[viewMode])
-        as FutureOr<Map<dynamic, dynamic>>);
+    Map? data = await (syncer.downloadData(storageBucketNameMapping[viewMode]));
     // print('got data');
     // print(data);
-    if (data['data'] != null) ctl.replaceBy(data['data']);
+    if (data?['data'] != null) ctl.replaceBy(data!['data']);
   }
 }
 
