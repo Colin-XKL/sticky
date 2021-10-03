@@ -1,10 +1,10 @@
 buildscript {
     ext.kotlin_version = '1.3.50'
     repositories {
-
         maven { url 'https://mirrors.tuna.tsinghua.edu.cn/flutter/download.flutter.io' }
-        google()
-        jcenter()
+        maven { url 'https://maven.aliyun.com/repository/google' }
+        maven { url 'https://maven.aliyun.com/repository/jcenter' }
+        maven { url 'https://maven.aliyun.com/nexus/content/groups/public' }
     }
 
     dependencies {
@@ -16,8 +16,9 @@ buildscript {
 allprojects {
     repositories {
         maven { url 'https://mirrors.tuna.tsinghua.edu.cn/flutter/download.flutter.io' }
-        google()
-        jcenter()
+        maven { url 'https://maven.aliyun.com/repository/google' }
+        maven { url 'https://maven.aliyun.com/repository/jcenter' }
+        maven { url 'http://maven.aliyun.com/nexus/content/groups/public' }
     }
 }
 
