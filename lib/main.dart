@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -7,12 +9,13 @@ import 'package:localstorage/localstorage.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:sentry/sentry.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
-import 'package:stickys/pages/setting.dart';
 
+import 'package:stickys/pages/setting.dart';
 import 'package:stickys/utils/platform.dart';
 import 'package:stickys/views/the_view.dart';
 import 'views/list.dart';
 import 'views/whiteboard.dart';
+import 'views/block.dart';
 import 'pages/about.dart';
 
 Future<void> main() async {
@@ -33,36 +36,40 @@ Future<void> main() async {
       'appName': packageInfo.appName,
       'packageName': packageInfo.packageName,
       'version': packageInfo.version,
-      'buildNumber': packageInfo.buildNumber,
     };
-    scope.setTag('Platform', PlatformInfo.getPlatformString());
+    scope.setTag('Platform', PlatformInfo.getPlatformString() ?? "Unknown");
     scope.setContexts('AppInfo', appInfo);
-
-    return scope;
   });
   await SentryFlutter.init(
-        (options) {
+    (options) {
       options.dsn =
-      'https://246fb2d534314bf3935d50f4ef0afd0b@o850059.ingest.sentry.io/5884653';
+          'https://246fb2d534314bf3935d50f4ef0afd0b@o850059.ingest.sentry.io/5884653';
     },
     appRunner: () => runApp(MyApp()),
   );
   Get.put<AppInfoController>(AppInfoController());
   final AppInfoController ctl = Get.find<AppInfoController>();
   ctl.updateData(packageInfo.version, packageInfo.buildNumber);
+  Get.put(ListInputOptionsController());
 }
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       title: "Mind Box",
       theme: ThemeData(
-          primarySwatch: Colors.teal,
           primaryColor: Colors.white,
-          primaryColorLight: Colors.teal,
-          primaryColorDark: Colors.yellow,
-          focusColor: Colors.lightGreen,
+          colorScheme: ThemeData.light().colorScheme.copyWith(
+                primary: Colors.teal,
+                secondary: Colors.teal,
+              ),
+          fontFamily: 'Sans'),
+      darkTheme: ThemeData(
+          colorScheme: ThemeData.dark().colorScheme.copyWith(
+                primary: Colors.teal,
+                secondary: Colors.teal,
+              ),
           fontFamily: 'Sans'),
       home: MyHome(),
     );
@@ -85,7 +92,13 @@ class _MyHomeState extends State<MyHome> {
     content: Text("Pasted"),
     duration: Duration(milliseconds: 300),
   );
-  TheView view;
+  late TheView view;
+
+  @override
+  void initState() {
+    super.initState();
+    this.view = widget.viewManager.getView();
+  }
 
   void newItemTriggeredByKey() {
     VIEW_MODE currentView = widget.viewManager.getCurrentViewType();
@@ -104,9 +117,6 @@ class _MyHomeState extends State<MyHome> {
 
   @override
   Widget build(BuildContext context) {
-    // print("view container widget build");
-    view = widget.viewManager.getView();
-
     return AreaWithKeyShortcut(
         onPasteDetected: () async {
           if (await pasteFromPastebin()) //has content
@@ -128,89 +138,101 @@ class _MyHomeState extends State<MyHome> {
             ),
             drawer: Drawer(
                 child: SingleChildScrollView(
-                  child: new Column(
-                    children: <Widget>[
-                      UserAccountsDrawerHeader(
-                        accountEmail: null,
-                        accountName: null,
-                      ),
-                      ListTile(
-                        title: Text("List View"),
-                        leading: Icon(Icons.format_list_bulleted_rounded),
-                        trailing: IconButton(
-                          icon: Icon(Icons.arrow_forward_ios),
-                          onPressed: () {},
-                        ),
-                        onTap: () {
-                          setState(() {
-                            widget.viewManager.setCurrentViewIndex(0);
-                          });
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                      ListTile(
-                        title: Text("Whiteboard"),
-                        leading: Icon(Icons.dashboard_sharp),
-                        trailing: IconButton(
-                          icon: Icon(Icons.arrow_forward_ios),
-                          onPressed: () {},
-                        ),
-                        onTap: () {
-                          setState(() {
-                            widget.viewManager.setCurrentViewIndex(1);
-                          });
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                      Divider(),
-                      ListTile(
-                        title: Text("Settings"),
-                        // leading: Icon(Icons.settings,size: 24,),
-                        dense: true,
-                        onTap: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => SettingsPage()));
-                        },
-                      ),
-                      ListTile(
-                        title: Text("Feedback"),
-                        dense: true,
-                        onTap: () {
-                          Navigator.push(context,
-                              MaterialPageRoute(
-                                  builder: (context) => AboutPage()));
-                        },
-                      ),
-                      ListTile(
-                        title: Text("About Us"),
-                        dense: true,
-                        onTap: () {},
-                      ),
-                      ListTile(
-                        title: Text("Give us a star!"),
-                        dense: true,
-                        onTap: () {},
-                      ),
-                      Padding(
-                        padding: EdgeInsets.fromLTRB(0, 32, 0, 0),
-                        child: Text(
-                          "MindBox, your last productivity app",
-                          softWrap: true,
-                          style: TextStyle(
-                              color: Colors.grey[500], fontSize: 12),
-                        ),
-                      )
-                    ],
+              child: Column(
+                children: <Widget>[
+                  UserAccountsDrawerHeader(
+                    accountEmail: null,
+                    accountName: null,
                   ),
-                )),
+                  ListTile(
+                    title: Text("List View"),
+                    leading: Icon(Icons.format_list_bulleted_rounded),
+                    trailing: IconButton(
+                      icon: Icon(Icons.arrow_forward_ios),
+                      onPressed: () {},
+                    ),
+                    onTap: () {
+                      setState(() {
+                        widget.viewManager.setCurrentViewIndex(0);
+                        this.view = widget.viewManager.getView();
+                      });
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                  ListTile(
+                    title: Text("Whiteboard"),
+                    leading: Icon(Icons.dashboard_sharp),
+                    trailing: IconButton(
+                      icon: Icon(Icons.arrow_forward_ios),
+                      onPressed: () {},
+                    ),
+                    onTap: () {
+                      setState(() {
+                        widget.viewManager.setCurrentViewIndex(1);
+                        this.view = widget.viewManager.getView();
+                      });
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                  ListTile(
+                    title: Text("Block"),
+                    onTap: () {
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) => BlockPage()));
+                    },
+                  ),
+                  Divider(),
+                  ListTile(
+                    title: Text("Settings"),
+                    // leading: Icon(Icons.settings,size: 24,),
+                    dense: true,
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => SettingsPage()));
+                    },
+                  ),
+                  ListTile(
+                    title: Text("Feedback"),
+                    dense: true,
+                    onTap: () {
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) => AboutPage()));
+                    },
+                  ),
+                  ListTile(
+                    title: Text("About Us"),
+                    dense: true,
+                    onTap: () {},
+                  ),
+                  ListTile(
+                    title: Text("Give us a star!"),
+                    dense: true,
+                    onTap: () {},
+                  ),
+                  ListTile(
+                    title: Text('Exit'),
+                    dense: true,
+                    onTap: () => {exit(0)},
+                  ),
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(0, 32, 0, 0),
+                    child: Text(
+                      "MindBox, your last productivity app",
+                      softWrap: true,
+                      style: TextStyle(color: Colors.grey[500], fontSize: 12),
+                    ),
+                  )
+                ],
+              ),
+            )),
             floatingActionButton: FloatingActionButton(
               child: Icon(Icons.add),
               onPressed: () async {
-                String ret = view.newItemFromCustomInput().toString();
+                List<String> ret = view.newItemsFromCustomInput();
                 if (ret.length > 0)
-                  view.ctl.newItemFromString(ret);
+                  view.ctl.newItemsFromString(ret);
                 else if (await pasteFromPastebin()) //hasContent
                   ScaffoldMessenger.of(context).showSnackBar(msgPasted);
               },
@@ -222,7 +244,7 @@ class _MyHomeState extends State<MyHome> {
     var controller = view.ctl;
     return Clipboard.getData(Clipboard.kTextPlain).then((value) {
       bool notEmpty =
-      (value != null && value.text != null && value.text.isNotEmpty);
+          (value != null && value.text != null && value.text!.isNotEmpty);
       controller.newItemFromString(value?.text ?? "");
 
       Clipboard.setData(ClipboardData(text: ""));
@@ -251,18 +273,18 @@ class ViewManager {
     if (i >= 0 && i < views.length) {
       this.currentViewIndex = i;
       return true;
-    } else
-      return false;
+    }
+    return false;
   }
 }
 
 // KEY SHORTCUT RESPONSE
 class AreaWithKeyShortcut extends StatelessWidget {
   const AreaWithKeyShortcut({
-    Key key,
-    @required this.child,
-    @required this.onPasteDetected,
-    @required this.onNewEmptyItemDetected,
+    Key? key,
+    required this.child,
+    required this.onPasteDetected,
+    required this.onNewEmptyItemDetected,
   }) : super(key: key);
   final Widget child;
   final VoidCallback onPasteDetected;
@@ -277,16 +299,17 @@ class AreaWithKeyShortcut extends StatelessWidget {
         pasteKeySet: PasteIntent(),
       },
       actions: {
-        PasteIntent: CallbackAction(onInvoke: (e) => onPasteDetected?.call()),
+        PasteIntent: CallbackAction(onInvoke: (e) => onPasteDetected.call()),
         NewEmptyItemIntent:
-        CallbackAction(onInvoke: (e) => onNewEmptyItemDetected?.call()),
+            CallbackAction(onInvoke: (e) => onNewEmptyItemDetected.call()),
       },
       child: child,
     );
   }
 }
 
-final newEmptyItemKeySet = LogicalKeySet(LogicalKeyboardKey.keyN,LogicalKeyboardKey.control);
+final newEmptyItemKeySet =
+    LogicalKeySet(LogicalKeyboardKey.keyN, LogicalKeyboardKey.control);
 final pasteKeySet = LogicalKeySet(LogicalKeyboardKey.paste);
 
 class PasteIntent extends Intent {}

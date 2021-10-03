@@ -1,8 +1,6 @@
 name: stickys
 description: Be a CV pro!
 
-# The following line prevents the package from being accidentally published to
-# pub.dev using `pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
 # The following defines the version and build number for your application.
@@ -15,34 +13,36 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 0.25.0+1
+version: 0.59.0+1
 
 environment:
-  sdk: ">=2.7.0 <3.0.0"
+  sdk: '>=2.12.0 <3.0.0'
 
 dependencies:
   flutter:
     sdk: flutter
 
-  # The following adds the Cupertino Icons font to your application.
-  # Use with the CupertinoIcons class for iOS style icons.
-#  cupertino_icons: ^1.0.2
   get: ^4.1.4
   get_storage: ^2.0.3
   localstorage: ^4.0.0
-  sentry_flutter: ^5.1.0
+  sentry_flutter: ^6.0.0
   url_launcher: ^6.0.9
   package_info_plus: ^1.0.5
   webdav_client: ^1.1.0
 
 dev_dependencies:
+  flutter_launcher_icons: ^0.9.2
   flutter_test:
     sdk: flutter
 
+flutter_icons:
+  android: "launcher_icon"
+  ios: true
+  remove_alpha_ios: true
+  image_path: "assets/icon/logo_1024.png"
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
-# The following section is specific to Flutter.
 flutter:
 
   # The following line ensures that the Material Icons font is
@@ -50,9 +50,9 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
-  # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
+    # To add assets to your application, add an assets section, like this:
+  assets:
+    - assets/icon/logo_1024.png
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

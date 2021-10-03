@@ -1,19 +1,29 @@
+import 'dart:math';
+
 import "package:flutter/material.dart";
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:stickys/views/the_view.dart';
 
 class TheBoardController extends TheViewController {
   TheBoardController() : super(VIEW_MODE.CARDS);
+  Map<Key, CardState> states = new Map();
 
   static RxController get to => Get.find();
 
   @override
   newItemFromString(String str) {
     //TODO: 兼容不同的内容类型
-    bool notEmpty = (str != null && str.isNotEmpty);
+    bool notEmpty = (str.isNotEmpty);
     // this.l.add(new BoardViewCard.text(notEmpty ? value : ""));
     newItem(CardData(CARD_TYPE.TEXT, TextCardContent(notEmpty ? str : "")));
-    return notEmpty;
+  }
+
+  replaceItem(Key dataKey, CardData cardData) {
+    int index = this.l.indexWhere((element) => element.dataKey == dataKey);
+    this.l[index] = cardData;
+    update();
+    save();
   }
 
   @override
@@ -21,42 +31,55 @@ class TheBoardController extends TheViewController {
     var content = TextCardContent(item['content']['text']);
     var state = item['state'];
     CardState cardState = new CardState();
-    cardState.top = state['top'] ?? 0;
-    cardState.left = state['left'] ?? 0;
-    cardState.width = state['width'] ?? 600;
-    cardState.height = state['height'] ?? 400;
-    cardState.pined = state['pined'] ?? false;
-    cardState.locked = state['locked'] ?? false;
+    cardState
+      ..top = state['top'] ?? 0
+      ..left = state['left'] ?? 0
+      ..width = state['width'] ?? 600
+      ..height = state['height'] ?? 400
+      ..pinned = state['pinned'] ?? false
+      ..locked = state['locked'] ?? false;
     return CardData(
         CARD_TYPE.TEXT, new TextCardContent(content.toString()), cardState);
+  }
+
+  @override
+  newItemsFromString(List<String> l) {
+    //TODO: 兼容不同的内容类型
+    l.forEach((str) {
+      this.l.add(
+          CardData(CARD_TYPE.TEXT, TextCardContent(str.isNotEmpty ? str : "")));
+    });
+    update();
+    save();
   }
 }
 
 class TheBoard extends TheView {
   TheBoard() : super(VIEW_MODE.CARDS, TheBoardController()) {
     // print('board initing');
-    var items = storage.getItem(enumMapping[VIEW_MODE.CARDS]);
-    if (this.ctl.initDone) return;
+    var items = bucket.getItem(storageBucketNameMapping[VIEW_MODE.CARDS]!);
+    if (this.ctl.initiated) return;
 
     if (items != null) {
       if ((items as List).length > 0) {
         if (this.ctl.l.length == 1) this.ctl.l.removeAt(0); //remove init item
         // TODO: various card type support
 
-        this.ctl.l.addAll(List<CardData>.from((items as List).map((item) {
-              // check item save and load
-              var content = TextCardContent(item['content']['text']);
-              var state = item['state'];
-              CardState cardState = new CardState();
-              cardState.top = state['top'] ?? 0;
-              cardState.left = state['left'] ?? 0;
-              cardState.width = state['width'] ?? 600;
-              cardState.height = state['height'] ?? 400;
-              cardState.pined = state['pined'] ?? false;
-              cardState.locked = state['locked'] ?? false;
-              return CardData(CARD_TYPE.TEXT,
-                  new TextCardContent(content.toString()), cardState);
-            })));
+        this.ctl.l.addAll(List<CardData>.from(items.map((item) {
+          // check item save and load
+          var content = TextCardContent(item['content']['text']);
+          var state = item['state'];
+          CardState cardState = new CardState();
+          cardState
+            ..top = state['top'] ?? 0
+            ..left = state['left'] ?? 0
+            ..width = state['width'] ?? 600
+            ..height = state['height'] ?? 400
+            ..pinned = state['pinned'] ?? false
+            ..locked = state['locked'] ?? false;
+          return CardData(CARD_TYPE.TEXT,
+              new TextCardContent(content.toString()), cardState);
+        })));
       } else
         // ctl.addNewItem("Add something here!");
         this.ctl.newItem(
@@ -75,7 +98,7 @@ class TheBoard extends TheView {
           .addAll(l.map((e) => CardData(CARD_TYPE.TEXT, e, new CardState())));
       this.ctl.save();
     }
-    this.ctl.initDone = true;
+    this.ctl.initiated = true;
     // print('board init done');
   }
 
@@ -83,7 +106,7 @@ class TheBoard extends TheView {
   Widget build(BuildContext context) {
     // print("board rebuild");
     return Container(
-      padding: EdgeInsets.all(24),
+      padding: EdgeInsets.fromLTRB(12, 8, 12, 8),
       child: GetBuilder<TheBoardController>(
           init: TheBoardController(),
           builder: (ctl) => Stack(
@@ -95,18 +118,18 @@ class TheBoard extends TheView {
   }
 
   @override
-  String newItemFromCustomInput() {
-    return "";
+  List<String> newItemsFromCustomInput() {
+    return [];
   }
 }
 
-class CardState extends Serializable {
+class CardState implements Serializable {
   double top = 0;
   double left = 0;
   double height = 320;
-  double width = 600;
+  double width = min(600, Get.width - 40);
   bool locked = false;
-  bool pined = false;
+  bool pinned = false;
 
   CardState();
 
@@ -118,7 +141,7 @@ class CardState extends Serializable {
     m['height'] = this.height;
     m['width'] = this.width;
     m['locked'] = this.locked;
-    m['pinned'] = this.pined;
+    m['pinned'] = this.pinned;
 
     return m;
   }
@@ -134,9 +157,9 @@ abstract class CardBody extends StatelessWidget {
 class CardData extends ViewDataListItem {
   final CARD_TYPE type;
   final CardContent content;
-  final CardState state;
+  CardState state;
 
-  CardData(this.type, this.content, [CardState cardState])
+  CardData(this.type, this.content, [CardState? cardState])
       : state = cardState ?? new CardState();
 
   @override
@@ -154,14 +177,14 @@ class CardData extends ViewDataListItem {
   }
 }
 
-abstract class CardContent extends Serializable {
+abstract class CardContent implements Serializable {
   final CARD_TYPE cardType;
 
   CardContent(this.cardType);
 }
 
 class TextCardContent extends CardContent {
-  final String text;
+  String text;
 
   TextCardContent(this.text) : super(CARD_TYPE.TEXT);
 
@@ -181,18 +204,18 @@ class TextCardContent extends CardContent {
 class TextCard extends CardBody {
   final TextCardContent data;
 
-  TextCard(String str)
-      : data = new TextCardContent(str),
+  TextCard(String? str)
+      : data = new TextCardContent(str ?? ""),
         super(CARD_TYPE.TEXT);
 
-  String get text => this.data.text;
+  String? get text => this.data.text;
 
   @override
   Widget build(BuildContext context) {
     return Scrollbar(
         isAlwaysShown: false,
         child: SingleChildScrollView(
-          child: SelectableText(this.text),
+          child: SelectableText(this.text!),
         ));
   }
 }
@@ -208,8 +231,8 @@ class BoardViewCard extends StatefulWidget {
   final Key dataKey;
 
   BoardViewCard(CardData cardData)
-      : state = cardData.state ?? new CardState(),
-        child = BoardViewCard.getCardWidget(cardData.content),
+      : state = cardData.state,
+        child = BoardViewCard.getCardWidget(cardData.content) as CardBody,
         dataKey = cardData.dataKey,
         super();
 
@@ -222,28 +245,6 @@ class BoardViewCard extends StatefulWidget {
     }
   }
 
-  // BoardViewCard.text(String s) : this(child: TextCard(s));
-
-  // BoardViewCard(Widget widget) {
-  //   this.child = widget;
-  //   // this.type=CARD_TYPE.WIDGET;
-  // }
-  //
-  // BoardViewCard.text(String s) {
-  //   this.type = CARD_TYPE.TEXT;
-  //   this.child = (Scrollbar(
-  //       isAlwaysShown: false,
-  //       child: SingleChildScrollView(
-  //         child: SelectableText(s),
-  //       )));
-  // }
-  // Map<String, dynamic> toJsonSerializable() {
-  //   Map<String, dynamic> m = new Map();
-  //   m['child'] = this.child.toJsonSerializable();
-  //   m['state'] = this.state.toJsonSerializable();
-  //   return m;
-  // }
-
   @override
   _BoardViewCardState createState() => _BoardViewCardState();
 }
@@ -252,25 +253,103 @@ class BoardViewCard extends StatefulWidget {
 
 class _BoardViewCardState extends State<BoardViewCard> {
   static const double minHeight = 128;
-  static const double minWidth = 256;
+  static const double minWidth = 300;
+  TextEditingController inputCtl = new TextEditingController();
 
-  static Widget _getFunctionButton(IconData icon, Function() onPressed,
-      [String tooltip]) {
+  static Widget funcButton(IconData icon, Function() onPressed,
+      [String? tooltip, double? iconSize]) {
     return IconButton(
-      icon: Icon(icon),
+      icon: Icon(
+        icon,
+        size: iconSize,
+      ),
       onPressed: onPressed,
       padding: EdgeInsets.zero,
       tooltip: tooltip,
       splashRadius: 18,
-      color: Colors.grey[700],
-
-      // splashColor: Theme.of(context).accentColor,
-      // focusColor: Theme.of(context).accentColor,
-      // hoverColor: Theme.of(context).accentColor,
+      color: Get.isDarkMode ? Colors.grey[200] : Colors.grey[700],
     );
   }
 
   Widget _getContentCard(double height, double width, Widget child) {
+    var actions = [
+      funcButton(Icons.edit_rounded, () {
+        TheBoardController controller = Get.find<TheBoardController>();
+        this.inputCtl = new TextEditingController(
+            text: controller.findItem(widget.dataKey).content.toString());
+        this.showEditDialog(context, widget.dataKey);
+      }, "Edit", 22),
+      funcButton(widget.state.locked ? Icons.copy : Icons.cut_rounded, () {
+        final TheBoardController wbc = Get.find<TheBoardController>();
+        final item = wbc.findItem(widget.dataKey);
+        var value = item.content.toString();
+
+        Clipboard.setData(ClipboardData(text: value));
+        if (!widget.state.locked) wbc.removeItem(widget.dataKey);
+
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Copied!'),
+          duration: Duration(milliseconds: 300),
+        ));
+      }, widget.state.locked ? "Copy" : "Cut", 20),
+      funcButton(Icons.delete_outline_rounded, () {
+        WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+          final TheBoardController wbc = Get.find<TheBoardController>();
+          wbc.removeItem(widget.dataKey);
+        });
+      }, "Delete"),
+      widget.state.locked
+          ? funcButton(Icons.lock_rounded, () {
+              setState(
+                () {
+                  widget.state
+                    ..locked = false
+                    ..pinned = false;
+                },
+              );
+            }, "Locked", 22)
+          : funcButton(Icons.lock_open_rounded, () {
+              setState(() {
+                widget.state
+                  ..pinned = true
+                  ..locked = true;
+              });
+            }, "Lock", 22),
+      widget.state.pinned
+          ? funcButton(Icons.push_pin_rounded, () {
+              setState(() {
+                widget.state.pinned = false;
+              });
+            }, "UnPin", 22)
+          : funcButton(Icons.push_pin_outlined, () {
+              setState(() {
+                widget.state.pinned = true;
+              });
+            }, "Pin", 22),
+    ];
+    moveFunc(double dx, double dy) {
+      if (!widget.state.pinned)
+        setState(() {
+          widget.state.top = widget.state.top + dy;
+          widget.state.left = widget.state.left + dx;
+          widget.state.top = max(widget.state.top, 0);
+          widget.state.left = max(widget.state.left, 0);
+        });
+    }
+
+    resizeFunc(double dx, double dy) {
+      //resize
+
+      if (!widget.state.locked) {
+        double newHeight = (widget.state.height + dy);
+        double newWidth = (widget.state.width + dx);
+        setState(() {
+          widget.state.height = max(newHeight, minHeight);
+          widget.state.width = max(newWidth, minWidth);
+        });
+      }
+    }
+
     return Container(
         height: height,
         width: width,
@@ -284,7 +363,7 @@ class _BoardViewCardState extends State<BoardViewCard> {
                   decoration: BoxDecoration(
                       border: Border(
                           bottom: BorderSide(
-                              color: Colors.grey.shade200,
+                              color: Theme.of(context).dividerColor,
                               width: 1,
                               style: BorderStyle.solid))),
                   child: Padding(
@@ -294,29 +373,20 @@ class _BoardViewCardState extends State<BoardViewCard> {
                         Padding(
                           //icon of card type & moving controller
                           padding: const EdgeInsets.all(4.0),
-                          child: Tooltip(
-                              message: widget.state.pined
-                                  ? "Pinned"
-                                  : "Drag to move the card",
-                              child: ManipulatingBall(
-                                child: Icon(Icons.text_fields_rounded),
-                                onDrag: (dx, dy) {
-                                  if (!widget.state.pined)
-                                    setState(() {
-                                      widget.state.top =
-                                          (widget.state.top + dy) + .0;
-                                      widget.state.left =
-                                          (widget.state.left + dx) + .0;
-                                      widget.state.top = widget.state.top > 0
-                                          ? widget.state.top
-                                          : 0;
-                                      widget.state.left = widget.state.left > 0
-                                          ? widget.state.left
-                                          : 0;
-                                    });
-                                },
-                                dragAreaLength: 48,
-                              )),
+                          child: MouseRegion(
+                              cursor: SystemMouseCursors.move,
+                              child: Tooltip(
+                                  message: widget.state.pinned
+                                      ? "Pinned"
+                                      : "Drag to move the card",
+                                  child: ManipulatingBall(
+                                    child: Icon(
+                                      Icons.text_fields_rounded,
+                                      size: 26,
+                                    ),
+                                    onDrag: moveFunc,
+                                    dragAreaLength: 48,
+                                  ))),
                         ),
                         Expanded(
                           //title of content card
@@ -326,60 +396,21 @@ class _BoardViewCardState extends State<BoardViewCard> {
                               "Text",
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: TextStyle(fontWeight: FontWeight.w600),
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.w600),
                             ),
                           ),
                         ),
                         SizedBox(
                           //button bar
-                          child: Row(
-                            children: [
+                          child:
+                              // Row(
+                              //   children: [
                               ButtonBar(
-                                buttonPadding: EdgeInsets.zero,
-                                children: [
-                                  _getFunctionButton(
-                                      Icons.delete_outline_rounded, () {
-                                    WidgetsBinding.instance
-                                        .addPostFrameCallback((timeStamp) {
-                                      final TheBoardController wbc =
-                                          Get.find<TheBoardController>();
-                                      wbc.removeItem(widget.dataKey);
-                                    });
-                                  }, "Delete"),
-                                  widget.state.locked
-                                      ? _getFunctionButton(Icons.lock_rounded,
-                                          () {
-                                          setState(
-                                            () {
-                                              widget.state.locked = false;
-                                              widget.state.pined = false;
-                                            },
-                                          );
-                                        }, "Locked")
-                                      : _getFunctionButton(
-                                          Icons.lock_open_rounded, () {
-                                          setState(() {
-                                            widget.state.pined = true;
-                                            widget.state.locked = true;
-                                          });
-                                        }, "Lock"),
-                                  widget.state.pined
-                                      ? _getFunctionButton(
-                                          Icons.push_pin_rounded, () {
-                                          setState(() {
-                                            widget.state.pined = false;
-                                          });
-                                        }, "UnPin")
-                                      : _getFunctionButton(
-                                          Icons.push_pin_outlined, () {
-                                          setState(() {
-                                            widget.state.pined = true;
-                                          });
-                                        }, "Pin"),
-                                ],
-                              ),
-                            ],
-                          ),
+                                  buttonPadding: EdgeInsets.zero,
+                                  children: actions),
+                          // ],
+                          // ),
                         ),
                       ],
                       // dense: true,
@@ -393,36 +424,23 @@ class _BoardViewCardState extends State<BoardViewCard> {
                     Align(
                       alignment: Alignment.bottomRight,
                       child: ManipulatingBall(
-                        child: Tooltip(
-                          child: Icon(
-                            Icons.signal_cellular_4_bar_rounded,
-                            color: Colors.grey[100],
-                          ),
-                          message:
-                              widget.state.locked ? "Locked" : "Drag to resize",
-                        ),
-                        onDrag: (dx, dy) {
-                          //resize
-                          // print("resize drag $dx $dy");
-                          if (!widget.state.locked) {
-                            num newHeight = (widget.state.height + dy);
-                            num newWidth = (widget.state.width + dx);
-
-                            setState(() {
-                              widget.state.height = newHeight > minHeight
-                                  ? newHeight.toDouble()
-                                  : minHeight;
-                              widget.state.width = newWidth > minWidth
-                                  ? newWidth.toDouble()
-                                  : minWidth;
-                            });
-                          }
-                        },
+                        child: SimpleHover(
+                            cursorOnHover: SystemMouseCursors.resizeDownRight,
+                            builder: (isHovered) {
+                              return Tooltip(
+                                child: Icon(Icons.signal_cellular_4_bar_rounded,
+                                    color: Theme.of(context).dividerColor),
+                                message: widget.state.locked
+                                    ? "Locked"
+                                    : "Drag to resize",
+                              );
+                            }),
+                        onDrag: resizeFunc,
                         dragAreaLength: 20,
                       ),
                     ),
                     Container(
-                      margin: EdgeInsets.fromLTRB(14, 8, 14, 8),
+                      margin: const EdgeInsets.fromLTRB(14, 8, 14, 8),
                       child: widget.child,
                     ),
                   ],
@@ -435,7 +453,6 @@ class _BoardViewCardState extends State<BoardViewCard> {
 
   @override
   Widget build(BuildContext context) {
-    // print("status: $widget.cardState._top , $widget.cardState._left");
     return Positioned(
       top: widget.state.top,
       left: widget.state.left,
@@ -443,22 +460,77 @@ class _BoardViewCardState extends State<BoardViewCard> {
           widget.state.height, widget.state.width, widget.child),
     );
   }
+
+  void showEditDialog(BuildContext ctx, Key dataKey) {
+    var dialogActions = [
+      TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: Text("CANCEL")),
+      TextButton(
+        onPressed: () {
+          TheBoardController controller = Get.find<TheBoardController>();
+          var item = controller.findItem(dataKey) as CardData;
+          (item.content as TextCardContent).text = inputCtl.text;
+          controller.replaceItem(dataKey, item);
+          Navigator.of(context).pop();
+        },
+        child: Text("SAVE"),
+      ),
+    ];
+    Widget editArea = TextField(
+      controller: this.inputCtl,
+      maxLines: null,
+      autofocus: true,
+      decoration: InputDecoration(
+        hintText: "Input multi-line content here",
+        labelText: "Content Text",
+        suffix: Icon(Icons.text_format_rounded),
+        // contentPadding: EdgeInsets.fromLTRB(16, 20, 16, 20),
+        // border: InputBorder.none
+      ),
+      // ),
+    );
+    showDialog(
+        context: ctx,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Edit Content'),
+            actions: dialogActions,
+            content: Container(
+                constraints: BoxConstraints(maxWidth: 800, maxHeight: 600),
+                child: AspectRatio(
+                  aspectRatio: 1 / 0.618,
+                  child: Column(
+                    children: [
+                      Expanded(child: editArea),
+                    ],
+                  ),
+                )),
+          );
+        });
+  }
 }
 
 class ManipulatingBall extends StatefulWidget {
-  ManipulatingBall({Key key, this.child, this.onDrag, this.dragAreaLength});
+  ManipulatingBall(
+      {Key? key,
+      required this.child,
+      required this.onDrag,
+      this.dragAreaLength});
 
   final Widget child;
   final Function onDrag;
-  final double dragAreaLength;
+  final double? dragAreaLength;
 
   @override
   _ManipulatingBallState createState() => _ManipulatingBallState();
 }
 
 class _ManipulatingBallState extends State<ManipulatingBall> {
-  double initX;
-  double initY;
+  double? initX;
+  double? initY;
 
   _handleDrag(details) {
     setState(() {
@@ -468,8 +540,8 @@ class _ManipulatingBallState extends State<ManipulatingBall> {
   }
 
   _handleUpdate(details) {
-    var dx = details.globalPosition.dx - initX;
-    var dy = details.globalPosition.dy - initY;
+    double dx = details.globalPosition.dx - initX;
+    double dy = details.globalPosition.dy - initY;
     initX = details.globalPosition.dx;
     initY = details.globalPosition.dy;
     widget.onDrag(dx, dy);
@@ -482,6 +554,47 @@ class _ManipulatingBallState extends State<ManipulatingBall> {
       onPanUpdate: _handleUpdate,
       child: Container(
         child: widget.child,
+      ),
+    );
+  }
+}
+
+class SimpleHover extends StatefulWidget {
+  final Widget Function(bool isHovered) builder;
+  final MouseCursor cursorOnHover;
+  final double noHoverOpacity;
+  final double hoverOpacity;
+
+  const SimpleHover(
+      {Key? key,
+      required this.builder,
+      this.cursorOnHover = MouseCursor.defer,
+      this.noHoverOpacity = 0.3,
+      this.hoverOpacity = 0.95})
+      : super(key: key);
+
+  @override
+  _SimpleHoverState createState() => _SimpleHoverState();
+}
+
+class _SimpleHoverState extends State<SimpleHover> {
+  bool isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      cursor: widget.cursorOnHover,
+      onEnter: (_) => setState(() {
+        this.isHovered = true;
+      }),
+      onExit: (_) => setState(() {
+        this.isHovered = false;
+      }),
+      child: AnimatedOpacity(
+        duration: const Duration(milliseconds: 100),
+        curve: Curves.easeInOut,
+        opacity: this.isHovered ? widget.hoverOpacity : widget.noHoverOpacity,
+        child: widget.builder(isHovered),
       ),
     );
   }

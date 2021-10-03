@@ -13,7 +13,7 @@ class PlatformInfo {
     PlatformType.Unknown: "Unknown",
   };
 
-  static String getPlatformString() {
+  static String? getPlatformString() {
     return platformNameMapping[getCurrentPlatformType()];
   }
 

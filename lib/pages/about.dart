@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -26,7 +28,7 @@ class AboutPage extends StatelessWidget {
   void _newEmail() async =>
       await canLaunch(uri) ? await launch(uri) : throw 'Could not launch $uri';
 
-  Widget _infoTile(String title, String subtitle) {
+  Widget _infoTile(String title, String? subtitle) {
     return Text(
       "$title:  $subtitle",
       style: TextStyle(color: Colors.grey[300]),
@@ -48,10 +50,10 @@ class AboutPage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
                 Padding(
-                  child: Icon(
-                    Icons.control_point_duplicate_rounded,
-                    size: 96,
-                    color: Theme.of(context).indicatorColor,
+                  child: Image(
+                    image: AssetImage('assets/icon/logo_1024.png'),
+                    height: 128,
+                    fit: BoxFit.fitHeight,
                   ),
                   padding: EdgeInsets.all(48.0),
                 ),
@@ -67,7 +69,6 @@ class AboutPage extends StatelessWidget {
                 ),
                 _infoTile("Platform", PlatformInfo.getPlatformString()),
                 _infoTile('App version', ctl.info['version']),
-                _infoTile('Build number', ctl.info['buildNumber']),
               ],
             ),
           ),
