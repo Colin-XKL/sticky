@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -48,10 +50,10 @@ class AboutPage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
                 Padding(
-                  child: Icon(
-                    Icons.control_point_duplicate_rounded,
-                    size: 96,
-                    color: Theme.of(context).indicatorColor,
+                  child: Image(
+                    image: AssetImage('assets/icon/logo_1024.png'),
+                    height: 128,
+                    fit: BoxFit.fitHeight,
                   ),
                   padding: EdgeInsets.all(48.0),
                 ),
