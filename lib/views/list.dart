@@ -129,7 +129,7 @@ class TheList extends TheView {
 
   final msgDeleted = new SnackBar(
     content: Text("Deleted"),
-    duration: Duration(milliseconds: 2000),
+    duration: const Duration(milliseconds: 2000),
     action: new SnackBarAction(
         label: 'Undo',
         onPressed: () {
@@ -143,138 +143,135 @@ class TheList extends TheView {
   @override
   Widget build(BuildContext context) {
     return Container(
-        padding: const EdgeInsets.all(4),
         child: Column(
-          children: [
-            Expanded(
-                child: Scrollbar(
-                    isAlwaysShown: false,
-                    showTrackOnHover: false,
-                    child: Obx(() => ReorderableListView.builder(
-                        buildDefaultDragHandles: false,
-                        onReorder: (int oldIndex, int newIndex) {
-                          if (oldIndex < newIndex) newIndex -= 1;
-                          var temp = ctl.l.removeAt(oldIndex);
-                          ctl.l.insert(newIndex, temp);
-                          ctl.save();
-                          this.focus.unfocus();
-                        },
-                        itemCount: ctl.l.length,
-                        itemBuilder: (context, index) {
-                          // print(ctl.l[index]);
-                          final item = ctl.l[index] as ListItem;
-                          return Dismissible(
-                              key: item.key,
-                              background: listTileBackground,
-                              onDismissed: (direction) {
-                                ctl.removeItemAt(index);
-                                ScaffoldMessenger.of(context)
-                                    .showSnackBar(msgDeleted);
-                                this.focus.unfocus();
-                              },
-                              child: ReorderableDelayedDragStartListener(
-                                  key: item.key,
-                                  index: index,
-                                  child: ListTile(
-                                    title: Text(item.title),
-                                    subtitle: Text(item.content),
-                                    contentPadding:
-                                        const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                                    onTap: () {
-                                      var value = item.content;
-                                      if (value.isNotEmpty)
-                                        Clipboard.setData(
-                                            ClipboardData(text: value));
-                                      ctl.removeItemAt(index);
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(value.isNotEmpty
-                                              ? msgCopied
-                                              : msgDeleted);
-                                      this.focus.unfocus();
-                                    },
-                                  )));
-                        })))),
-            Container(
-                margin: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Obx(
-                      () => Wrap(
-                        spacing: 8,
-                        runSpacing: 4,
-                        children: [
-                          InputOptionsChip(
-                              labelString: "MultiLine Mode",
-                              avatar: Icon(Icons.format_list_numbered_rounded,
-                                  size: 20),
-                              selected: this.optionsCtl.multiLineMode.value,
-                              onSelected: (bool selected) {
-                                this.optionsCtl.multiLineMode.value = selected;
-                                if (!selected)
-                                  this.optionsCtl.multiLineToList.value = false;
-                              }),
-                          InputOptionsChip(
-                            labelString: "Trim Text",
-                            avatar: Icon(
-                              Icons.compare_arrows_rounded,
-                            ),
-                            selected: this.optionsCtl.trim.value,
-                            onSelected: (bool selected) {
-                              this.optionsCtl.trim.value = selected;
-                            },
-                          ),
-                          InputOptionsChip(
-                            labelString: "MultiLine To List",
-                            avatar: Icon(
-                              Icons.library_add_check_rounded,
-                              size: 20,
-                            ),
-                            selected: this.optionsCtl.multiLineToList.value,
-                            onSelected: (bool selected) {
-                              this.optionsCtl.multiLineToList.value = selected;
-                              if (selected)
-                                this.optionsCtl.multiLineMode.value = true;
-                            },
-                          )
-                        ],
-                      ),
-                    ),
-                    Container(
-                      margin: const EdgeInsets.fromLTRB(0, 8, 0, 0),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8.0),
-                        color: Theme.of(context).hoverColor,
-                        // color: Colors.blueGrey[50],
-                      ),
-                      child: Obx(
-                        () => TextField(
-                          controller: inputController,
-                          focusNode: this.focus,
-                          maxLines:
-                              this.optionsCtl.multiLineMode.isTrue ? null : 1,
-                          // mobile platform keyboard should not show up when opening the app
-                          autofocus: false,
-                          onSubmitted: (value) {
-                            ctl.newItemFromString(value);
-                            inputController.clear();
+      children: [
+        Expanded(
+            child: Scrollbar(
+                isAlwaysShown: false,
+                showTrackOnHover: false,
+                child: Obx(() => ReorderableListView.builder(
+                    // reverse: true,
+                    buildDefaultDragHandles: false,
+                    onReorder: (int oldIndex, int newIndex) {
+                      if (oldIndex < newIndex) newIndex -= 1;
+                      var temp = ctl.l.removeAt(oldIndex);
+                      ctl.l.insert(newIndex, temp);
+                      ctl.save();
+                      this.focus.unfocus();
+                    },
+                    itemCount: ctl.l.length,
+                    itemBuilder: (context, index) {
+                      // print(ctl.l[index]);
+                      final item = ctl.l[index] as ListItem;
+                      return Dismissible(
+                          key: item.key,
+                          background: listTileBackground,
+                          onDismissed: (direction) {
+                            ctl.removeItemAt(index);
                             ScaffoldMessenger.of(context)
-                                .showSnackBar(msgPasted);
+                                .showSnackBar(msgDeleted);
                             this.focus.unfocus();
                           },
-                          cursorRadius: Radius.circular(4),
-                          decoration: InputDecoration(
-                              hintText: "Add your idea",
-                              prefixIcon:
-                                  Icon(Icons.radio_button_checked_rounded),
-                              border: InputBorder.none),
+                          child: ReorderableDelayedDragStartListener(
+                              key: item.key,
+                              index: index,
+                              child: ListTile(
+                                title: Text(item.title),
+                                subtitle: Text(item.content),
+                                // contentPadding:
+                                // const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                                onTap: () {
+                                  var value = item.content;
+                                  if (value.isNotEmpty)
+                                    Clipboard.setData(
+                                        ClipboardData(text: value));
+                                  ctl.removeItemAt(index);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                      value.isNotEmpty
+                                          ? msgCopied
+                                          : msgDeleted);
+                                  this.focus.unfocus();
+                                },
+                              )));
+                    })))),
+        Container(
+            margin: const EdgeInsets.fromLTRB(14, 6, 14, 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Obx(
+                  () => Wrap(
+                    spacing: 6,
+                    runSpacing: 4,
+                    children: [
+                      InputOptionsChip(
+                          labelString: "MultiLine Mode",
+                          avatar: Icon(Icons.format_list_numbered_rounded,
+                              size: 20),
+                          selected: this.optionsCtl.multiLineMode.value,
+                          onSelected: (bool selected) {
+                            this.optionsCtl.multiLineMode.value = selected;
+                            if (!selected)
+                              this.optionsCtl.multiLineToList.value = false;
+                          }),
+                      InputOptionsChip(
+                        labelString: "Trim Text",
+                        avatar: Icon(
+                          Icons.compare_arrows_rounded,
                         ),
+                        selected: this.optionsCtl.trim.value,
+                        onSelected: (bool selected) {
+                          this.optionsCtl.trim.value = selected;
+                        },
                       ),
-                    )
-                  ],
-                ))
-          ],
-        ));
+                      InputOptionsChip(
+                        labelString: "MultiLine To List",
+                        avatar: Icon(
+                          Icons.library_add_check_rounded,
+                          size: 20,
+                        ),
+                        selected: this.optionsCtl.multiLineToList.value,
+                        onSelected: (bool selected) {
+                          this.optionsCtl.multiLineToList.value = selected;
+                          if (selected)
+                            this.optionsCtl.multiLineMode.value = true;
+                        },
+                      )
+                    ],
+                  ),
+                ),
+                Container(
+                  margin: const EdgeInsets.fromLTRB(0, 8, 16, 0),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8.0),
+                    color: Theme.of(context).hoverColor,
+                    // color: Colors.blueGrey[50],
+                  ),
+                  child: Obx(
+                    () => TextField(
+                      controller: inputController,
+                      focusNode: this.focus,
+                      maxLines: this.optionsCtl.multiLineMode.isTrue ? null : 1,
+                      // mobile platform keyboard should not show up when opening the app
+                      autofocus: false,
+                      onSubmitted: (value) {
+                        ctl.newItemFromString(value);
+                        inputController.clear();
+                        ScaffoldMessenger.of(context).showSnackBar(msgPasted);
+                        this.focus.unfocus();
+                      },
+                      cursorRadius: const Radius.circular(4),
+                      decoration: InputDecoration(
+                          hintText: "Add your idea",
+                          prefixIcon: Icon(Icons.radio_button_checked_rounded),
+                          border: InputBorder.none),
+                    ),
+                  ),
+                )
+              ],
+            ))
+      ],
+    ));
   }
 
   @override
@@ -300,7 +297,7 @@ class TheList extends TheView {
               minWidth: 64,
               maxWidth: 64,
             ),
-            child: Icon(
+            child: const Icon(
               Icons.delete,
               color: Colors.white,
             ),
@@ -332,8 +329,8 @@ class InputOptionsChip extends FilterChip {
       : super(
           label: Text(labelString),
           labelStyle: selected
-              ? TextStyle(color: Colors.white)
-              : TextStyle(color: Colors.black87),
+              ? const TextStyle(color: Colors.white)
+              : const TextStyle(color: Colors.black87),
           avatar: selected
               ? Icon(
                   avatar.icon,
