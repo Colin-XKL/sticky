@@ -14,4 +14,5 @@ jobs:
       - uses: subosito/flutter-action@v1
       - uses: bluefireteam/flutter-gh-pages@v7
         with:
+          webRenderer: html
           customArgs: --dart-define=FLUTTER_WEB_CANVASKIT_URL=https://cdn.jsdelivr.net/npm/canvaskit-wasm/bin/
