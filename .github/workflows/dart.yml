@@ -5,18 +5,34 @@ on:
   push:
     branches: [ master,dev ]
   pull_request:
-    branches: [ master,dev]
+    branches: [ master,dev ]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     steps:
-      - uses: actions/checkout@v2
-      - uses: subosito/flutter-action@v1
+      - name: Set up environment
+        uses: actions/checkout@v2
+      - name: Set up flutter
+        uses: subosito/flutter-action@v1
         with:
           channel: 'stable' # or: 'beta', 'dev' or 'master'
-      - run: flutter pub get
-      - run: flutter analyze
-      - run: flutter build web # run basic build test
+        run: flutter pub get
+      - name: Get flutter app version
+        run: |
+          set -e
+          brew install yq
+          _flutterAppVersion=$( yq e ".version" pubspec.yaml )
+          echo "APP_VERSION=${_flutterAppVersion}" >> $GITHUB_ENV
+      - name: Static analyze
+        run: flutter analyze
+
+      - name: Build - Web
+        run: flutter build web --release --web-renderer html # run basic build test
+      - name: Upload - Web
+        uses: actions/upload-artifact@v2
+        with:
+          name: MindBox_Web_${{ env.APP_VERSION }}
+          path: ${{ github.workspace }}/build/web/
 #      - run: flutter test  # uncomment it if wrote unit test file
