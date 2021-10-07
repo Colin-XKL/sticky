@@ -39,9 +39,7 @@ jobs:
         with:
           java-version: '11.x'
       - name: Set up gradle distribution download entrypoint
-        run: |
-        sed -i 's/mirrors.cloud.tencent.com\/gradle/services.gradle.org\/distributions/' \
-        ${{ github.workspace }}/android/gradle/wrapper/gradle-wrapper.properties
+        run: sed -i 's/mirrors.cloud.tencent.com\/gradle/services.gradle.org\/distributions/' ${{ github.workspace }}/android/gradle/wrapper/gradle-wrapper.properties
       - name: Build - Android
         run: flutter build apk --release
       - name: Upload - Android
