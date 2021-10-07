@@ -1,5 +1,6 @@
-# Dart code analyze and pub dependencies check
-name: Dart
+name: Basic Test
+author: Colin_XKL@outlook.com
+Description: Dart code analyze and pub dependencies check
 
 on:
   push:
@@ -28,12 +29,3 @@ jobs:
           echo "APP_VERSION=${_flutterAppVersion}" >> $GITHUB_ENV
       - name: Static analyze
         run: flutter analyze
-
-      - name: Build - Web
-        run: flutter build web --release --web-renderer html # run basic build test
-      - name: Upload - Web
-        uses: actions/upload-artifact@v2
-        with:
-          name: MindBox_Web_${{ env.APP_VERSION }}
-          path: ${{ github.workspace }}/build/web/
-#      - run: flutter test  # uncomment it if wrote unit test file
