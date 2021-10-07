@@ -17,6 +17,7 @@ import 'views/list.dart';
 import 'views/whiteboard.dart';
 import 'views/block.dart';
 import 'pages/about.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 Future<void> main() async {
   GetStorage g = GetStorage('Settings');
@@ -194,7 +195,7 @@ class _MyHomeState extends State<MyHome> {
                     },
                   ),
                   ListTile(
-                    title: Text("Feedback"),
+                    title: Text("About MindBox"),
                     dense: true,
                     onTap: () {
                       Navigator.push(context,
@@ -202,14 +203,18 @@ class _MyHomeState extends State<MyHome> {
                     },
                   ),
                   ListTile(
-                    title: Text("About Us"),
+                    title: Text("Author's Blog"),
                     dense: true,
-                    onTap: () {},
+                    onTap: () {
+                      launch("https://blog.colinx.one/");
+                    },
                   ),
                   ListTile(
                     title: Text("Give us a star!"),
                     dense: true,
-                    onTap: () {},
+                    onTap: () {
+                      launch("https://github.com/Colin-XKL/sticky");
+                    },
                   ),
                   ListTile(
                     title: Text('Exit'),
