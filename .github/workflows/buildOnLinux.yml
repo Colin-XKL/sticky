@@ -28,7 +28,6 @@ jobs:
 
       - name: Build - Web
         run: flutter build web --release --web-renderer html # run basic build test
-      - name:
       - name: Upload - Web
         uses: actions/upload-artifact@v2
         with:
@@ -38,7 +37,7 @@ jobs:
       - name: Set up Java
         uses: actions/setup-java@v1
         with:
-          java-version: '13.x'
+          java-version: '11.x'
       - name: Build - Android
         run: flutter build apk --release
       - name: Upload - Web
