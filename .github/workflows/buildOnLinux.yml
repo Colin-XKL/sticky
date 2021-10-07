@@ -1,6 +1,6 @@
 # author: Colin_XKL@outlook.com
+# description: Build for Web&Android&Linux and upload artifacts.
 name: Build - Web&Android&Linux
-description: Build for Web&Android&Linux and upload artifacts.
 
 on:
   push:
@@ -28,6 +28,7 @@ jobs:
 
       - name: Build - Web
         run: flutter build web --release --web-renderer html # run basic build test
+      - name:
       - name: Upload - Web
         uses: actions/upload-artifact@v2
         with:

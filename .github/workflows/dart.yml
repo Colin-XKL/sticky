@@ -1,5 +1,5 @@
+# description: Dart code analyze and pub dependencies check
 name: Basic Test
-description: Dart code analyze and pub dependencies check
 
 on:
   push:
