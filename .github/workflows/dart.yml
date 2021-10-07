@@ -1,6 +1,5 @@
 name: Basic Test
-author: Colin_XKL@outlook.com
-Description: Dart code analyze and pub dependencies check
+description: Dart code analyze and pub dependencies check
 
 on:
   push:

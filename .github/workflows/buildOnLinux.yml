@@ -1,5 +1,5 @@
+# author: Colin_XKL@outlook.com
 name: Build - Web&Android&Linux
-author: Colin_XKL@outlook.com
 description: Build for Web&Android&Linux and upload artifacts.
 
 on:
