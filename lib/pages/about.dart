@@ -46,30 +46,33 @@ class AboutPage extends StatelessWidget {
         children: <Widget>[
           Align(
             alignment: FractionalOffset(0.5, 0.1),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                Padding(
-                  child: Image(
-                    image: AssetImage('assets/icon/logo_1024.png'),
-                    height: 128,
-                    fit: BoxFit.fitHeight,
+            child: Padding(
+              padding: EdgeInsets.all(4),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  Padding(
+                    child: Image(
+                      image: AssetImage('assets/icon/logo_1024.png'),
+                      height: 128,
+                      fit: BoxFit.fitHeight,
+                    ),
+                    padding: EdgeInsets.all(48.0),
                   ),
-                  padding: EdgeInsets.all(48.0),
-                ),
-                Text(
-                  "This is an app that can help you be a CV engineer. 🕶 Powered Copy&Paste experience.\n️",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 16),
-                ),
-                Text(
-                  "If you have any questions or any good idea, just let me know.\nYou can tap the email address below to copy the address.",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 14, color: Colors.grey),
-                ),
-                _infoTile("Platform", PlatformInfo.getPlatformString()),
-                _infoTile('App version', ctl.info['version']),
-              ],
+                  Text(
+                    "This is an app that can help you be a CV engineer. 🕶 Powered Copy&Paste experience.\n️",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 16),
+                  ),
+                  Text(
+                    "If you have any questions or any good idea, just let me know.\nYou can tap the email address below to copy the address.",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 14, color: Colors.grey),
+                  ),
+                  _infoTile("Platform", PlatformInfo.getPlatformString()),
+                  _infoTile('App version', ctl.info['version']),
+                ],
+              ),
             ),
           ),
           Align(
