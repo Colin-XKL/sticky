@@ -59,19 +59,20 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       title: "Mind Box",
-      theme: ThemeData(
-          primaryColor: Colors.white,
-          colorScheme: ThemeData.light().colorScheme.copyWith(
-                primary: Colors.teal,
-                secondary: Colors.teal,
-              ),
-          fontFamily: 'Sans'),
+      theme: ThemeData.light().copyWith(
+        appBarTheme: ThemeData.light().appBarTheme.copyWith(
+            backgroundColor: Colors.white, foregroundColor: Colors.black87),
+        colorScheme: ThemeData.light().colorScheme.copyWith(
+              primary: Colors.teal,
+              secondary: Colors.teal,
+            ),
+      ),
       darkTheme: ThemeData(
-          colorScheme: ThemeData.dark().colorScheme.copyWith(
-                primary: Colors.teal,
-                secondary: Colors.teal,
-              ),
-          fontFamily: 'Sans'),
+        colorScheme: ThemeData.dark().colorScheme.copyWith(
+              primary: Colors.teal,
+              secondary: Colors.teal,
+            ),
+      ),
       home: MyHome(),
     );
   }
@@ -126,7 +127,7 @@ class _MyHomeState extends State<MyHome> {
         onNewEmptyItemDetected: newItemTriggeredByKey,
         child: Scaffold(
             appBar: new AppBar(
-              foregroundColor: Colors.white,
+              // foregroundColor: Colors.white,
               title: Text("Mind Box"),
               actions: [
                 IconButton(
