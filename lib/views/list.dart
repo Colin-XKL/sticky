@@ -143,8 +143,7 @@ class TheList extends TheView {
   @override
   Widget build(BuildContext context) {
     return Container(
-        child: Column(
-      children: [
+      child: Column(children: [
         Expanded(
             child: Scrollbar(
                 isAlwaysShown: false,
@@ -195,14 +194,14 @@ class TheList extends TheView {
                               )));
                     })))),
         Container(
-            margin: const EdgeInsets.fromLTRB(14, 6, 14, 16),
+            padding: const EdgeInsets.fromLTRB(14, 6, 14, 16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Obx(
                   () => Wrap(
                     spacing: 6,
-                    runSpacing: 4,
+                    runSpacing: 8,
                     children: [
                       InputOptionsChip(
                           labelString: "MultiLine Mode",
@@ -269,9 +268,9 @@ class TheList extends TheView {
                   ),
                 )
               ],
-            ))
-      ],
-    ));
+            )),
+      ]),
+    );
   }
 
   @override
