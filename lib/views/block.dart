@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:stickys/views/the_item.dart';
+import 'package:get/get.dart';
 
 class Block extends StatelessWidget {
   final Key key = UniqueKey();
@@ -34,9 +36,9 @@ class ItemList {
 
   ItemList();
 
-  ItemList.fromStrs(List<String> strs) {
+  ItemList.fromStrList(List<String> list) {
     List<Item> l = [];
-    strs.forEach((element) {
+    list.forEach((element) {
       l.add(Item(str: element, listKey: this.key));
     });
     this.list = l;
@@ -62,12 +64,26 @@ class _BlockViewState extends State<BlockView> {
   @override
   void initState() {
     print("init");
-    var l1 = ItemList.fromStrs(["aaa", 'bbb']);
-    var l2 = ItemList.fromStrs(["strs", 'ccc', 'ddd']);
+    var l1 = ItemList.fromStrList(["aaa", 'bbb']);
+    var l2 = ItemList.fromStrList(["st", 'ccc', 'ddd']);
     addNewList(l1);
     addNewList(l2);
     super.initState();
     // print(this.itemLists.length);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Center(
+        child: Wrap(
+          // mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ...(this.itemLists.map((e) => board(e)).toList()),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget board(ItemList l) {
@@ -85,7 +101,20 @@ class _BlockViewState extends State<BlockView> {
           itemBuilder: (context, index) {
             Widget content;
             if (index < l.list.length) {
-              Block block = Block(l.list[index].str.toString());
+              // Block block = Block(l.list[index].str.toString());
+              Widget block = ConstrainedBox(
+                constraints:
+                    BoxConstraints(maxHeight: 512, maxWidth: Get.width),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: Card(
+                      child: Padding(
+                    padding: EdgeInsets.all(6),
+                    child: TextBlock(l.list[index].str.toString()),
+                  )),
+                ),
+              );
+
               content = Draggable(
                 data: l.list[index],
                 child: Container(
@@ -94,12 +123,18 @@ class _BlockViewState extends State<BlockView> {
                 ),
                 feedback: Container(
                   margin: const EdgeInsets.all(1),
-                  child: block,
+                  child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxWidth: Get.width * 0.2,
+                        maxHeight: Get.height * 0.2,
+                      ),
+                      child: block),
                   color: Colors.yellow.shade400,
                 ),
                 childWhenDragging:
                     Container(child: block, color: Colors.blue.shade200),
               );
+              // ));
             } else
               content = Container(
                 height: 100,
@@ -153,20 +188,6 @@ class _BlockViewState extends State<BlockView> {
             list.add(data);
         });
       },
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      child: Center(
-        child: Wrap(
-          // mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            ...(this.itemLists.map((e) => board(e)).toList()),
-          ],
-        ),
-      ),
     );
   }
 }

@@ -12,6 +12,7 @@ import 'package:sentry_flutter/sentry_flutter.dart';
 
 import 'package:stickys/pages/setting.dart';
 import 'package:stickys/utils/platform.dart';
+import 'package:stickys/views/the_item.dart';
 import 'package:stickys/views/the_view.dart';
 import 'views/list.dart';
 import 'views/whiteboard.dart';
@@ -112,7 +113,7 @@ class _MyHomeState extends State<MyHome> {
       //whiteboard
       final TheBoardController wbc = Get.find();
       wbc.l.add(
-        new CardData(CARD_TYPE.TEXT, TextCardContent("empty")),
+        new CardData(ITEM_TYPE.TEXT, TextCardContent("empty")),
       );
     }
   }

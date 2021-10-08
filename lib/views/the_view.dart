@@ -4,6 +4,7 @@ import 'package:localstorage/localstorage.dart';
 import 'package:stickys/utils/sync.dart';
 import 'package:stickys/views/list.dart';
 import 'package:stickys/views/whiteboard.dart';
+import "package:flutter/material.dart";
 
 enum VIEW_MODE { LIST, CARDS }
 

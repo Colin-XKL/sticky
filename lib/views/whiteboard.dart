@@ -3,6 +3,7 @@ import 'dart:math';
 import "package:flutter/material.dart";
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:stickys/views/the_item.dart';
 import 'package:stickys/views/the_view.dart';
 
 class TheBoardController extends TheViewController {
@@ -16,7 +17,7 @@ class TheBoardController extends TheViewController {
     //TODO: 兼容不同的内容类型
     bool notEmpty = (str.isNotEmpty);
     // this.l.add(new BoardViewCard.text(notEmpty ? value : ""));
-    newItem(CardData(CARD_TYPE.TEXT, TextCardContent(notEmpty ? str : "")));
+    newItem(CardData(ITEM_TYPE.TEXT, TextCardContent(notEmpty ? str : "")));
   }
 
   replaceItem(Key dataKey, CardData cardData) {
@@ -39,7 +40,7 @@ class TheBoardController extends TheViewController {
       ..pinned = state['pinned'] ?? false
       ..locked = state['locked'] ?? false;
     return CardData(
-        CARD_TYPE.TEXT, new TextCardContent(content.toString()), cardState);
+        ITEM_TYPE.TEXT, new TextCardContent(content.toString()), cardState);
   }
 
   @override
@@ -47,7 +48,7 @@ class TheBoardController extends TheViewController {
     //TODO: 兼容不同的内容类型
     l.forEach((str) {
       this.l.add(
-          CardData(CARD_TYPE.TEXT, TextCardContent(str.isNotEmpty ? str : "")));
+          CardData(ITEM_TYPE.TEXT, TextCardContent(str.isNotEmpty ? str : "")));
     });
     update();
     save();
@@ -77,13 +78,13 @@ class TheBoard extends TheView {
             ..height = state['height'] ?? 400
             ..pinned = state['pinned'] ?? false
             ..locked = state['locked'] ?? false;
-          return CardData(CARD_TYPE.TEXT,
+          return CardData(ITEM_TYPE.TEXT,
               new TextCardContent(content.toString()), cardState);
         })));
       } else
         // ctl.addNewItem("Add something here!");
         this.ctl.newItem(
-            CardData(CARD_TYPE.TEXT, TextCardContent(("Add something here!"))));
+            CardData(ITEM_TYPE.TEXT, TextCardContent(("Add something here!"))));
     } else {
       var l = [
         TextCardContent('''I've just did simple prototype to show main idea.
@@ -95,7 +96,7 @@ class TheBoard extends TheView {
       this
           .ctl
           .l
-          .addAll(l.map((e) => CardData(CARD_TYPE.TEXT, e, new CardState())));
+          .addAll(l.map((e) => CardData(ITEM_TYPE.TEXT, e, new CardState())));
       this.ctl.save();
     }
     this.ctl.initiated = true;
@@ -126,8 +127,8 @@ class TheBoard extends TheView {
 class CardState implements Serializable {
   double top = 0;
   double left = 0;
-  double height = 320;
-  double width = min(600, Get.width - 40);
+  double height = 300;
+  double width = min(500, Get.width - 40);
   bool locked = false;
   bool pinned = false;
 
@@ -142,20 +143,12 @@ class CardState implements Serializable {
     m['width'] = this.width;
     m['locked'] = this.locked;
     m['pinned'] = this.pinned;
-
     return m;
   }
 }
 
-abstract class CardBody extends StatelessWidget {
-  final Key key = UniqueKey();
-  final CARD_TYPE type;
-
-  CardBody(this.type);
-}
-
 class CardData extends ViewDataListItem {
-  final CARD_TYPE type;
+  final ITEM_TYPE type;
   final CardContent content;
   CardState state;
 
@@ -178,7 +171,7 @@ class CardData extends ViewDataListItem {
 }
 
 abstract class CardContent implements Serializable {
-  final CARD_TYPE cardType;
+  final ITEM_TYPE cardType;
 
   CardContent(this.cardType);
 }
@@ -186,7 +179,7 @@ abstract class CardContent implements Serializable {
 class TextCardContent extends CardContent {
   String text;
 
-  TextCardContent(this.text) : super(CARD_TYPE.TEXT);
+  TextCardContent(this.text) : super(ITEM_TYPE.TEXT);
 
   @override
   Map<String, dynamic> serialize() {
@@ -201,47 +194,26 @@ class TextCardContent extends CardContent {
   }
 }
 
-class TextCard extends CardBody {
-  final TextCardContent data;
-
-  TextCard(String? str)
-      : data = new TextCardContent(str ?? ""),
-        super(CARD_TYPE.TEXT);
-
-  String? get text => this.data.text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scrollbar(
-        isAlwaysShown: false,
-        child: SingleChildScrollView(
-          child: SelectableText(this.text!),
-        ));
-  }
-}
-
-enum CARD_TYPE { TEXT, IMAGE, LINK, TODO, WIDGET }
-
 class BoardViewCard extends StatefulWidget {
   final Key key = UniqueKey();
 
   // final CardData data;
-  final CardBody child;
+  final TheItemBlock child;
   final CardState state;
   final Key dataKey;
 
   BoardViewCard(CardData cardData)
       : state = cardData.state,
-        child = BoardViewCard.getCardWidget(cardData.content) as CardBody,
+        child = BoardViewCard.getCardWidget(cardData.content) as TheItemBlock,
         dataKey = cardData.dataKey,
         super();
 
   static Widget getCardWidget(CardContent content) {
-    if (content.cardType == CARD_TYPE.TEXT)
-      return TextCard((content as TextCardContent).text);
+    if (content.cardType == ITEM_TYPE.TEXT)
+      return TextBlock((content as TextCardContent).text);
     else {
       // TODO implement other kind of card
-      return TextCard("unimplemented");
+      return TextBlock("unimplemented");
     }
   }
 
