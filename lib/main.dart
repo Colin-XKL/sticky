@@ -52,7 +52,7 @@ Future<void> main() async {
   Get.put<AppInfoController>(AppInfoController());
   final AppInfoController ctl = Get.find<AppInfoController>();
   ctl.updateData(packageInfo.version, packageInfo.buildNumber);
-  Get.put(ListInputOptionsController());
+  Get.put(InputOptionsController());
 }
 
 class MyApp extends StatelessWidget {
@@ -123,7 +123,9 @@ class _MyHomeState extends State<MyHome> {
     return AreaWithKeyShortcut(
         onPasteDetected: () async {
           if (await pasteFromPastebin()) //has content
-            ScaffoldMessenger.of(context).showSnackBar(msgPasted);
+            ScaffoldMessenger.of(context)
+              ..removeCurrentSnackBar()
+              ..showSnackBar(msgPasted);
         },
         onNewEmptyItemDetected: newItemTriggeredByKey,
         child: Scaffold(
@@ -241,7 +243,9 @@ class _MyHomeState extends State<MyHome> {
                 if (ret.length > 0)
                   view.ctl.newItemsFromString(ret);
                 else if (await pasteFromPastebin()) //hasContent
-                  ScaffoldMessenger.of(context).showSnackBar(msgPasted);
+                  ScaffoldMessenger.of(context)
+                    ..removeCurrentSnackBar()
+                    ..showSnackBar(msgPasted);
               },
             ),
             body: view));

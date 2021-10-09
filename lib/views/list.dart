@@ -31,7 +31,7 @@ class TheListController extends TheViewController {
   }
 }
 
-class ListInputOptionsController extends GetxController {
+class InputOptionsController extends GetxController {
   RxBool multiLineMode = false.obs;
   RxBool trim = true.obs;
   RxBool multiLineToList = false.obs;
@@ -42,7 +42,6 @@ class ListItem extends ViewDataListItem {
   late String title;
   bool isBinary = false;
 
-  // var content;
   String? notations;
 
   ListItem(String title, String? content) {
@@ -74,8 +73,7 @@ class ListItem extends ViewDataListItem {
 
 class TheList extends TheView {
   final TextEditingController inputController = TextEditingController();
-  final ListInputOptionsController optionsCtl =
-      Get.find<ListInputOptionsController>();
+  final InputOptionsController optionsCtl = Get.find<InputOptionsController>();
   final FocusNode focus = new FocusNode();
 
   TheList() : super(VIEW_MODE.LIST, TheListController()) {
@@ -106,40 +104,6 @@ class TheList extends TheView {
     // print('list init done');
   }
 
-  final msgPasted = new SnackBar(
-    content: Text("Pasted"),
-    duration: const Duration(milliseconds: 300),
-  );
-  final msgEmpty = new SnackBar(
-    content: Text("Empty"),
-    duration: const Duration(milliseconds: 300),
-  );
-  final msgCopied = new SnackBar(
-    content: Text("Copied"),
-    duration: const Duration(milliseconds: 300),
-    action: new SnackBarAction(
-        label: 'Undo',
-        onPressed: () {
-          final TheListController c = Get.find<TheListController>();
-          // c.l.add(c.lastDeleted);
-          c.newItem(c.lastDeleted);
-          // lastDeleted=null;
-        }),
-  );
-
-  final msgDeleted = new SnackBar(
-    content: Text("Deleted"),
-    duration: const Duration(milliseconds: 2000),
-    action: new SnackBarAction(
-        label: 'Undo',
-        onPressed: () {
-          final TheListController c = Get.find<TheListController>();
-          // c.l.add(c.lastDeleted);
-          c.newItem(c.lastDeleted);
-          // lastDeleted=null;
-        }),
-  );
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -162,36 +126,36 @@ class TheList extends TheView {
                     itemBuilder: (context, index) {
                       // print(ctl.l[index]);
                       final item = ctl.l[index] as ListItem;
+                      final Widget tile = ListTile(
+                        leading: Icon(Icons.text_fields_outlined),
+                        title: Text(item.content),
+                        // subtitle: Text(item.content),
+                        // contentPadding:
+                        // const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                        onTap: () {
+                          var value = item.content;
+                          if (value.isNotEmpty)
+                            Clipboard.setData(ClipboardData(text: value));
+                          ctl.removeItemAt(index);
+                          ScaffoldMessenger.of(context)
+                            ..removeCurrentSnackBar()
+                            ..showSnackBar(
+                                value.isNotEmpty ? msgCopied : msgDeleted);
+                          this.focus.unfocus();
+                        },
+                      );
                       return Dismissible(
                           key: item.key,
                           background: listTileBackground,
                           onDismissed: (direction) {
                             ctl.removeItemAt(index);
                             ScaffoldMessenger.of(context)
-                                .showSnackBar(msgDeleted);
+                              ..removeCurrentSnackBar()
+                              ..showSnackBar(msgDeleted);
                             this.focus.unfocus();
                           },
                           child: ReorderableDelayedDragStartListener(
-                              key: item.key,
-                              index: index,
-                              child: ListTile(
-                                title: Text(item.title),
-                                subtitle: Text(item.content),
-                                // contentPadding:
-                                // const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                                onTap: () {
-                                  var value = item.content;
-                                  if (value.isNotEmpty)
-                                    Clipboard.setData(
-                                        ClipboardData(text: value));
-                                  ctl.removeItemAt(index);
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                      value.isNotEmpty
-                                          ? msgCopied
-                                          : msgDeleted);
-                                  this.focus.unfocus();
-                                },
-                              )));
+                              key: item.key, index: index, child: tile));
                     })))),
         Container(
             padding: const EdgeInsets.fromLTRB(14, 6, 14, 16),
@@ -256,7 +220,9 @@ class TheList extends TheView {
                       onSubmitted: (value) {
                         ctl.newItemFromString(value);
                         inputController.clear();
-                        ScaffoldMessenger.of(context).showSnackBar(msgPasted);
+                        ScaffoldMessenger.of(context)
+                          ..removeCurrentSnackBar()
+                          ..showSnackBar(msgPasted);
                         this.focus.unfocus();
                       },
                       cursorRadius: const Radius.circular(4),
@@ -320,6 +286,40 @@ class TheList extends TheView {
           )
         ],
       ));
+
+  final msgPasted = new SnackBar(
+    content: Text("Pasted"),
+    duration: const Duration(milliseconds: 300),
+  );
+  final msgEmpty = new SnackBar(
+    content: Text("Empty"),
+    duration: const Duration(milliseconds: 300),
+  );
+  final msgCopied = new SnackBar(
+    content: Text("Copied"),
+    duration: const Duration(milliseconds: 300),
+    action: new SnackBarAction(
+        label: 'Undo',
+        onPressed: () {
+          final TheListController c = Get.find<TheListController>();
+          // c.l.add(c.lastDeleted);
+          c.newItem(c.lastDeleted);
+          // lastDeleted=null;
+        }),
+  );
+
+  final msgDeleted = new SnackBar(
+    content: Text("Deleted"),
+    duration: const Duration(milliseconds: 2000),
+    action: new SnackBarAction(
+        label: 'Undo',
+        onPressed: () {
+          final TheListController c = Get.find<TheListController>();
+          // c.l.add(c.lastDeleted);
+          c.newItem(c.lastDeleted);
+          // lastDeleted=null;
+        }),
+  );
 }
 
 class InputOptionsChip extends FilterChip {

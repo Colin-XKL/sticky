@@ -27,7 +27,7 @@ jobs:
           echo "APP_VERSION=${_flutterAppVersion}" >> $GITHUB_ENV
 
       - name: Build - Web
-        run: flutter build web --release --web-renderer html # run basic build test
+        run: flutter build web --release --web-renderer html
       - name: Upload - Web
         uses: actions/upload-artifact@v2
         with:

@@ -259,10 +259,12 @@ class _BoardViewCardState extends State<BoardViewCard> {
         Clipboard.setData(ClipboardData(text: value));
         if (!widget.state.locked) wbc.removeItem(widget.dataKey);
 
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Copied!'),
-          duration: Duration(milliseconds: 300),
-        ));
+        ScaffoldMessenger.of(context)
+          ..removeCurrentSnackBar()
+          ..showSnackBar(const SnackBar(
+            content: Text('Copied!'),
+            duration: Duration(milliseconds: 300),
+          ));
       }, widget.state.locked ? "Copy" : "Cut", 20),
       funcButton(Icons.delete_outline_rounded, () {
         WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
