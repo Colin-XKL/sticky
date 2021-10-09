@@ -44,7 +44,7 @@ class TheBoardController extends TheViewController {
   }
 
   @override
-  newItemsFromString(List<String> l) {
+  newItemsFromStringList(List<String> l) {
     //TODO: 兼容不同的内容类型
     l.forEach((str) {
       this.l.add(

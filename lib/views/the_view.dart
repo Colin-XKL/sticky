@@ -65,15 +65,18 @@ abstract class TheViewController extends DataController {
     // print("saved");
   }
 
-  newItem(ViewDataListItem item) {
-    this.l.add(item);
+  newItem(ViewDataListItem item, [bool insertToHead = true]) {
+    if (insertToHead)
+      this.l.insert(0, item);
+    else
+      this.l.add(item);
     update();
     save();
   }
 
   newItemFromString(String str);
 
-  newItemsFromString(List<String> l);
+  newItemsFromStringList(List<String> l);
 
   ViewDataListItem reverseSerialize(Map map);
 

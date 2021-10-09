@@ -241,7 +241,7 @@ class _MyHomeState extends State<MyHome> {
               onPressed: () async {
                 List<String> ret = view.newItemsFromCustomInput();
                 if (ret.length > 0)
-                  view.ctl.newItemsFromString(ret);
+                  view.ctl.newItemsFromStringList(ret);
                 else if (await pasteFromPastebin()) //hasContent
                   ScaffoldMessenger.of(context)
                     ..removeCurrentSnackBar()

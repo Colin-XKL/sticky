@@ -11,7 +11,7 @@ class TheListController extends TheViewController {
   @override
   newItemFromString(String str) {
     this.newItem(
-        str.isNotEmpty ? ListItem("Text", str) : ListItem("Empty ", ""));
+        str.isNotEmpty ? ListItem("Text", str) : ListItem("Empty ", ""), true);
   }
 
   @override
@@ -20,12 +20,14 @@ class TheListController extends TheViewController {
   }
 
   @override
-  newItemsFromString(List<String> l) {
-    l.forEach((str) {
-      this
-          .l
-          .add(str.isNotEmpty ? ListItem("Text", str) : ListItem("Empty ", ""));
+  newItemsFromStringList(List<String> l) {
+    l.reversed.forEach((str) {
+      this.l.insert(0,
+          str.isNotEmpty ? ListItem("Text", str) : ListItem("Empty ", "Empty"));
     });
+    // l.forEach((str) {
+    // this.l.add(str.isNotEmpty ? ListItem("Text", str) : ListItem("Empty ", ""));
+    // });
     update();
     save();
   }
@@ -127,7 +129,7 @@ class TheList extends TheView {
                       // print(ctl.l[index]);
                       final item = ctl.l[index] as ListItem;
                       final Widget tile = ListTile(
-                        leading: Icon(Icons.text_fields_outlined),
+                        // leading: Icon(Icons.text_fields_outlined),
                         title: Text(item.content),
                         // subtitle: Text(item.content),
                         // contentPadding:
