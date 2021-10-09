@@ -84,13 +84,15 @@ class TheBoard extends TheView {
       } else
         // ctl.addNewItem("Add something here!");
         this.ctl.newItem(
-            CardData(ITEM_TYPE.TEXT, TextCardContent(("Add something here!"))));
+            CardData(ITEM_TYPE.TEXT, TextCardContent(("这里空空如也，写点什么吧 ~"))));
     } else {
       var l = [
-        TextCardContent('''I've just did simple prototype to show main idea.
-    1. Draw size handlers with container;
-    2. Use GestureDetector to get new variables of sizes
-    3. Refresh the main container size.'''),
+        TextCardContent('''欢迎来到MindBox的白板模式
+        在这里你可以自由地排布和组织卡片以按照你想要的方式展示信息
+    1. 同样地，你可以点击加号按钮来插入剪贴板的内容。如果剪贴板为空的话，你会得到一个空白的卡片
+    2. 点击卡片上方的铅笔按钮可以编辑具体内容
+    3. 拖动卡片左上角的图标可以移动卡片，拖动右下角的小三角可以更改卡片的大小。卡片上方的其他按钮可以帮助你固定卡片的位置、锁定卡片的大小
+    '''),
         TextCardContent("Hello Widget"),
       ];
       this
