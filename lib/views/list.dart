@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:stickys/views/the_view.dart';
 
 class TheListController extends TheViewController {
-  ListItem lastDeleted = new ListItem("Empty", "No thing here.");
+  ListItem lastDeleted = new ListItem("空", "这里什么也没有~.");
 
   TheListController() : super(VIEW_MODE.LIST);
 
@@ -170,7 +170,7 @@ class TheList extends TheView {
                     runSpacing: 8,
                     children: [
                       InputOptionsChip(
-                          labelString: "MultiLine Mode",
+                          labelString: "多行模式",
                           avatar: Icon(Icons.format_list_numbered_rounded,
                               size: 20),
                           selected: this.optionsCtl.multiLineMode.value,
@@ -180,7 +180,7 @@ class TheList extends TheView {
                               this.optionsCtl.multiLineToList.value = false;
                           }),
                       InputOptionsChip(
-                        labelString: "Trim Text",
+                        labelString: "清理空格",
                         avatar: Icon(
                           Icons.compare_arrows_rounded,
                         ),
@@ -190,7 +190,7 @@ class TheList extends TheView {
                         },
                       ),
                       InputOptionsChip(
-                        labelString: "MultiLine To List",
+                        labelString: "多行文本转列表",
                         avatar: Icon(
                           Icons.library_add_check_rounded,
                           size: 20,
@@ -229,7 +229,7 @@ class TheList extends TheView {
                       },
                       cursorRadius: const Radius.circular(4),
                       decoration: InputDecoration(
-                          hintText: "Add your idea",
+                          hintText: "写点什么吧 o(*￣▽￣*)ブ",
                           prefixIcon: Icon(Icons.radio_button_checked_rounded),
                           border: InputBorder.none),
                     ),
@@ -290,18 +290,18 @@ class TheList extends TheView {
       ));
 
   final msgPasted = new SnackBar(
-    content: Text("Pasted"),
+    content: Text("已粘贴"),
     duration: const Duration(milliseconds: 300),
   );
   final msgEmpty = new SnackBar(
-    content: Text("Empty"),
+    content: Text("无内容"),
     duration: const Duration(milliseconds: 300),
   );
   final msgCopied = new SnackBar(
-    content: Text("Copied"),
+    content: Text("已复制"),
     duration: const Duration(milliseconds: 300),
     action: new SnackBarAction(
-        label: 'Undo',
+        label: '撤销',
         onPressed: () {
           final TheListController c = Get.find<TheListController>();
           // c.l.add(c.lastDeleted);
@@ -311,10 +311,10 @@ class TheList extends TheView {
   );
 
   final msgDeleted = new SnackBar(
-    content: Text("Deleted"),
+    content: Text("已删除"),
     duration: const Duration(milliseconds: 2000),
     action: new SnackBarAction(
-        label: 'Undo',
+        label: '撤销',
         onPressed: () {
           final TheListController c = Get.find<TheListController>();
           // c.l.add(c.lastDeleted);

@@ -250,7 +250,7 @@ class _BoardViewCardState extends State<BoardViewCard> {
         this.inputCtl = new TextEditingController(
             text: controller.findItem(widget.dataKey).content.toString());
         this.showEditDialog(context, widget.dataKey);
-      }, "Edit", 22),
+      }, "编辑", 22),
       funcButton(widget.state.locked ? Icons.copy : Icons.cut_rounded, () {
         final TheBoardController wbc = Get.find<TheBoardController>();
         final item = wbc.findItem(widget.dataKey);
@@ -262,10 +262,10 @@ class _BoardViewCardState extends State<BoardViewCard> {
         ScaffoldMessenger.of(context)
           ..removeCurrentSnackBar()
           ..showSnackBar(const SnackBar(
-            content: Text('Copied!'),
+            content: Text('已复制!'),
             duration: Duration(milliseconds: 300),
           ));
-      }, widget.state.locked ? "Copy" : "Cut", 20),
+      }, widget.state.locked ? "复制" : "剪切", 20),
       funcButton(Icons.delete_outline_rounded, () {
         WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
           final TheBoardController wbc = Get.find<TheBoardController>();
@@ -281,25 +281,25 @@ class _BoardViewCardState extends State<BoardViewCard> {
                     ..pinned = false;
                 },
               );
-            }, "Locked", 22)
+            }, "已锁定", 22)
           : funcButton(Icons.lock_open_rounded, () {
               setState(() {
                 widget.state
                   ..pinned = true
                   ..locked = true;
               });
-            }, "Lock", 22),
+            }, "锁定位置和大小", 22),
       widget.state.pinned
           ? funcButton(Icons.push_pin_rounded, () {
               setState(() {
                 widget.state.pinned = false;
               });
-            }, "UnPin", 22)
+            }, "已锁定位置", 22)
           : funcButton(Icons.push_pin_outlined, () {
               setState(() {
                 widget.state.pinned = true;
               });
-            }, "Pin", 22),
+            }, "锁定位置", 22),
     ];
     moveFunc(double dx, double dy) {
       if (!widget.state.pinned)
@@ -351,8 +351,8 @@ class _BoardViewCardState extends State<BoardViewCard> {
                               cursor: SystemMouseCursors.move,
                               child: Tooltip(
                                   message: widget.state.pinned
-                                      ? "Pinned"
-                                      : "Drag to move the card",
+                                      ? "已锁定位置"
+                                      : "拖动以移动卡片位置",
                                   child: ManipulatingBall(
                                     child: Icon(
                                       Icons.text_fields_rounded,
@@ -367,7 +367,7 @@ class _BoardViewCardState extends State<BoardViewCard> {
                           child: Padding(
                             padding: const EdgeInsets.all(4.0),
                             child: Text(
-                              "Text",
+                              "文本内容",
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style:
@@ -405,8 +405,8 @@ class _BoardViewCardState extends State<BoardViewCard> {
                                 child: Icon(Icons.signal_cellular_4_bar_rounded,
                                     color: Theme.of(context).dividerColor),
                                 message: widget.state.locked
-                                    ? "Locked"
-                                    : "Drag to resize",
+                                    ? "卡片大小已锁定"
+                                    : "拖动以更改卡片大小",
                               );
                             }),
                         onDrag: resizeFunc,
@@ -441,7 +441,7 @@ class _BoardViewCardState extends State<BoardViewCard> {
           onPressed: () {
             Navigator.of(context).pop();
           },
-          child: Text("CANCEL")),
+          child: Text("取消")),
       TextButton(
         onPressed: () {
           TheBoardController controller = Get.find<TheBoardController>();
@@ -450,7 +450,7 @@ class _BoardViewCardState extends State<BoardViewCard> {
           controller.replaceItem(dataKey, item);
           Navigator.of(context).pop();
         },
-        child: Text("SAVE"),
+        child: Text("保存"),
       ),
     ];
     Widget editArea = TextField(
@@ -458,8 +458,8 @@ class _BoardViewCardState extends State<BoardViewCard> {
       maxLines: null,
       autofocus: true,
       decoration: InputDecoration(
-        hintText: "Input multi-line content here",
-        labelText: "Content Text",
+        hintText: "键入多行文本",
+        labelText: "内容文本",
         suffix: Icon(Icons.text_format_rounded),
         // contentPadding: EdgeInsets.fromLTRB(16, 20, 16, 20),
         // border: InputBorder.none
@@ -470,7 +470,7 @@ class _BoardViewCardState extends State<BoardViewCard> {
         context: ctx,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text('Edit Content'),
+            title: Text('编辑内容'),
             actions: dialogActions,
             content: Container(
                 constraints: BoxConstraints(maxWidth: 800, maxHeight: 600),

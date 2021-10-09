@@ -60,7 +60,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       title: "Mind Box",
-      theme: ThemeData.light().copyWith(
+      theme: ThemeData(
+        fontFamily: "Microsoft Yahei UI",
         appBarTheme: ThemeData.light().appBarTheme.copyWith(
             backgroundColor: Colors.white, foregroundColor: Colors.black87),
         colorScheme: ThemeData.light().colorScheme.copyWith(
@@ -69,6 +70,7 @@ class MyApp extends StatelessWidget {
             ),
       ),
       darkTheme: ThemeData(
+        fontFamily: "Microsoft Yahei UI",
         colorScheme: ThemeData.dark().colorScheme.copyWith(
               primary: Colors.teal,
               secondary: Colors.teal,
@@ -88,11 +90,11 @@ class MyHome extends StatefulWidget {
 
 class _MyHomeState extends State<MyHome> {
   final msgEmpty = new SnackBar(
-    content: Text("Empty Pastebin!"),
+    content: Text("剪贴板为空！"),
     duration: Duration(milliseconds: 500),
   );
   final msgPasted = new SnackBar(
-    content: Text("Pasted"),
+    content: Text("已粘贴"),
     duration: Duration(milliseconds: 300),
   );
   late TheView view;
@@ -108,12 +110,12 @@ class _MyHomeState extends State<MyHome> {
     if (currentView == VIEW_MODE.LIST) {
       //list
       final TheListController c = Get.find();
-      c.l.add(ListItem("Empty ", ""));
+      c.l.add(ListItem("空 ", ""));
     } else if (currentView == VIEW_MODE.CARDS) {
       //whiteboard
       final TheBoardController wbc = Get.find();
       wbc.l.add(
-        new CardData(ITEM_TYPE.TEXT, TextCardContent("empty")),
+        new CardData(ITEM_TYPE.TEXT, TextCardContent("无内容")),
       );
     }
   }
@@ -150,7 +152,7 @@ class _MyHomeState extends State<MyHome> {
                     accountName: null,
                   ),
                   ListTile(
-                    title: Text("List View"),
+                    title: Text("列表模式"),
                     leading: Icon(Icons.format_list_bulleted_rounded),
                     trailing: IconButton(
                       icon: Icon(Icons.arrow_forward_ios),
@@ -165,7 +167,7 @@ class _MyHomeState extends State<MyHome> {
                     },
                   ),
                   ListTile(
-                    title: Text("Whiteboard"),
+                    title: Text("白板模式"),
                     leading: Icon(Icons.dashboard_sharp),
                     trailing: IconButton(
                       icon: Icon(Icons.arrow_forward_ios),
@@ -188,7 +190,7 @@ class _MyHomeState extends State<MyHome> {
                   ),
                   Divider(),
                   ListTile(
-                    title: Text("Settings"),
+                    title: Text("设置"),
                     // leading: Icon(Icons.settings,size: 24,),
                     dense: true,
                     onTap: () {
@@ -199,7 +201,7 @@ class _MyHomeState extends State<MyHome> {
                     },
                   ),
                   ListTile(
-                    title: Text("About MindBox"),
+                    title: Text("关于 MindBox"),
                     dense: true,
                     onTap: () {
                       Navigator.push(context,
@@ -207,21 +209,21 @@ class _MyHomeState extends State<MyHome> {
                     },
                   ),
                   ListTile(
-                    title: Text("Author's Blog"),
+                    title: Text("作者博客"),
                     dense: true,
                     onTap: () {
                       launch("https://blog.colinx.one/");
                     },
                   ),
                   ListTile(
-                    title: Text("Give us a star!"),
+                    title: Text("给项目送上 star!"),
                     dense: true,
                     onTap: () {
                       launch("https://github.com/Colin-XKL/sticky");
                     },
                   ),
                   ListTile(
-                    title: Text('Exit'),
+                    title: Text('退出'),
                     dense: true,
                     onTap: () => {exit(0)},
                   ),
