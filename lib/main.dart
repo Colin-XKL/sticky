@@ -181,13 +181,13 @@ class _MyHomeState extends State<MyHome> {
                       Navigator.of(context).pop();
                     },
                   ),
-                  ListTile(
-                    title: Text("Block"),
-                    onTap: () {
-                      Navigator.push(context,
-                          MaterialPageRoute(builder: (context) => BlockPage()));
-                    },
-                  ),
+                  // ListTile(
+                  //   title: Text("Block"),
+                  //   onTap: () {
+                  //     Navigator.push(context,
+                  //         MaterialPageRoute(builder: (context) => BlockPage()));
+                  //   },
+                  // ),
                   Divider(),
                   ListTile(
                     title: Text("设置"),
