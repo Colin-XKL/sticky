@@ -15,7 +15,7 @@ jobs:
       - name: Set up environment
         uses: actions/checkout@v2
       - name: Set up flutter
-        uses: subosito/flutter-action@v1
+        uses: subosito/flutter-action@v2.0.4
         with:
           channel: 'stable' # or: 'beta', 'dev' or 'master'
       - name: Set up Mind Box
