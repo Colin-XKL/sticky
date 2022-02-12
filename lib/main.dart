@@ -14,6 +14,7 @@ import 'package:stickys/views/the_item.dart';
 import 'package:stickys/views/the_view.dart';
 import 'views/list.dart';
 import 'views/whiteboard.dart';
+
 // import 'views/block.dart';
 import 'pages/about.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -134,11 +135,26 @@ class _MyHomeState extends State<MyHome> {
               title: Text("Ender Box"),
               actions: [
                 IconButton(
-                  onPressed: () => view.download(),
+                  onPressed: () async {
+                    if (!view.hasValidSyncAccount()) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("No sync account.")));
+                      return;
+                    }
+                    view.download();
+                  },
                   icon: Icon(Icons.download),
                 ),
                 IconButton(
-                    onPressed: () => view.upload(), icon: Icon(Icons.save)),
+                    onPressed: () async {
+                      if (!view.hasValidSyncAccount()) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text("No sync account.")));
+                        return;
+                      }
+                      view.upload();
+                    },
+                    icon: Icon(Icons.save)),
               ],
             ),
             drawer: Drawer(
