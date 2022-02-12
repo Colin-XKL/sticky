@@ -16,4 +16,3 @@ jobs:
         with:
           webRenderer: html
           customArgs: --dart-define=FLUTTER_WEB_CANVASKIT_URL=https://cdn.jsdelivr.net/npm/canvaskit-wasm/bin/
-          baseHref: https://cdn.jsdelivr.net/gh/Colin-XKL/sticky@gh-pages/
