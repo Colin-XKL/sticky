@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:stickys/utils/sync.dart';
 import 'package:stickys/views/list.dart';
@@ -28,11 +29,16 @@ abstract class TheView extends StatelessWidget {
 
   List<String> newItemsFromCustomInput();
 
+  hasValidSyncAccount() {
+    final GetStorage g = GetStorage('Settings');
+    return !(g.read('WebDavUserName').toString().length > 0 &&
+        g.read('WebDavPassword').toString().length > 0);
+  }
+
   upload() => syncer.uploadData(storageBucketNameMapping[viewMode],
       {'data': ctl.l.map((element) => element.serialize()).toList()});
 
   download() async {
-    // int lastModify =
     await syncer.getServerLastModifyTime();
     // print('last modify - server $lastModify');
     // print('last modify - client ${ctl.lastModifyTime}');
@@ -65,15 +71,18 @@ abstract class TheViewController extends DataController {
     // print("saved");
   }
 
-  newItem(ViewDataListItem item) {
-    this.l.add(item);
+  newItem(ViewDataListItem item, [bool insertToHead = true]) {
+    if (insertToHead)
+      this.l.insert(0, item);
+    else
+      this.l.add(item);
     update();
     save();
   }
 
   newItemFromString(String str);
 
-  newItemsFromString(List<String> l);
+  newItemsFromStringList(List<String> l);
 
   ViewDataListItem reverseSerialize(Map map);
 

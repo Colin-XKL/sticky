@@ -3,6 +3,7 @@ import 'dart:math';
 import "package:flutter/material.dart";
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:stickys/views/the_item.dart';
 import 'package:stickys/views/the_view.dart';
 
 class TheBoardController extends TheViewController {
@@ -16,7 +17,7 @@ class TheBoardController extends TheViewController {
     //TODO: 兼容不同的内容类型
     bool notEmpty = (str.isNotEmpty);
     // this.l.add(new BoardViewCard.text(notEmpty ? value : ""));
-    newItem(CardData(CARD_TYPE.TEXT, TextCardContent(notEmpty ? str : "")));
+    newItem(CardData(ITEM_TYPE.TEXT, TextCardContent(notEmpty ? str : "")));
   }
 
   replaceItem(Key dataKey, CardData cardData) {
@@ -39,15 +40,15 @@ class TheBoardController extends TheViewController {
       ..pinned = state['pinned'] ?? false
       ..locked = state['locked'] ?? false;
     return CardData(
-        CARD_TYPE.TEXT, new TextCardContent(content.toString()), cardState);
+        ITEM_TYPE.TEXT, new TextCardContent(content.toString()), cardState);
   }
 
   @override
-  newItemsFromString(List<String> l) {
+  newItemsFromStringList(List<String> l) {
     //TODO: 兼容不同的内容类型
     l.forEach((str) {
       this.l.add(
-          CardData(CARD_TYPE.TEXT, TextCardContent(str.isNotEmpty ? str : "")));
+          CardData(ITEM_TYPE.TEXT, TextCardContent(str.isNotEmpty ? str : "")));
     });
     update();
     save();
@@ -77,25 +78,27 @@ class TheBoard extends TheView {
             ..height = state['height'] ?? 400
             ..pinned = state['pinned'] ?? false
             ..locked = state['locked'] ?? false;
-          return CardData(CARD_TYPE.TEXT,
+          return CardData(ITEM_TYPE.TEXT,
               new TextCardContent(content.toString()), cardState);
         })));
       } else
         // ctl.addNewItem("Add something here!");
         this.ctl.newItem(
-            CardData(CARD_TYPE.TEXT, TextCardContent(("Add something here!"))));
+            CardData(ITEM_TYPE.TEXT, TextCardContent(("这里空空如也，写点什么吧 ~"))));
     } else {
       var l = [
-        TextCardContent('''I've just did simple prototype to show main idea.
-    1. Draw size handlers with container;
-    2. Use GestureDetector to get new variables of sizes
-    3. Refresh the main container size.'''),
+        TextCardContent('''欢迎来到EnderBox的白板模式
+        在这里你可以自由地排布和组织卡片以按照你想要的方式展示信息
+    1. 同样地，你可以点击加号按钮来插入剪贴板的内容。如果剪贴板为空的话，你会得到一个空白的卡片
+    2. 点击卡片上方的铅笔按钮可以编辑具体内容
+    3. 拖动卡片左上角的图标可以移动卡片，拖动右下角的小三角可以更改卡片的大小。卡片上方的其他按钮可以帮助你固定卡片的位置、锁定卡片的大小
+    '''),
         TextCardContent("Hello Widget"),
       ];
       this
           .ctl
           .l
-          .addAll(l.map((e) => CardData(CARD_TYPE.TEXT, e, new CardState())));
+          .addAll(l.map((e) => CardData(ITEM_TYPE.TEXT, e, new CardState())));
       this.ctl.save();
     }
     this.ctl.initiated = true;
@@ -126,8 +129,8 @@ class TheBoard extends TheView {
 class CardState implements Serializable {
   double top = 0;
   double left = 0;
-  double height = 320;
-  double width = min(600, Get.width - 40);
+  double height = 300;
+  double width = min(500, Get.width - 40);
   bool locked = false;
   bool pinned = false;
 
@@ -142,20 +145,12 @@ class CardState implements Serializable {
     m['width'] = this.width;
     m['locked'] = this.locked;
     m['pinned'] = this.pinned;
-
     return m;
   }
 }
 
-abstract class CardBody extends StatelessWidget {
-  final Key key = UniqueKey();
-  final CARD_TYPE type;
-
-  CardBody(this.type);
-}
-
 class CardData extends ViewDataListItem {
-  final CARD_TYPE type;
+  final ITEM_TYPE type;
   final CardContent content;
   CardState state;
 
@@ -178,7 +173,7 @@ class CardData extends ViewDataListItem {
 }
 
 abstract class CardContent implements Serializable {
-  final CARD_TYPE cardType;
+  final ITEM_TYPE cardType;
 
   CardContent(this.cardType);
 }
@@ -186,7 +181,7 @@ abstract class CardContent implements Serializable {
 class TextCardContent extends CardContent {
   String text;
 
-  TextCardContent(this.text) : super(CARD_TYPE.TEXT);
+  TextCardContent(this.text) : super(ITEM_TYPE.TEXT);
 
   @override
   Map<String, dynamic> serialize() {
@@ -201,47 +196,26 @@ class TextCardContent extends CardContent {
   }
 }
 
-class TextCard extends CardBody {
-  final TextCardContent data;
-
-  TextCard(String? str)
-      : data = new TextCardContent(str ?? ""),
-        super(CARD_TYPE.TEXT);
-
-  String? get text => this.data.text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scrollbar(
-        isAlwaysShown: false,
-        child: SingleChildScrollView(
-          child: SelectableText(this.text!),
-        ));
-  }
-}
-
-enum CARD_TYPE { TEXT, IMAGE, LINK, TODO, WIDGET }
-
 class BoardViewCard extends StatefulWidget {
   final Key key = UniqueKey();
 
   // final CardData data;
-  final CardBody child;
+  final TheItemBlock child;
   final CardState state;
   final Key dataKey;
 
   BoardViewCard(CardData cardData)
       : state = cardData.state,
-        child = BoardViewCard.getCardWidget(cardData.content) as CardBody,
+        child = BoardViewCard.getCardWidget(cardData.content) as TheItemBlock,
         dataKey = cardData.dataKey,
         super();
 
   static Widget getCardWidget(CardContent content) {
-    if (content.cardType == CARD_TYPE.TEXT)
-      return TextCard((content as TextCardContent).text);
+    if (content.cardType == ITEM_TYPE.TEXT)
+      return TextBlock((content as TextCardContent).text);
     else {
       // TODO implement other kind of card
-      return TextCard("unimplemented");
+      return TextBlock("unimplemented");
     }
   }
 
@@ -278,7 +252,7 @@ class _BoardViewCardState extends State<BoardViewCard> {
         this.inputCtl = new TextEditingController(
             text: controller.findItem(widget.dataKey).content.toString());
         this.showEditDialog(context, widget.dataKey);
-      }, "Edit", 22),
+      }, "编辑", 22),
       funcButton(widget.state.locked ? Icons.copy : Icons.cut_rounded, () {
         final TheBoardController wbc = Get.find<TheBoardController>();
         final item = wbc.findItem(widget.dataKey);
@@ -287,11 +261,13 @@ class _BoardViewCardState extends State<BoardViewCard> {
         Clipboard.setData(ClipboardData(text: value));
         if (!widget.state.locked) wbc.removeItem(widget.dataKey);
 
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Copied!'),
-          duration: Duration(milliseconds: 300),
-        ));
-      }, widget.state.locked ? "Copy" : "Cut", 20),
+        ScaffoldMessenger.of(context)
+          ..removeCurrentSnackBar()
+          ..showSnackBar(const SnackBar(
+            content: Text('已复制!'),
+            duration: Duration(milliseconds: 300),
+          ));
+      }, widget.state.locked ? "复制" : "剪切", 20),
       funcButton(Icons.delete_outline_rounded, () {
         WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
           final TheBoardController wbc = Get.find<TheBoardController>();
@@ -307,25 +283,25 @@ class _BoardViewCardState extends State<BoardViewCard> {
                     ..pinned = false;
                 },
               );
-            }, "Locked", 22)
+            }, "已锁定", 22)
           : funcButton(Icons.lock_open_rounded, () {
               setState(() {
                 widget.state
                   ..pinned = true
                   ..locked = true;
               });
-            }, "Lock", 22),
+            }, "锁定位置和大小", 22),
       widget.state.pinned
           ? funcButton(Icons.push_pin_rounded, () {
               setState(() {
                 widget.state.pinned = false;
               });
-            }, "UnPin", 22)
+            }, "已锁定位置", 22)
           : funcButton(Icons.push_pin_outlined, () {
               setState(() {
                 widget.state.pinned = true;
               });
-            }, "Pin", 22),
+            }, "锁定位置", 22),
     ];
     moveFunc(double dx, double dy) {
       if (!widget.state.pinned)
@@ -377,8 +353,8 @@ class _BoardViewCardState extends State<BoardViewCard> {
                               cursor: SystemMouseCursors.move,
                               child: Tooltip(
                                   message: widget.state.pinned
-                                      ? "Pinned"
-                                      : "Drag to move the card",
+                                      ? "已锁定位置"
+                                      : "拖动以移动卡片位置",
                                   child: ManipulatingBall(
                                     child: Icon(
                                       Icons.text_fields_rounded,
@@ -393,7 +369,7 @@ class _BoardViewCardState extends State<BoardViewCard> {
                           child: Padding(
                             padding: const EdgeInsets.all(4.0),
                             child: Text(
-                              "Text",
+                              "文本内容",
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style:
@@ -431,8 +407,8 @@ class _BoardViewCardState extends State<BoardViewCard> {
                                 child: Icon(Icons.signal_cellular_4_bar_rounded,
                                     color: Theme.of(context).dividerColor),
                                 message: widget.state.locked
-                                    ? "Locked"
-                                    : "Drag to resize",
+                                    ? "卡片大小已锁定"
+                                    : "拖动以更改卡片大小",
                               );
                             }),
                         onDrag: resizeFunc,
@@ -467,7 +443,7 @@ class _BoardViewCardState extends State<BoardViewCard> {
           onPressed: () {
             Navigator.of(context).pop();
           },
-          child: Text("CANCEL")),
+          child: Text("取消")),
       TextButton(
         onPressed: () {
           TheBoardController controller = Get.find<TheBoardController>();
@@ -476,7 +452,7 @@ class _BoardViewCardState extends State<BoardViewCard> {
           controller.replaceItem(dataKey, item);
           Navigator.of(context).pop();
         },
-        child: Text("SAVE"),
+        child: Text("保存"),
       ),
     ];
     Widget editArea = TextField(
@@ -484,8 +460,8 @@ class _BoardViewCardState extends State<BoardViewCard> {
       maxLines: null,
       autofocus: true,
       decoration: InputDecoration(
-        hintText: "Input multi-line content here",
-        labelText: "Content Text",
+        hintText: "键入多行文本",
+        labelText: "内容文本",
         suffix: Icon(Icons.text_format_rounded),
         // contentPadding: EdgeInsets.fromLTRB(16, 20, 16, 20),
         // border: InputBorder.none
@@ -496,7 +472,7 @@ class _BoardViewCardState extends State<BoardViewCard> {
         context: ctx,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text('Edit Content'),
+            title: Text('编辑内容'),
             actions: dialogActions,
             content: Container(
                 constraints: BoxConstraints(maxWidth: 800, maxHeight: 600),

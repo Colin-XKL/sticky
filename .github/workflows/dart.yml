@@ -1,22 +1,30 @@
-# Dart code analyze and pub dependencies check
-name: Dart
+# description: Dart code analyze and pub dependencies check
+name: Basic Test
 
 on:
   push:
     branches: [ master,dev ]
   pull_request:
-    branches: [ master,dev]
+    branches: [ master,dev ]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     steps:
-      - uses: actions/checkout@v2
-      - uses: subosito/flutter-action@v1
+      - name: Set up environment
+        uses: actions/checkout@v2
+      - name: Set up flutter
+        uses: subosito/flutter-action@v2.3.0
         with:
           channel: 'stable' # or: 'beta', 'dev' or 'master'
-      - run: flutter pub get
-      - run: flutter analyze
-      - run: flutter build web # run basic build test
-#      - run: flutter test  # uncomment it if wrote unit test file
+      - name: Set up Ender Box
+        run: flutter pub get
+      - name: Get flutter app version
+        run: |
+          set -e
+          brew install yq
+          _flutterAppVersion=$( yq e ".version" pubspec.yaml )
+          echo "APP_VERSION=${_flutterAppVersion}" >> $GITHUB_ENV
+      - name: Static analyze
+        run: flutter analyze

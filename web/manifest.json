@@ -1,6 +1,6 @@
 {
-  "name": "Mind Box",
-  "short_name": "Mind Box",
+  "name": "Ender Box",
+  "short_name": "Ender Box",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#0175C2",

@@ -1,0 +1,51 @@
+# author: Colin_XKL@outlook.com
+# description: Build for Web&Android&Linux and upload artifacts.
+name: Build - Web&Android&Linux
+
+on:
+  push:
+    branches: [ master,dev ]
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+
+    steps:
+      - name: Set up environment
+        uses: actions/checkout@v2
+      - name: Set up flutter
+        uses: subosito/flutter-action@v2.3.0
+        with:
+          channel: 'stable' # or: 'beta', 'dev' or 'master'
+      - name: Set up Ender Box
+        run: flutter pub get
+      - name: Get flutter app version
+        run: |
+          set -e
+          brew install yq
+          _flutterAppVersion=$( yq e ".version" pubspec.yaml | cut -d "+" -f1)
+          echo "APP_VERSION=${_flutterAppVersion}" >> $GITHUB_ENV
+
+      - name: Build - Web
+        run: flutter build web --release --web-renderer html
+      - name: Upload - Web
+        uses: actions/upload-artifact@v2
+        with:
+          name: EnderBox_${{ env.APP_VERSION }}_Web
+          path: ${{ github.workspace }}/build/web/
+
+      - name: Set up Java
+        uses: actions/setup-java@v2.5.0
+        with:
+          distribution: adopt
+          java-version: '11.x'
+          cache: 'gradle'
+      - name: Set up gradle distribution download entrypoint
+        run: sed -i 's/mirrors.cloud.tencent.com\/gradle/services.gradle.org\/distributions/' ${{ github.workspace }}/android/gradle/wrapper/gradle-wrapper.properties
+      - name: Build - Android
+        run: flutter build apk --release
+      - name: Upload - Android
+        uses: actions/upload-artifact@v2
+        with:
+          name: EnderBox_${{ env.APP_VERSION }}_Android
+          path: ${{ github.workspace }}/build/app/outputs/flutter-apk/app-release.apk
