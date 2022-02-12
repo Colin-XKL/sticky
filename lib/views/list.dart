@@ -91,13 +91,13 @@ class TheList extends TheView {
         this.ctl.newItem(ListItem("写点什么吧 ", ""));
     } else {
       var l = [
-        ListItem("Tutorial", "欢迎使用Mind Box！"),
+        ListItem("Tutorial", "欢迎使用Ender Box！"),
         ListItem("#1 Paste from your pastebin",
             "#1 点击加号按钮可以快速将你剪贴板的内容添加到这里\n当然你也可以在下方的输入框中自行填写.\n"),
         ListItem("#2 Copy from the list", "#2 点击列表中的条目，里面的内容就会被复制到你的剪贴板\n"),
         ListItem("#3 Delete item", "#3 向左或向右滑动某个条目就可以删除它\n"),
         ListItem("#4 Reorder items", "#4 长按一个条目上下拖动可以改变顺序\n"),
-        ListItem("#4 Reorder items", "这就是MindBox列表模式的所有功能啦，是不是很简单呢\n"),
+        ListItem("#4 Reorder items", "这就是EnderBox列表模式的所有功能啦，是不是很简单呢\n"),
       ];
       this.ctl.l.addAll(l);
       this.ctl.save();

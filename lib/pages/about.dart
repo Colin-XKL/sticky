@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -78,7 +76,7 @@ class AboutPage extends StatelessWidget {
           Align(
             alignment: FractionalOffset(0.5, 0.97),
             child: Text(
-              "©2018-2021 X Studio All Rights Reserved.",
+              "©2018-2022 X Studio All Rights Reserved.",
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 12, color: Colors.grey),
             ),
@@ -121,7 +119,7 @@ final Uri emailLaunchUri = Uri(
   scheme: 'mailto',
   path: 'Colin_XKL@outlook.com',
   query: encodeQueryParameters(
-      <String, String>{'subject': 'Mind Box App Feedback'}),
+      <String, String>{'subject': 'Ender Box App Feedback'}),
 );
 
 String encodeQueryParameters(Map<String, String> params) {

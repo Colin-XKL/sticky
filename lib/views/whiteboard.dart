@@ -87,7 +87,7 @@ class TheBoard extends TheView {
             CardData(ITEM_TYPE.TEXT, TextCardContent(("这里空空如也，写点什么吧 ~"))));
     } else {
       var l = [
-        TextCardContent('''欢迎来到MindBox的白板模式
+        TextCardContent('''欢迎来到EnderBox的白板模式
         在这里你可以自由地排布和组织卡片以按照你想要的方式展示信息
     1. 同样地，你可以点击加号按钮来插入剪贴板的内容。如果剪贴板为空的话，你会得到一个空白的卡片
     2. 点击卡片上方的铅笔按钮可以编辑具体内容

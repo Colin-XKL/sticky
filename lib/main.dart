@@ -57,7 +57,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      title: "Mind Box",
+      title: "Ender Box",
       theme: ThemeData(
         fontFamily: "Microsoft Yahei UI",
         appBarTheme: ThemeData.light().appBarTheme.copyWith(
@@ -131,7 +131,7 @@ class _MyHomeState extends State<MyHome> {
         child: Scaffold(
             appBar: new AppBar(
               // foregroundColor: Colors.white,
-              title: Text("Mind Box"),
+              title: Text("Ender Box"),
               actions: [
                 IconButton(
                   onPressed: () => view.download(),
@@ -199,7 +199,7 @@ class _MyHomeState extends State<MyHome> {
                     },
                   ),
                   ListTile(
-                    title: Text("关于 MindBox"),
+                    title: Text("关于 EnderBox"),
                     dense: true,
                     onTap: () {
                       Navigator.push(context,
@@ -213,13 +213,13 @@ class _MyHomeState extends State<MyHome> {
                       launch("https://blog.colinx.one/");
                     },
                   ),
-                  ListTile(
-                    title: Text("给项目送上 star!"),
-                    dense: true,
-                    onTap: () {
-                      launch("https://github.com/Colin-XKL/sticky");
-                    },
-                  ),
+                  // ListTile(
+                  //   title: Text("给项目送上 star!"),
+                  //   dense: true,
+                  //   onTap: () {
+                  //     launch("https://github.com/Colin-XKL/sticky");
+                  //   },
+                  // ),
                   ListTile(
                     title: Text('退出'),
                     dense: true,
@@ -228,7 +228,7 @@ class _MyHomeState extends State<MyHome> {
                   Padding(
                     padding: EdgeInsets.fromLTRB(0, 32, 0, 0),
                     child: Text(
-                      "MindBox, your last productivity app",
+                      "EnderBox, your last productivity app",
                       softWrap: true,
                       style: TextStyle(color: Colors.grey[500], fontSize: 12),
                     ),
