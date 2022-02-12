@@ -1,13 +1,11 @@
 import 'dart:io';
 
-import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:sentry/sentry.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
 import 'package:stickys/pages/setting.dart';
@@ -16,7 +14,7 @@ import 'package:stickys/views/the_item.dart';
 import 'package:stickys/views/the_view.dart';
 import 'views/list.dart';
 import 'views/whiteboard.dart';
-import 'views/block.dart';
+// import 'views/block.dart';
 import 'pages/about.dart';
 import 'package:url_launcher/url_launcher.dart';
 
