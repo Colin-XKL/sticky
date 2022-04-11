@@ -29,7 +29,7 @@ jobs:
       - name: Build - Web
         run: flutter build web --release --web-renderer html
       - name: Upload - Web
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: EnderBox_${{ env.APP_VERSION }}_Web
           path: ${{ github.workspace }}/build/web/
@@ -45,7 +45,7 @@ jobs:
       - name: Build - Android
         run: flutter build apk --release
       - name: Upload - Android
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: EnderBox_${{ env.APP_VERSION }}_Android
           path: ${{ github.workspace }}/build/app/outputs/flutter-apk/app-release.apk
