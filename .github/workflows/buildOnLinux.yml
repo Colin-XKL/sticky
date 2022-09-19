@@ -14,7 +14,7 @@ jobs:
       - name: Set up environment
         uses: actions/checkout@v2
       - name: Set up flutter
-        uses: subosito/flutter-action@v2.3.0
+        uses: subosito/flutter-action@v2.7.1
         with:
           channel: 'stable' # or: 'beta', 'dev' or 'master'
       - name: Set up Ender Box
